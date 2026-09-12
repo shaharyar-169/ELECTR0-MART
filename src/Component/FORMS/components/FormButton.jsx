@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 export default function FormButtons({
   saveText = "Save",
   returnText = "Return",
@@ -8,6 +10,17 @@ export default function FormButtons({
   saveButtonRef,
   disabled = false,
 }) {
+  const navigate = useNavigate();
+
+  const handleReturnClick = () => {
+    // If a custom onReturn handler is provided, run it first
+    if (typeof onReturn === "function") {
+      onReturn();
+    }
+    // Then navigate to "/"
+    navigate("/MainPage");
+  };
+
   return (
     <div className="el-form-actions">
       <button
@@ -23,7 +36,7 @@ export default function FormButtons({
       <button
         type="button"
         className="el-btn el-btn-return"
-        onClick={onReturn}
+        onClick={handleReturnClick}
       >
         {returnText}
       </button>

@@ -96,7 +96,7 @@ export default function EmployeeList() {
       FLocCod: Companyselectdata,
       code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
-      // code: "IZONECOMP",
+      // code: "AMRELEC",
       // FLocCod: "001",
       FSchTxt: searchQuery,
     }).toString();
@@ -389,7 +389,7 @@ export default function EmployeeList() {
     };
 
     // Define the number of rows per page
-    const rowsPerPage = 47; // Adjust this value based on your requirements
+    const rowsPerPage = 29; // Adjust this value based on your requirements
 
     // Function to handle pagination
     const handlePagination = () => {
@@ -535,7 +535,7 @@ doc.setFont("verdana-regular", "normal");
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const numColumns = 7; // Ensure this matches the actual number of columns
+    const numColumns = 11; // Ensure this matches the actual number of columns
 
     // Define alignment for each column separately
     const columnAlignments = {
@@ -548,6 +548,8 @@ doc.setFont("verdana-regular", "normal");
       7: "left", // Dlv Code
       8: "left", // Adv Code
       9: "left", // Dlv Code
+        9: "left", // Dlv Code
+          9: "left", // Dlv Code
     };
 
     // Define fonts for different sections
@@ -616,28 +618,7 @@ doc.setFont("verdana-regular", "normal");
     // Create the row with empty placeholder cells
     const typeAndStoreRow = worksheet.addRow(["", "", "", ""]);
 
-    // // Put LOCATION + company in the **first cell**
-    // typeAndStoreRow.getCell(1).value = `LOCATION :   ${typecompany}`;
 
-    // // Merge A and B so it becomes wide
-    // worksheet.mergeCells(
-    //   `A${typeAndStoreRow.number}:B${typeAndStoreRow.number}`
-    // );
-
-    // // Style
-    // typeAndStoreRow.eachCell((cell) => {
-    //   cell.font = { name: "CustomFont", size: 10 };
-    //   cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
-
-    // typeAndStoreRow.eachCell((cell, colIndex) => {
-    //   cell.font = {
-    //     name: "CustomFont" || "CustomFont",
-    //     size: 10,
-    //     bold: [1, 2].includes(colIndex),
-    //   };
-    //   cell.alignment = { horizontal: "left", vertical: "middle" };
-    // });
 
     // Create row with empty placeholders (so we can merge properly)
     const typeAndStoreRow3 = worksheet.addRow(["", "", "", "", ""]);
@@ -705,6 +686,8 @@ doc.setFont("verdana-regular", "normal");
       "Joine Date",
       "Adv Code",
       "Dlv Code",
+       "Email",
+        "NIc",
     ];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
@@ -721,6 +704,8 @@ doc.setFont("verdana-regular", "normal");
         item["Join Date"],
         item["Adv Code"],
         item["Dlv Code"],
+        item.Email,
+        item.NIC,
       ]);
 
       row.eachCell((cell, colIndex) => {
@@ -750,7 +735,7 @@ doc.setFont("verdana-regular", "normal");
     });
 
     // Set column widths
-    [7, 30, 7, 30, 12, 12, 10, 10, 10].forEach((width, index) => {
+    [7, 30, 7, 30, 12, 12, 10, 10, 10, 25, 25].forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
 
@@ -764,6 +749,8 @@ doc.setFont("verdana-regular", "normal");
         "",
         "",
         "",
+           "",
+        "",
        
      ]);
  
@@ -772,9 +759,9 @@ doc.setFont("verdana-regular", "normal");
      totalRow.eachCell((cell, colNumber) => {
        cell.font = { bold: true };
        cell.border = {
-         top: { style: "thin" },
+         top: { style: "double" },
          left: { style: "thin" },
-         bottom: { style: "thin" },
+         bottom: { style: "double" },
          right: { style: "thin" },
        };
  

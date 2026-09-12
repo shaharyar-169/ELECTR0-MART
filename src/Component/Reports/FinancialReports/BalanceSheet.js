@@ -370,14 +370,14 @@ function fetchReceivableReport() {
   
     FRepDat: toInputDate,
     FRepRat: transectionType,
+    code: organisation.code,
+    FLocCod: locationnumber || getLocationNumber,
+    FYerDsc: yeardescription || getyeardescription,
   
-     code: organisation.code,
-        FLocCod: locationnumber || getLocationNumber,
-        FYerDsc: yeardescription || getyeardescription,
-  
-    // code: "EJAZCENTRE",
+    // code: "IMAMBARI",
     // FLocCod: "001",
     // FYerDsc: "2025-2025",
+
   }).toString();
   
   axios
@@ -1695,8 +1695,7 @@ const DotButton = ({ onClick }) => {
               }} >Land & Building :</div>
                <div style={{width:'30%', height:'100%', padding:'0px', display:"flex", gap:"2px"}} >
             <div style={boxStyle}>
-                  {/* {tableData.ASSETS["FIXED ASSETS"]["LAND & BUILDING"]} */}
-                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["LAND & BUILDING"]}
+                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["LAND & BUILDIND "]}
                 </div>
 <DotButton />
               </div>
@@ -1714,7 +1713,7 @@ const DotButton = ({ onClick }) => {
               }} >Vehicles :</div>
                <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["VEHICLES"]}
+                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["VEHICLES "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1732,7 +1731,7 @@ const DotButton = ({ onClick }) => {
               }} >Furniture & Fixture :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["FURNITURE & FIXTURE"]}
+                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["FURNITURE & FIXTURE "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1750,7 +1749,7 @@ const DotButton = ({ onClick }) => {
               }} >Electric Equipment :</div>
                <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["ELECTRIC EQUIPMENT"]}
+                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["ELECTRIC EQUIPEMENT "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1786,7 +1785,7 @@ const DotButton = ({ onClick }) => {
               }} >IT Equipment :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["IT EQUIPMENT"]}
+                  {tableData?.ASSETS?.["FIXED ASSETS"]?.["IT EQUIPMENT "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1844,7 +1843,7 @@ const DotButton = ({ onClick }) => {
               }} >Cash Account :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["CASH & BANK BALANCES"]?.["CASH ACCOUNT"]}
+                  {tableData?.ASSETS?.["CASN & BANK BALANCE "]?.["CASH ACCOUNT "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1862,7 +1861,7 @@ const DotButton = ({ onClick }) => {
               }} >Banks :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["CASH & BANK BALANCES"]?.["BANKS"]}
+                  {tableData?.ASSETS?.["CASN & BANK BALANCE "]?.["BANK ACCOUNT "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1880,7 +1879,7 @@ const DotButton = ({ onClick }) => {
               }} >Credit Cards :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["CASH & BANK BALANCES"]?.["CREDIT CARDS"]}
+                  {tableData?.ASSETS?.["CASN & BANK BALANCE "]?.["CREDIT CARDS "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1898,7 +1897,7 @@ const DotButton = ({ onClick }) => {
               }} >Cheques :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["CASH & BANK BALANCES"]?.["CHEQUES"]}
+                  {tableData?.ASSETS?.["CASN & BANK BALANCE "]?.["CHEQUES "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1918,7 +1917,7 @@ const DotButton = ({ onClick }) => {
                  <div style={{width:"30%"}} ></div>
                <div style={{width:'25%', height:'100%', padding:'0px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["CASH & BANK BALANCES"]?.["Total"]}
+                  {tableData?.ASSETS?.["CASN & BANK BALANCE "]?.["Total"]}
                 </div>
               </div>
             
@@ -1956,7 +1955,7 @@ const DotButton = ({ onClick }) => {
               }} >Credit Sale Account :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["RECEIVEABLE"]?.["CREDIT SALE ACCOUNT"]}
+                  {tableData?.ASSETS?.["RECEIVEABLE "]?.["CREDIT SALE ACCOUNT "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1974,7 +1973,7 @@ const DotButton = ({ onClick }) => {
               }} >Salesman Receivable :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["RECEIVEABLE"]?.["SALESMAN RECEIVABLE"]}
+                  {tableData?.ASSETS?.["RECEIVEABLE "]?.["SALESMAN RECEIVABLE "]}
                 </div>
                 <DotButton/>
               </div>
@@ -1992,7 +1991,7 @@ const DotButton = ({ onClick }) => {
               }} >Staff Advances :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["RECEIVEABLE"]?.["STAFF ADVANCES"]}
+                  {tableData?.ASSETS?.["RECEIVEABLE "]?.["STAFF ADVANCE "]}
                 </div>
                 <DotButton/>
               </div>
@@ -2010,7 +2009,7 @@ const DotButton = ({ onClick }) => {
               }} >Other Receivables :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["RECEIVEABLE"]?.["OTHER RECEIVEABLES"]}
+                  {tableData?.ASSETS?.["RECEIVEABLE "]?.["OTHER RECEIVABLE "]}
                 </div>
                 <DotButton/>
               </div>
@@ -2028,7 +2027,7 @@ const DotButton = ({ onClick }) => {
               }} >Security Receiables :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["RECEIVEABLE"]?.["SECURITY RECEIVABLES"]}
+                  {tableData?.ASSETS?.["RECEIVEABLE "]?.["SECURITY RECEIVABLES"]}
                 </div>
                 <DotButton/>
               </div>
@@ -2046,7 +2045,7 @@ const DotButton = ({ onClick }) => {
               }} >Investments :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["RECEIVEABLE"]?.["INVESTMENTS"]}
+                  {tableData?.ASSETS?.["RECEIVEABLE "]?.["INVESTMENTS"]}
                 </div>
                 <DotButton/>
               </div>
@@ -2065,7 +2064,7 @@ const DotButton = ({ onClick }) => {
                  <div style={{width:"25%"}} ></div>
                <div style={{width:'25%', height:'100%', padding:'0px'}} >
                 <div style={boxStyle}>
-                  {tableData?.ASSETS?.["RECEIVEABLE"]?.["Total"]}
+                  {tableData?.ASSETS?.["RECEIVEABLE "]?.["Total"]}
                 </div>
               </div>
             
@@ -2171,7 +2170,7 @@ const DotButton = ({ onClick }) => {
               }} >Suppliers :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["PAYABLE"]?.["SUPPLIERS"]}
+                  {tableData?.LIABILITIES?.["PAYABLE "]?.["SUPPLIER"]}
                 </div>
                 <DotButton/>
               </div>
@@ -2189,7 +2188,7 @@ const DotButton = ({ onClick }) => {
               }} >Other Payables :</div>
                <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["PAYABLE"]?.["OTHER PAYABLES"]}
+                  {tableData?.LIABILITIES?.["PAYABLE "]?.["OTHER PAYABLES "]}
                 </div>
                 <DotButton/>
               </div>
@@ -2207,7 +2206,7 @@ const DotButton = ({ onClick }) => {
               }} >Commission Payables :</div>
                <div style={{width:'30%', height:'100%', padding:'0px', display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["PAYABLE"]?.["COMMISSION PAYABLES"]}
+                  {tableData?.LIABILITIES?.["PAYABLE "]?.["COMMISSION PAYABLES"]}
                 </div>
                 <DotButton/>
               </div>
@@ -2225,7 +2224,7 @@ const DotButton = ({ onClick }) => {
               }} >Investment By Others :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["PAYABLE"]?.["INVESTMENT BY OTHERS"]}
+                  {tableData?.LIABILITIES?.["PAYABLE "]?.["INVESTMENT BY OTHER "]}
                 </div>
                 <DotButton/>
               </div>
@@ -2243,7 +2242,7 @@ const DotButton = ({ onClick }) => {
               }} >Security Payables :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["PAYABLE"]?.["SECURITY PAYABLES"]}
+                  {tableData?.LIABILITIES?.["PAYABLE "]?.["SECURITY PAYABLES "]}
                 </div>
                 <DotButton/>
               </div>
@@ -2261,7 +2260,7 @@ const DotButton = ({ onClick }) => {
               }} >Advance Payables :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["PAYABLE"]?.["ADVANCES PAYABLES"]}
+                  {tableData?.LIABILITIES?.["PAYABLE "]?.["ADVANCE PAYABLE "]}
                 </div>
                 <DotButton/>
               </div>
@@ -2280,7 +2279,7 @@ const DotButton = ({ onClick }) => {
                  <div style={{width:"25%"}} ></div>
                <div style={{width:'25%', height:'100%', padding:'0px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["PAYABLE"]?.["Total"]}
+                  {tableData?.LIABILITIES?.["PAYABLE "]?.["Total"]}
                 </div>
               </div>
             
@@ -2314,7 +2313,7 @@ const DotButton = ({ onClick }) => {
               }} >Capital :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["CAPITAL"]?.["CAPITAL"]}
+                  {tableData?.LIABILITIES?.["CAPITAL "]?.["CAPITAL"]}
                 </div>
                 <DotButton/>
               </div>
@@ -2332,7 +2331,7 @@ const DotButton = ({ onClick }) => {
               }} >Drawing :</div>
                <div style={{width:'30%', height:'100%', padding:'0px',display:'flex', gap:'2px'}} >
                 <div style={boxStyle}>
-                  {tableData?.LIABILITIES?.["CAPITAL"]?.["DRAWING"]}
+                  {tableData?.LIABILITIES?.["CAPITAL "]?.["DRAWING"]}
                 </div>
                 <DotButton/>
               </div>

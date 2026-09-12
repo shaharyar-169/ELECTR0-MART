@@ -1,7 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
 
-export default function CitySelect({
+/**
+ * DynamicSelect
+ * -------------
+ * Reusable searchable dropdown.
+ * Previously named CitySelect — all existing behavior is preserved.
+ * Can be used for City, Area, or any other list-based dropdown
+ * by passing different apiEndpoint + valueKey/labelKey/codeKey.
+ */
+export default function DynamicSelect({
   apiEndpoint,
   apiLinks,
   organisation,
@@ -11,18 +19,23 @@ export default function CitySelect({
   valueKey = "tctydsc",
   labelKey = "tctydsc",
   codeKey = "tctycod",
-  onCityCodeChange,
+  onCityCodeChange,       // kept — City still uses this
+  onCodeChange,           // new — generic alias (Area uses this)
   onKeyDown,
+  placeholder = "Please Select City",
 }) {
   const [cityOptions, setCityOptions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [searchText, setSearchText] = useState(""); // 🆕 visible search buffer
+
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const blurTimeoutRef = useRef(null);
   const searchBufferRef = useRef("");
   const searchTimeoutRef = useRef(null);
 
+  // ---------- Fetch options ----------
   useEffect(() => {
     if (!organisation) return;
     const apiUrl = apiLinks + apiEndpoint;
@@ -36,61 +49,71 @@ export default function CitySelect({
         if (response.data && Array.isArray(response.data)) {
           setCityOptions(response.data);
         } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
+          console.warn("Response data structure is not as expected:", response.data);
           setCityOptions([]);
         }
       })
       .catch((error) => {
-        console.error("Error fetching cities:", error);
+        console.error("Error fetching options:", error);
         setCityOptions([]);
       });
   }, [organisation, apiLinks, apiEndpoint, locationNumber]);
 
-  // Keep highlighted index pointed at the current value whenever the list opens
+  // ---------- Filtered list based on search text ----------
+  const filteredOptions = useMemo(() => {
+    if (!searchText) return cityOptions;
+    const q = searchText.toLowerCase();
+    return cityOptions.filter((city) =>
+      String(city[labelKey] || "").toLowerCase().includes(q)
+    );
+  }, [cityOptions, searchText, labelKey]);
+
+  // Reset highlight if it goes out of filtered range
+  useEffect(() => {
+    if (highlightedIndex >= filteredOptions.length) {
+      setHighlightedIndex(filteredOptions.length > 0 ? 0 : -1);
+    }
+  }, [filteredOptions, highlightedIndex]);
+
+  // ---------- Helpers ----------
   const openAndHighlightCurrent = () => {
-    const idx = cityOptions.findIndex((city) => city[valueKey] === value);
+    const idx = filteredOptions.findIndex((city) => city[valueKey] === value);
     setHighlightedIndex(idx >= 0 ? idx : 0);
     setIsOpen(true);
   };
 
-  // Selecting a city via mouse click - same logic/behavior as before
+  // Fire both code callbacks — City uses onCityCodeChange, Area uses onCodeChange
+  const emitCode = (code) => {
+    if (typeof onCityCodeChange === "function") onCityCodeChange(code);
+    if (typeof onCodeChange === "function") onCodeChange(code);
+  };
+
   const handleSelect = (city) => {
-    const selectedValue = city[valueKey];
-    onChange(selectedValue);
-    if (city && city[codeKey] !== undefined) {
-      onCityCodeChange(city[codeKey]);
-    } else {
-      onCityCodeChange("");
-    }
+    if (!city) return;
+    onChange(city[valueKey]);
+    emitCode(city[codeKey] !== undefined ? city[codeKey] : "");
     setIsOpen(false);
-  };
-
-  // Clear the selected city
-  const handleClear = (e) => {
-    e.stopPropagation(); // Prevent dropdown from opening
-    onChange(""); // Clear the displayed value
-    onCityCodeChange(""); // Clear the city code
-    setIsOpen(false); // Close dropdown if open
-    // Reset highlighted index
+    setSearchText("");           // clear search
+    resetSearchBuffer();
     setHighlightedIndex(-1);
-    // Focus the input after clearing
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
   };
 
-  // Scroll the highlighted option into view
+  const handleClear = (e) => {
+    e.stopPropagation();
+    onChange("");
+    emitCode("");
+    setIsOpen(false);
+    setSearchText("");
+    setHighlightedIndex(-1);
+    resetSearchBuffer();
+    if (inputRef.current) inputRef.current.focus();
+  };
+
+  // Scroll highlighted option into view
   useEffect(() => {
     if (!isOpen || highlightedIndex < 0 || !listRef.current) return;
-    const el = listRef.current.querySelector(
-      `[data-index="${highlightedIndex}"]`
-    );
-    if (el) {
-      el.scrollIntoView({ block: "nearest" });
-    }
+    const el = listRef.current.querySelector(`[data-index="${highlightedIndex}"]`);
+    if (el) el.scrollIntoView({ block: "nearest" });
   }, [highlightedIndex, isOpen]);
 
   const resetSearchBuffer = () => {
@@ -101,20 +124,37 @@ export default function CitySelect({
     }
   };
 
+  // ---------- Keyboard handling ----------
   const handleInputKeyDown = (e) => {
+    // ---- Ctrl + A (allow default browser select-all) ----
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+      // Do NOT preventDefault – let the browser select all text
+      return;
+    }
+
+    // ---- Delete (clear all typed text/value like the cross button) ----
+    if (e.key === "Delete") {
+      e.preventDefault();
+      handleClear(e);
+      return;
+    }
+
+    // ---- Enter ----
     if (e.key === "Enter") {
-      // Select the highlighted option (if any), then move to next field (NIC).
       e.preventDefault();
       e.stopPropagation();
-      if (isOpen && highlightedIndex >= 0 && cityOptions[highlightedIndex]) {
-        handleSelect(cityOptions[highlightedIndex]);
+      if (isOpen && highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
+        handleSelect(filteredOptions[highlightedIndex]);
+      } else {
+        setIsOpen(false);
+        setSearchText("");
+        resetSearchBuffer();
       }
-      setIsOpen(false);
-      resetSearchBuffer();
       if (onKeyDown) onKeyDown(e);
       return;
     }
 
+    // ---- ArrowDown ----
     if (e.key === "ArrowDown") {
       e.preventDefault();
       resetSearchBuffer();
@@ -123,11 +163,12 @@ export default function CitySelect({
         return;
       }
       setHighlightedIndex((prev) =>
-        Math.min(prev + 1, cityOptions.length - 1)
+        Math.min(prev + 1, filteredOptions.length - 1)
       );
       return;
     }
 
+    // ---- ArrowUp ----
     if (e.key === "ArrowUp") {
       e.preventDefault();
       resetSearchBuffer();
@@ -139,52 +180,71 @@ export default function CitySelect({
       return;
     }
 
+    // ---- Escape ----
     if (e.key === "Escape") {
-      setIsOpen(false);
-      resetSearchBuffer();
+      e.preventDefault();
+      if (searchText) {
+        // First Escape clears search but keeps dropdown open
+        setSearchText("");
+        resetSearchBuffer();
+        setHighlightedIndex(0);
+      } else {
+        setIsOpen(false);
+        resetSearchBuffer();
+      }
       return;
     }
 
+    // ---- Space (open list, don't add to search) ----
     if (e.key === " ") {
-      // Space opens the list (like native select) instead of doing nothing.
       e.preventDefault();
       if (!isOpen) openAndHighlightCurrent();
       return;
     }
 
-    // Typeahead search - typing letters/numbers jumps to a matching city,
-    // same as native <select> search behavior.
-    if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
-      searchBufferRef.current += e.key.toLowerCase();
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-      searchTimeoutRef.current = setTimeout(resetSearchBuffer, 600);
-
-      const query = searchBufferRef.current;
-      const matchIndex = cityOptions.findIndex((city) =>
-        String(city[labelKey] || "")
-          .toLowerCase()
-          .startsWith(query)
-      );
-
-      if (matchIndex >= 0) {
-        setHighlightedIndex(matchIndex);
+    // ---- Backspace ----
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      if (searchText) {
+        const newText = searchText.slice(0, -1);
+        setSearchText(newText);
+        // Rebuild buffer to match
+        searchBufferRef.current = newText.toLowerCase();
         if (!isOpen) setIsOpen(true);
+        // Reset highlight to top of new filtered list
+        setHighlightedIndex(0);
       }
+      return;
+    }
+
+    // ---- Typing (letters/numbers) ----
+    if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
+      e.preventDefault();
+
+      // Reset buffer when user types faster than timeout would clear it
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+      // ✅ Force uppercase for displayed text
+      const newText = (searchText + e.key).toUpperCase();
+      setSearchText(newText);
+      searchBufferRef.current = newText.toLowerCase(); // buffer lowercase for filtering
+      setIsOpen(true);
+      setHighlightedIndex(0); // highlight first filtered match
+
+      // ❌ REMOVED auto-clear timeout – typed text stays until user clears or selects
     }
   };
 
   const handleBlur = () => {
-    // Delay closing so a click on an option registers first
     blurTimeoutRef.current = setTimeout(() => {
       setIsOpen(false);
+      setSearchText("");
       resetSearchBuffer();
     }, 150);
   };
 
   const handleFocus = () => {
-    if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
-    }
+    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
   };
 
   useEffect(() => {
@@ -194,6 +254,9 @@ export default function CitySelect({
     };
   }, []);
 
+  // ---------- What to display in input ----------
+  const displayValue = searchText ? searchText : value || "";
+
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
       <div style={{ position: "relative", display: "inline-block" }}>
@@ -202,23 +265,25 @@ export default function CitySelect({
           type="text"
           readOnly
           className="city-select-dropdown fixed-width-field"
-          value={value || ""}
+          value={displayValue}                 /* 🆕 shows typed search text */
           onClick={() => {
-            if (isOpen) {
-              setIsOpen(false);
-            } else {
-              openAndHighlightCurrent();
-            }
+            if (isOpen) setIsOpen(false);
+            else openAndHighlightCurrent();
           }}
           onKeyDown={handleInputKeyDown}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          placeholder={placeholder}
           style={{
-            paddingRight: value ? "20px" : "8px", // Add space for clear icon when value exists
+            paddingRight: displayValue ? "20px" : "8px",
+            fontStyle: "normal",   // ✅ Always normal/roman – never italic
+            color: searchText ? "#444" : "inherit",
+            textTransform: searchText ? "uppercase" : "none", // ✅ display typed text uppercase
           }}
         />
-        {/* Clear (×) icon - only show when a city is selected */}
-        {value && (
+
+        {/* Clear (×) icon */}
+        {(value || searchText) && (
           <button
             type="button"
             onClick={handleClear}
@@ -248,7 +313,7 @@ export default function CitySelect({
               e.currentTarget.style.color = "#999";
               e.currentTarget.style.backgroundColor = "transparent";
             }}
-            aria-label="Clear selected city"
+            aria-label="Clear selection"
           >
             ×
           </button>
@@ -274,30 +339,68 @@ export default function CitySelect({
             zIndex: 1000,
             listStyle: "none",
             padding: 0,
+            minWidth: "100%",
           }}
         >
-          {cityOptions.map((city, index) => (
+          {filteredOptions.length === 0 ? (
             <li
-              key={city.id}
-              data-index={index}
-              role="option"
-              aria-selected={index === highlightedIndex}
-              onMouseDown={(e) => e.preventDefault()} // keep input focus until click completes
-              onMouseEnter={() => setHighlightedIndex(index)}
-              onClick={() => handleSelect(city)}
               style={{
-                padding: "2px 8px",
+                padding: "6px 8px",
                 fontSize: "12px",
-                cursor: "pointer",
-                background:
-                  index === highlightedIndex ? "#e6f0ff" : "transparent",
+                color: "#999",
+                textAlign: "center",
               }}
             >
-              {city[labelKey]}
+              No options found
             </li>
-          ))}
+          ) : (
+            filteredOptions.map((city, index) => (
+              <li
+                key={city.id || city[codeKey] || index}
+                data-index={index}
+                role="option"
+                aria-selected={index === highlightedIndex}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                onClick={() => handleSelect(city)}
+                style={{
+                  padding: "2px 8px",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  background:
+                    index === highlightedIndex ? "#e6f0ff" : "transparent",
+                }}
+              >
+                {/* Highlight matching part of the text */}
+                {highlightMatch(String(city[labelKey] || ""), searchText)}
+              </li>
+            ))
+          )}
         </ul>
       )}
     </div>
   );
 }
+
+/* ---------- Inline highlight helper ---------- */
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <strong style={{ color: "#0d47a1", backgroundColor: "#fff59d" }}>
+        {text.slice(idx, idx + query.length)}
+      </strong>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
+/* ---------- Backward-compatibility alias ----------
+ * Any existing file that still does
+ *   `import CitySelect from "./components/CityDropdown"`
+ * keeps working without modification.
+ */
+export { DynamicSelect as CitySelect };

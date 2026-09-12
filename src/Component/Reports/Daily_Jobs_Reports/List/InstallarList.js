@@ -422,233 +422,258 @@ export default function InstallarList() {
    ///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
  
  
-   const handleDownloadCSV = async () => {
-     const workbook = new ExcelJS.Workbook();
-     const worksheet = workbook.addWorksheet("Sheet1");
- 
-     const numColumns = 16; // Ensure this matches the actual number of columns
-     const columnAlignments = [
-      "center", 
-      "left", 
-      "left",
-      "left",
-      "left",
-      "center",
-      "center",
-      "center",
-      "left",
-      "left",
-      "center",
-      "center",
-      "left",
-      "left",
-      "left",
-      "left",
-     
-    ];
- 
-     // Define fonts
-     const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
-     const fontStoreList = { name: "CustomFont", size: 10, bold: false };
-     const fontHeader = { name: "CustomFont", size: 10, bold: true };
-     const fontTableContent = { name: "CustomFont", size: 10, bold: false };
- 
-     // Empty row
-     worksheet.addRow([]);
- 
-     // Company name
-     const companyRow = worksheet.addRow([comapnyname]);
-     companyRow.eachCell((cell) => {
-       cell.font = fontCompanyName;
-       cell.alignment = { horizontal: "center" };
-     });
-     worksheet.getRow(companyRow.number).height = 30;
-     worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
- 
-     // Store List
-     const storeListRow = worksheet.addRow(["Installar List"]);
-     storeListRow.eachCell((cell) => {
-       cell.font = fontStoreList;
-       cell.alignment = { horizontal: "center" };
-     });
-     worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
- 
-     // Empty row
-     worksheet.addRow([]);
- 
-    //  // Filter data
-     let typestatus =
-       transectionType === "N" ? "NON-ACTIVE" :
-         transectionType === "A" ? "ACTIVE" : "ALL";
-     let typesearch = searchQuery || "";
- 
-     const typeAndStoreRow3 = worksheet.addRow(
-       searchQuery ? ["Status :", typestatus,"","","","", "Search :", typesearch] : ["Status", typestatus]
-     );
- 
-     typeAndStoreRow3.eachCell((cell, colIndex) => {
-       cell.font = { name: "CustomFont", size: 10, bold: [1,7].includes(colIndex) };
-       cell.alignment = { horizontal: "left", vertical: "middle" };
-     });
- 
-     // Header style
-     const headerStyle = {
-       font: fontHeader,
-       alignment: { horizontal: "center", vertical: "middle" },
-       fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
-       border: {
-         top: { style: "thin" },
-         left: { style: "thin" },
-         bottom: { style: "thin" },
-         right: { style: "thin" },
-       },
-     };
- 
-     // Headers
-     const headers = [
-      "Code", 
-      "Description", 
-      "Contact", 
-      "Address1", 
-      "Address2",
+const handleDownloadCSV = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet1");
 
-       "Mobile", 
-      "Mobile", 
-      "Status", 
-      "Cnic", 
-      "Name",
+  const numColumns = 23; // ✅ Updated column count
+  const columnAlignments = [
+    "center", // Code
+    "left",   // Description
+    "left",   // Contect person
+    "left",   // Address1
+    "left",   // Address2
+    "center", // Phone No
+    "center", // Mobile No
+    "center", // Status
+    "left",   // NIC
+    "left",   // Jazzcash Name
+    "center", // Jazzcash No
+    "center", // Easypaisa Name
+    "left",   // Eeasypaisa No
+    "left",   // Bank
+    "left",   // Ac Code
+    "left",   // City
+    "center", // City Code
+    "left",   // Installarcode
+    "left",   // Email
+    "left",   // Ins User
+    "left",   // Ins Date
+    "left",   // Up User
+    "left",   // Up Date
+  ];
 
-       "Mobile", 
-      "Name", 
-      "Mobile", 
-      "Bank", 
-      "Account",
-      "City"
-    ];
-     const headerRow = worksheet.addRow(headers);
-     headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
- 
-     // ✅ Add data rows with alternating light grey background
-     tableData.forEach((item, index) => {
-       const row = worksheet.addRow([
-  item.tintcod,
-       item.tintdsc,
-       item.tintper,
-       item.tadd001,
-       item.tadd002  , 
+  // Define fonts
+  const fontCompanyName = { name: "CustomFont", size: 18, bold: true };
+  const fontStoreList = { name: "CustomFont", size: 10, bold: false };
+  const fontHeader = { name: "CustomFont", size: 10, bold: true };
+  const fontTableContent = { name: "CustomFont", size: 10, bold: false };
 
-       item.tphnnum,
-       item.tmobnum,
-       item.tinssts,
-       item.tnicnum,
-       item.tjaznam  ,
+  // Empty row
+  worksheet.addRow([]);
 
-        item.tjaznum,
-       item.tespnam,
-       item.tespnum,
-       item.tbnknam,
-       item.taccnum,  
-      item.City, 
-      ]);
- 
-       row.eachCell((cell, colIndex) => {
-         cell.font = fontTableContent;
-         cell.border = {
-           top: { style: "thin" },
-           left: { style: "thin" },
-           bottom: { style: "thin" },
-           right: { style: "thin" },
-         };
-         cell.alignment = {
-           horizontal: columnAlignments[colIndex - 1] || "left",
-           vertical: "middle",
-         };
- 
-         // ✅ Apply very light grey background to odd rows
-         if ((index + 1) % 2 !== 0) {
-           cell.fill = {
-             type: "pattern",
-             pattern: "solid",
-             fgColor: { argb: "FFEFEFEF" }, // Very light grey
-           };
-         }
-       });
-     });
- 
-     // Column widths
-     [8,40,15,30,30,12,12,7, 17,30,12,30,15,35,35,30].forEach((width, index) => {
-       worksheet.getColumn(index + 1).width = width;
-     });
- 
-     const totalRow = worksheet.addRow([
-       String(formatValue(tableData.length.toLocaleString())),
-       "",
-        "",
-        "",
-        "",
-         "",
-           "",
-        "",
-        "",
-        "",
-         "",
-           "",
-        "",
-        "",
-        "",
-         "",
-     ]);
- 
-     // total row added
- 
-     totalRow.eachCell((cell, colNumber) => {
-       cell.font = { bold: true };
-       cell.border = {
-         top: { style: "double" },
-         left: { style: "thin" },
-         bottom: { style: "double" },
-         right: { style: "thin" },
-       };
- 
-       // Align only the "Total" text to the right
-       if (colNumber === 1) {
-         cell.alignment = { horizontal: "center" };
-       }
-     });
- 
- 
-     // Blank row
-     worksheet.addRow([]);
- 
-     // Date and Time
-     const today = new Date();
-     const currentTime = today.toLocaleTimeString("en-GB");
-     const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
-     const userid = user.tusrid;
- 
-     const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
-     dateTimeRow.eachCell((cell) => {
-       cell.font = { name: "CustomFont", size: 10 };
-       cell.alignment = { horizontal: "left" };
-     });
- 
-     const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-     dateTimeRow1.eachCell((cell) => {
-       cell.font = { name: "CustomFont", size: 10 };
-       cell.alignment = { horizontal: "left" };
-     });
- 
-     // Merge cells
-     worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
-     worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
- 
-     // Save Excel
-     const buffer = await workbook.xlsx.writeBuffer();
-     const blob = new Blob([buffer], {
-       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-     });
-     saveAs(blob, `InstallarList As On ${currentDate}.xlsx`);
-   };
+  // Company name
+  const companyRow = worksheet.addRow([comapnyname]);
+  companyRow.eachCell((cell) => {
+    cell.font = fontCompanyName;
+    cell.alignment = { horizontal: "center" };
+  });
+  worksheet.getRow(companyRow.number).height = 30;
+  worksheet.mergeCells(`A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`);
+
+  // Store List
+  const storeListRow = worksheet.addRow(["Installar List"]);
+  storeListRow.eachCell((cell) => {
+    cell.font = fontStoreList;
+    cell.alignment = { horizontal: "center" };
+  });
+  worksheet.mergeCells(`A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`);
+
+  // Empty row
+  worksheet.addRow([]);
+
+  // Filter data
+  let typestatus =
+    transectionType === "N" ? "NON-ACTIVE" :
+      transectionType === "A" ? "ACTIVE" : "ALL";
+  let typesearch = searchQuery || "";
+
+  const typeAndStoreRow3 = worksheet.addRow(
+    searchQuery ? ["Status :", typestatus, "", "", "", "", "Search :", typesearch] : ["Status", typestatus]
+  );
+
+  typeAndStoreRow3.eachCell((cell, colIndex) => {
+    cell.font = { name: "CustomFont", size: 10, bold: [1, 7].includes(colIndex) };
+    cell.alignment = { horizontal: "left", vertical: "middle" };
+  });
+
+  // Header style
+  const headerStyle = {
+    font: fontHeader,
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6D9F7" } },
+    border: {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    },
+  };
+
+  // Headers
+  const headers = [
+    "Code",              // tintcod
+    "Description",       // tintdsc
+    "Contect person",    // tintper
+    "Address1",          // tadd001
+    "Address2",          // tadd002
+    "Phone No",          // tphnnum
+    "Mobile No",         // tmobnum
+    "Status",            // tinssts
+    "NIC",               // tnicnum
+    "Jazzcash Name",     // tjaznam
+    "Jazzcash No",       // tjaznum
+    "Easypaisa Name",    // tespnam
+    "Eeasypaisa No",     // tespnum
+    "Bank",              // tbnknam
+    "Ac Code",           // taccnum
+    "City",              // City
+    "City Code",         // tctycod
+    "Installarcode",     // tinscod
+    "Email",             // temladd
+    "Ins User",          // tinsusr  ← LAST 4
+    "Ins Date",          // tinsdat
+    "Up User",           // tupdusr
+    "Up Date",           // tupddat
+  ];
+
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+  // ✅ Add data rows with alternating light grey background
+  tableData.forEach((item, index) => {
+    const row = worksheet.addRow([
+      item.tintcod,
+      item.tintdsc,
+      item.tintper,
+      item.tadd001,
+      item.tadd002,
+      item.tphnnum,
+      item.tmobnum,
+      item.tinssts,
+      item.tnicnum,
+      item.tjaznam,
+      item.tjaznum,
+      item.tespnam,
+      item.tespnum,
+      item.tbnknam,
+      item.taccnum,
+      item.City,
+      item.tctycod,
+      item.tinscod,
+      item.temladd,
+      item.tinsusr,   // LAST 4
+      item.tinsdat,
+      item.tupdusr,
+      item.tupddat,
+    ]);
+
+    // ✅ FIX: Iterate over ALL columns (1..numColumns) so empty cells also get border
+    for (let colIndex = 1; colIndex <= numColumns; colIndex++) {
+      const cell = row.getCell(colIndex);
+      cell.font = fontTableContent;
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.alignment = {
+        horizontal: columnAlignments[colIndex - 1] || "left",
+        vertical: "middle",
+      };
+
+      // ✅ Apply very light grey background to odd rows
+      if ((index + 1) % 2 !== 0) {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFEFEFEF" },
+        };
+      }
+    }
+  });
+
+  // Column widths
+  [
+    8,   // Code
+    40,  // Description
+    15,  // Contect person
+    30,  // Address1
+    30,  // Address2
+    12,  // Phone No
+    12,  // Mobile No
+    7,   // Status
+    17,  // NIC
+    30,  // Jazzcash Name
+    12,  // Jazzcash No
+    30,  // Easypaisa Name
+    15,  // Eeasypaisa No
+    35,  // Bank
+    35,  // Ac Code
+    30,  // City
+    10,  // City Code
+    15,  // Installarcode
+    30,  // Email
+    15,  // Ins User
+    15,  // Ins Date
+    15,  // Up User
+    15,  // Up Date
+  ].forEach((width, index) => {
+    worksheet.getColumn(index + 1).width = width;
+  });
+
+  const totalRow = worksheet.addRow([
+    String(formatValue(tableData.length.toLocaleString())),
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  ]);
+
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true };
+    cell.border = {
+      top: { style: "double" },
+      left: { style: "thin" },
+      bottom: { style: "double" },
+      right: { style: "thin" },
+    };
+
+    if (colNumber === 1) {
+      cell.alignment = { horizontal: "center" };
+    }
+  });
+
+  // Blank row
+  worksheet.addRow([]);
+
+  // Date and Time
+  const today = new Date();
+  const currentTime = today.toLocaleTimeString("en-GB");
+  const currentDate = today.toLocaleDateString("en-GB").replace(/\//g, "-");
+  const userid = user.tusrid;
+
+  const dateTimeRow = worksheet.addRow([`DATE:   ${currentDate}  TIME:   ${currentTime}`]);
+  dateTimeRow.eachCell((cell) => {
+    cell.font = { name: "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  dateTimeRow1.eachCell((cell) => {
+    cell.font = { name: "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  // Merge cells
+  worksheet.mergeCells(`A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`);
+  worksheet.mergeCells(`A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`);
+
+  // Save Excel
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, `InstallarList As On ${currentDate}.xlsx`);
+};
 
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 

@@ -9,7 +9,7 @@ import {
   getYearDescription,
 } from "../../Component/Auth";
 
-import CitySelect from "./components/CityDropdown";
+import DynamicSelect from "./components/CityDropdown";
 import FormButtons from "./components/FormButton";
 import InstallationCode from "./components/InstallarCode";
 import InstallerSearchModal from "./InstallerSearchModal";
@@ -51,6 +51,8 @@ export default function InstallarMaintenance() {
     phone: "",
     mobile: "",
     city: "",
+    area: "",
+    FAreCod: "",          // ← NEW: holds selected Area code for Save API
     nic: "",
     jcName: "",
     jcNumber: "",
@@ -61,13 +63,15 @@ export default function InstallarMaintenance() {
     accountCode: "22-03-0",
   });
 
-  console.log('getUserData', getUserData.user)
-
   const [code, setCode] = useState("");
   const [maxCode, setMaxCode] = useState("");
   const [organisation, setOrganisation] = useState(null);
   const [selectedCityCode, setSelectedCityCode] = useState("");
+  console.log('CITYCODE', selectedCityCode)
+  const [selectedAreaCode, setSelectedAreaCode] = useState("");
+  console.log('AREACODE', selectedAreaCode)
   const [cityOptions, setCityOptions] = useState([]);
+  const [areaOptions, setAreaOptions] = useState([]);
   const [showDescriptionInUnlabeled, setShowDescriptionInUnlabeled] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -86,6 +90,7 @@ export default function InstallarMaintenance() {
   const phoneInputRef = useRef(null);
   const mobileInputRef = useRef(null);
   const citySelectRef = useRef(null);
+  const areaSelectRef = useRef(null);
   const jcNameInputRef = useRef(null);
   const jcNumberInputRef = useRef(null);
   const epNameInputRef = useRef(null);
@@ -98,7 +103,8 @@ export default function InstallarMaintenance() {
   console.log("FormStore", formStore);
   console.log("InstallationCode", code);
   console.log("SelectedCityCode", selectedCityCode);
- 
+  console.log("SelectedAreaCode", selectedAreaCode);
+
   // Get organisation data
   useEffect(() => {
     const orgData = getOrganisationData();
@@ -108,10 +114,8 @@ export default function InstallarMaintenance() {
   // Auto-focus InstallationCode on initial load
   useEffect(() => {
     if (code && isInitialLoad) {
-      // Focus the code input after it gets its initial value
       const timer = setTimeout(() => {
         if (codeInputRef.current) {
-          // Find the input element inside InstallationCode component
           const input = codeInputRef.current.querySelector('input');
           if (input) {
             input.focus();
@@ -120,7 +124,7 @@ export default function InstallarMaintenance() {
         }
         setIsInitialLoad(false);
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [code, isInitialLoad]);
@@ -149,10 +153,7 @@ export default function InstallarMaintenance() {
         if (response.data && Array.isArray(response.data)) {
           setCityOptions(response.data);
         } else {
-          console.warn(
-            "Response data structure is not as expected:",
-            response.data
-          );
+          console.warn("Response data structure is not as expected:", response.data);
           setCityOptions([]);
         }
       })
@@ -162,7 +163,32 @@ export default function InstallarMaintenance() {
       });
   }, [organisation, apiLinks, getLocationNumber]);
 
-  // Show toast notification with optional type (success or error)
+  // Fetch areas for the dropdown
+  useEffect(() => {
+    if (!organisation) return;
+
+    const apiUrl = apiLinks + "/GetActiveArea.php";
+    const formData = new URLSearchParams({
+      code: organisation.code,
+      FLocCod: getLocationNumber || getLocationnumber(),
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setAreaOptions(response.data);
+        } else {
+          setAreaOptions([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching areas:", error);
+        setAreaOptions([]);
+      });
+  }, [organisation, apiLinks, getLocationNumber]);
+
+  // Show toast notification
   const showToast = (message, type = 'success') => {
     console.log("Toast:", message);
 
@@ -184,14 +210,14 @@ export default function InstallarMaintenance() {
     `;
     toast.textContent = message;
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
       toast.style.animation = 'slideOut 0.3s ease-in';
       setTimeout(() => {
         document.body.removeChild(toast);
       }, 300);
     }, 3000);
-    
+
     if (!document.getElementById('toast-styles')) {
       const style = document.createElement('style');
       style.id = 'toast-styles';
@@ -209,7 +235,9 @@ export default function InstallarMaintenance() {
     }
   };
 
-  // Fetch installation data by Code
+  // ==========================================================
+  // Fetch installation data by Code  ---  FIXED 3 FIELDS
+  // ==========================================================
   const fetchInstallationDataByCode = (installationCode) => {
     if (!organisation || !installationCode) {
       showToast("Data not found", 'error');
@@ -227,7 +255,7 @@ export default function InstallarMaintenance() {
       .then((response) => {
         if (response.data && response.data.length > 0) {
           const data = response.data[0];
-          
+
           // Find the city name from city code
           let cityName = data.tctycod || "";
           if (cityName && cityOptions.length > 0) {
@@ -238,14 +266,25 @@ export default function InstallarMaintenance() {
               cityName = matchedCity.tctydsc;
             }
           }
-          
-          // Update formStore
+
+          // Find the area name from area code
+          let areaName = "";
+          if (data.tarecod && areaOptions.length > 0) {
+            const matchedArea = areaOptions.find(
+              (area) => String(area.tarecod).trim() === String(data.tarecod).trim()
+            );
+            if (matchedArea) {
+              areaName = matchedArea.taredsc;
+            }
+          }
+
+          // ---------- FIXED MAPPING ----------
           setFormStore((prev) => ({
             ...prev,
             status: data.tinssts || prev.status,
             description: data.tintdsc || prev.description,
-            contactPerson: data.temladd || prev.contactPerson,
-            email: data.FEmlAdd || prev.email,
+            contactPerson: data.tintper || prev.contactPerson,
+            email: data.temladd || prev.email,
             address: data.tadd001 || prev.address,
             address2: data.tadd002 || prev.address2,
             phone: data.tphnnum || prev.phone,
@@ -256,8 +295,10 @@ export default function InstallarMaintenance() {
             epName: data.tespnam || prev.epName,
             epNumber: data.tespnum || prev.epNumber,
             bank: data.tbnknam || prev.bank,
-            accountNumber: data.tinscod || prev.accountNumber,
+            accountNumber: data.taccnum || prev.accountNumber,
             city: cityName || prev.city,
+            area: areaName || "",
+            FAreCod: data.tarecod || "",
           }));
 
           // Update selected city code
@@ -265,7 +306,11 @@ export default function InstallarMaintenance() {
             setSelectedCityCode(data.tctycod);
           }
 
-          // Show success toast
+          // Update selected area code
+          if (data.tarecod) {
+            setSelectedAreaCode(data.tarecod);
+          }
+
           showToast("User data found", 'success');
         } else {
           // No data found - clear form fields
@@ -279,6 +324,8 @@ export default function InstallarMaintenance() {
             phone: "",
             mobile: "",
             city: "",
+            area: "",
+            FAreCod: "",
             nic: "",
             jcName: "",
             jcNumber: "",
@@ -288,27 +335,23 @@ export default function InstallarMaintenance() {
             accountNumber: "",
             accountCode: `22-03-0${code}`,
           }));
-          
-          // Clear selected city code
+
           setSelectedCityCode("");
-          
-          // Show error toast
+          setSelectedAreaCode("");
           showToast("Data not found", 'error');
-          
-          console.warn(
-            "No data found for installation code:",
-            installationCode
-          );
+
+          console.warn("No data found for installation code:", installationCode);
         }
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        // Show error toast on API failure
         showToast("Data not found", 'error');
       });
   };
 
-  // Fetch installation data by NIC
+  // ==========================================================
+  // Fetch installation data by NIC  ---  FIXED 3 FIELDS
+  // ==========================================================
   const fetchInstallationDataByNIC = (nicNumber) => {
     if (!organisation || !nicNumber) {
       console.error("[NIC Lookup] Missing organisation or nicNumber:", { organisation, nicNumber });
@@ -316,7 +359,6 @@ export default function InstallarMaintenance() {
       return;
     }
 
-    // Remove hyphens for API call
     const cleanNic = nicNumber.replace(/-/g, '');
     console.log("[NIC Lookup] Input NIC:", nicNumber, "| Cleaned NIC:", cleanNic);
     console.log("[NIC Lookup] Organisation code:", organisation.code);
@@ -334,12 +376,10 @@ export default function InstallarMaintenance() {
       .post(apiUrl, formData)
       .then((response) => {
         console.log("[NIC Lookup] Raw response.data:", response.data);
-        console.log("[NIC Lookup] response.data type:", typeof response.data);
-        console.log("[NIC Lookup] response.data length:", response.data?.length);
+
         if (response.data && response.data.length > 0) {
           const data = response.data[0];
-          
-          // Find the city name from city code
+
           let cityName = data.tctycod || "";
           if (cityName && cityOptions.length > 0) {
             const matchedCity = cityOptions.find(
@@ -349,14 +389,25 @@ export default function InstallarMaintenance() {
               cityName = matchedCity.tctydsc;
             }
           }
-          
-          // Update formStore
+
+          // Find the area name from area code
+          let areaName = "";
+          if (data.tarecod && areaOptions.length > 0) {
+            const matchedArea = areaOptions.find(
+              (area) => String(area.tarecod).trim() === String(data.tarecod).trim()
+            );
+            if (matchedArea) {
+              areaName = matchedArea.taredsc;
+            }
+          }
+
+          // ---------- FIXED MAPPING ----------
           setFormStore((prev) => ({
             ...prev,
             status: data.tinssts || prev.status,
             description: data.tintdsc || prev.description,
-            contactPerson: data.temladd || prev.contactPerson,
-            email: data.FEmlAdd || prev.email,
+            contactPerson: data.tintper || prev.contactPerson,
+            email: data.temladd || prev.email,
             address: data.tadd001 || prev.address,
             address2: data.tadd002 || prev.address2,
             phone: data.tphnnum || prev.phone,
@@ -367,25 +418,28 @@ export default function InstallarMaintenance() {
             epName: data.tespnam || prev.epName,
             epNumber: data.tespnum || prev.epNumber,
             bank: data.tbnknam || prev.bank,
-            accountNumber: data.tinscod || prev.accountNumber,
+            accountNumber: data.taccnum || prev.accountNumber,
             city: cityName || prev.city,
+            area: areaName || "",
+            FAreCod: data.tarecod || "",
           }));
 
-          // Update selected city code
           if (data.tctycod) {
             setSelectedCityCode(data.tctycod);
           }
 
-          // Update code field with the found installation code
+          if (data.tarecod) {
+            setSelectedAreaCode(data.tarecod);
+          }
+
           if (data.tintcod) {
             setCode(data.tintcod);
           }
 
-          // Show success toast
           showToast("User data found", 'success');
         } else {
           console.warn("[NIC Lookup] No data found. response.data:", response.data);
-          // No data found - clear form fields
+
           setFormStore((prev) => ({
             status: "Active",
             description: "",
@@ -396,6 +450,8 @@ export default function InstallarMaintenance() {
             phone: "",
             mobile: "",
             city: "",
+            area: "",
+            FAreCod: "",
             nic: prev.nic,
             jcName: "",
             jcNumber: "",
@@ -405,37 +461,27 @@ export default function InstallarMaintenance() {
             accountNumber: "",
             accountCode: `22-03-0${code}`,
           }));
-          
-          // Clear selected city code
+
           setSelectedCityCode("");
-          
-          // Show error toast
+          setSelectedAreaCode("");
           showToast("Data not found", 'error');
-          
-          console.warn(
-            "[NIC Lookup] No data found for NIC:",
-            nicNumber
-          );
+
+          console.warn("[NIC Lookup] No data found for NIC:", nicNumber);
         }
       })
       .catch((error) => {
         console.error("[NIC Lookup] API error:", error);
         console.error("[NIC Lookup] Error response:", error.response?.data);
         console.error("[NIC Lookup] Error status:", error.response?.status);
-        // Show error toast on API failure
         showToast("Data not found", 'error');
       });
   };
 
   // Format NIC with automatic hyphens
   const formatNIC = (value) => {
-    // Remove all non-digit characters
-    const digits = value.replace(/\D/g, '');
-    
-    // Limit to 13 digits
+    const digits = String(value || "").replace(/\D/g, '');
     const limitedDigits = digits.slice(0, 13);
-    
-    // Format with hyphens: 5-7-1 (total 13 digits)
+
     if (limitedDigits.length <= 5) {
       return limitedDigits;
     } else if (limitedDigits.length <= 12) {
@@ -445,7 +491,6 @@ export default function InstallarMaintenance() {
     }
   };
 
-  // Handle NIC change with formatting
   const handleNicChange = (e) => {
     const rawValue = e.target.value;
     const formattedValue = formatNIC(rawValue);
@@ -457,37 +502,19 @@ export default function InstallarMaintenance() {
     setFormStore((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleCodeChange = (e) => {
-    setCode(e.target.value);
-  };
-
-  const bumpCode = (dir) => {
-    setCode((prevCode) => {
-      const currentCode = parseInt(prevCode, 10) || 0;
-      const next = Math.max(0, currentCode + dir);
-      const newCode = String(next).padStart(4, "0");
-      return newCode;
-    });
-  };
-
-  // Handle selection from search modal
   const handleInstallerSelect = (installerData) => {
     if (installerData.code) {
       setCode(installerData.code);
-      // Immediately fetch full data for the selected code
       fetchInstallationDataByCode(installerData.code);
     }
   };
 
-  // Handle Installer Code change from increment/decrement controls
   const handleInstallerCodeChange = (newCode) => {
     fetchInstallationDataByCode(newCode);
   };
 
-  // Handle modal close - return focus to Code input
   const handleModalClose = () => {
     setIsSearchModalOpen(false);
-    // Focus the Code input field after modal closes
     setTimeout(() => {
       if (codeInputRef.current) {
         const input = codeInputRef.current.querySelector('input');
@@ -499,23 +526,18 @@ export default function InstallarMaintenance() {
     }, 100);
   };
 
-  // Handle Enter key navigation - moves focus to next field
   const handleKeyDown = (e, nextRef) => {
     if (e.key === 'Enter') {
-      e.preventDefault(); // PREVENT FORM SUBMISSION
-      e.stopPropagation(); // Prevent any default select/highlight behavior
+      e.preventDefault();
+      e.stopPropagation();
       if (nextRef && nextRef.current) {
-        // For select elements, focus works directly
-        // For custom components, we need to find the actual input/select element
         const element = nextRef.current;
         if (element.tagName === 'SELECT' || element.tagName === 'INPUT') {
           element.focus();
-          // If it's an input, select its content for better UX
           if (element.tagName === 'INPUT') {
             element.select();
           }
         } else {
-          // For custom components like InstallationCode or CitySelect
           const input = element.querySelector('input, select');
           if (input) {
             input.focus();
@@ -528,25 +550,20 @@ export default function InstallarMaintenance() {
     }
   };
 
-  // Handle Enter key on NIC field - triggers API call then moves to Description
   const handleNicEnter = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       e.stopPropagation();
       console.log("[NIC Enter] formStore.nic:", formStore.nic);
-      // Call the API with current NIC value (with hyphens)
       if (formStore.nic && organisation) {
         fetchInstallationDataByNIC(formStore.nic);
       }
-      // Move focus to Description field after API call
       if (descriptionInputRef.current) {
         descriptionInputRef.current.focus();
       }
     }
   };
 
-  // Reset form to default/empty values (full reset)
-  // After clearing, fetch the next available installation code from the API.
   const resetForm = () => {
     setFormStore({
       status: "Active",
@@ -558,6 +575,8 @@ export default function InstallarMaintenance() {
       phone: "",
       mobile: "",
       city: "",
+      area: "",
+      FAreCod: "",
       nic: "",
       jcName: "",
       jcNumber: "",
@@ -568,8 +587,8 @@ export default function InstallarMaintenance() {
       accountCode: `22-03-0${code}`,
     });
     setSelectedCityCode("");
+    setSelectedAreaCode("");
 
-    // Fetch next code from API
     if (organisation) {
       const apiUrl = apiLinks + "/NewInstallar.php";
       const formData = new URLSearchParams({
@@ -601,53 +620,12 @@ export default function InstallarMaintenance() {
     }
   };
 
-  // Reset form but keep code, status, and accountCode
-  const resetFormKeepCodeAndStatus = () => {
-    setFormStore({
-      status: formStore.status, // Keep current status
-      description: "",
-      contactPerson: "",
-      email: "",
-      address: "",
-      address2: "",
-      phone: "",
-      mobile: "",
-      city: "",
-      nic: "",
-      jcName: "",
-      jcNumber: "",
-      epName: "",
-      epNumber: "",
-      bank: "",
-      accountNumber: "",
-      accountCode: formStore.accountCode, // Keep current accountCode
-    });
-    setSelectedCityCode("");
-  };
-
-  // Convert display status to API status.
-  // Database returns "A" / "I"; the dropdown shows "Active" / "Non-Active".
-  // This helper normalises everything to the values the API expects.
   const mapStatusForApi = (status) => {
     if (status === "Active") return "A";
-    if (status === "Non-Active") return "I";
-    return status || ""; // Already an API value (e.g. "A", "I") or empty
+    if (status === "Non-Active") return "N";
+    return status || "";
   };
 
-  // Resolve the backend city code (FCtyCod) that should be sent on Save.
-  //
-  // `selectedCityCode` is normally kept in sync by the CitySelect component's
-  // onCityCodeChange callback. That path is exercised reliably when a record
-  // is loaded via GetInstallar (we set it directly from data.tctycod), which
-  // is why the "populate then save" flow always worked.
-  //
-  // When a user types/selects a city by hand, formStore.city (the display
-  // name) can end up set without selectedCityCode being updated in the same
-  // tick (or at all, depending on how CitySelect fires its callbacks) — the
-  // Save request then goes out with FCtyCod empty, and the backend rejects
-  // the insert with a 500. This helper re-derives the code from the already
-  // fetched cityOptions list as a fallback, so Save is correct regardless of
-  // which path set formStore.city.
   const resolveCityCode = () => {
     if (selectedCityCode) return selectedCityCode;
 
@@ -663,7 +641,6 @@ export default function InstallarMaintenance() {
     return "";
   };
 
-  // Handle Save API
   const handleSave = async () => {
     if (!organisation) {
       console.error("Organisation data not available");
@@ -671,15 +648,12 @@ export default function InstallarMaintenance() {
       return;
     }
 
-    // Validate required fields
     if (!code) {
       console.error("Code is required");
       showToast("Code is required", 'error');
       return;
     }
 
-    // Resolve the city code the same way regardless of whether the record
-    // was loaded via GetInstallar or the city was picked manually.
     const cityCodeToSend = resolveCityCode();
 
     if (formStore.city && !cityCodeToSend) {
@@ -693,14 +667,8 @@ export default function InstallarMaintenance() {
     try {
       const apiUrl = apiLinks + "/SaveInstallar.php";
 
-      // Prepare form data for API - matching Postman format.
-      // Same field mapping as before; values are trimmed so manually typed
-      // entries (which can carry leading/trailing spaces or be left
-      // untouched as "") are sent in the same shape as values that came
-      // back from GetInstallar.
       const payload = {
         code: organisation.code,
-        // FUsrId: getUserData.user || "",
         FUsrId: "sohaib" || "",
         FIntCod: code,
         FIntDsc: (formStore.description || "").trim(),
@@ -709,9 +677,10 @@ export default function InstallarMaintenance() {
         FPhnNum: (formStore.phone || "").trim(),
         FMobNum: (formStore.mobile || "").trim(),
         FCtyCod: cityCodeToSend || "",
-        FInsCod: formStore.accountCode || "", // FIXED: Use accountCode instead of accountNumber
+        FAreCod: (formStore.FAreCod || "").trim(),   // ← NEW: Area code sent to Save API
+        FInsCod: formStore.accountCode || "",
         FInsSts: mapStatusForApi(formStore.status),
-        FNicNum: (formStore.nic || "").replace(/-/g, '').trim(), // Remove hyphens for API
+        FNicNum: (formStore.nic || "").replace(/-/g, '').trim(),
         FJazNum: (formStore.jcNumber || "").trim(),
         FJazNam: (formStore.jcName || "").trim(),
         FEspNum: (formStore.epNumber || "").trim(),
@@ -720,10 +689,9 @@ export default function InstallarMaintenance() {
         FAccNum: (formStore.accountNumber || "").trim(),
         FEmlAdd: (formStore.email || "").trim(),
         FConPer: (formStore.contactPerson || "").trim(),
-        FIntPer: "", // Always send empty string
+        FIntPer: (formStore.contactPerson || "").trim(),
       };
 
-      // Log the payload for debugging
       console.log("Saving payload:", payload);
 
       const formData = new URLSearchParams(payload).toString();
@@ -740,7 +708,6 @@ export default function InstallarMaintenance() {
         console.log("Save successful:", response.data);
         showToast("Form saved successfully!", 'success');
         resetForm();
-        // 5-second cooldown to prevent duplicate saves
         setIsCoolingDown(true);
         setTimeout(() => setIsCoolingDown(false), 5000);
       } else {
@@ -751,8 +718,7 @@ export default function InstallarMaintenance() {
       console.error("Error saving data:", error);
       console.error("Error response:", error.response?.data);
       console.error("Error status:", error.response?.status);
-      
-      // Show more detailed error message
+
       let errorMessage = "Error saving data";
       if (error.response?.data) {
         errorMessage = error.response.data.message || error.response.data || errorMessage;
@@ -766,14 +732,6 @@ export default function InstallarMaintenance() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form submission prevented - use Save button");
-  };
-
-  const handleUnlabeledFocus = () => {
-    setShowDescriptionInUnlabeled(true);
-  };
-
-  const handleUnlabeledBlur = () => {
-    setShowDescriptionInUnlabeled(false);
   };
 
   const handleReturn = () => {
@@ -791,7 +749,6 @@ export default function InstallarMaintenance() {
         <div className="el-page">
           <div className="el-card">
             <form onSubmit={handleSubmit}>
-              {/* Header */}
               <header className="el-header">
                 <h1>Installer Maintenance</h1>
                 <p className="el-subtitle">
@@ -799,21 +756,14 @@ export default function InstallarMaintenance() {
                 </p>
               </header>
 
-              {/* Scrollable Body */}
               <div className="el-scrollable-body">
-                {/* TOP BAR: Code + Status */}
                 <div className="el-top-bar">
                   <div
                     className="el-field-row"
                     onKeyDownCapture={(e) => {
-                      // Intercept Enter in the capture phase so it always fires,
-                      // even if the Code value is selected/highlighted, and
-                      // regardless of InstallationCode's internal key handling.
                       if (e.key === 'Enter') {
                         e.preventDefault();
                         e.stopPropagation();
-                        // Trigger the existing installation-data API using the
-                        // current Code value, then move focus to Status.
                         fetchInstallationDataByCode(code);
                         if (statusSelectRef.current) {
                           statusSelectRef.current.focus();
@@ -841,9 +791,9 @@ export default function InstallarMaintenance() {
 
                   <div className="el-field-row">
                     <span className="el-field-label-right">Status :</span>
-                    <select 
+                    <select
                       ref={statusSelectRef}
-                      value={formStore.status} 
+                      value={formStore.status}
                       onChange={set("status")}
                       onKeyDown={(e) => handleKeyDown(e, nicInputRef)}
                     >
@@ -857,12 +807,9 @@ export default function InstallarMaintenance() {
                 </div>
 
                 <div className="el-body">
-                  {/* LEFT COLUMN */}
                   <div className="el-main-content">
-                    {/* Personal Information - No heading */}
                     <section className="el-section">
                       <div className="el-stack">
-                        {/* NIC # field - moved before Description */}
                         <div className="el-field-row">
                           <span className="el-field-label-right">NIC # :</span>
                           <input
@@ -988,37 +935,70 @@ export default function InstallarMaintenance() {
                           </div>
                         </div>
 
-                        <div className="el-field-row">
-                          <span className="el-field-label-right">City :</span>
-
-                          <div ref={citySelectRef}>
-                            <CitySelect
-                              apiEndpoint="/GetActiveCity.php"
-                              apiLinks={apiLinks}
-                              organisation={organisation}
-                              locationNumber={
-                                getLocationNumber || getLocationnumber()
-                              }
-                              value={isInitialLoad ? "" : (formStore.city || "")}
-                              onChange={(selectedCity) => {
-                                setFormStore((prev) => ({ ...prev, city: selectedCity }));
-                              }}
-                              valueKey="tctydsc"
-                              labelKey="tctydsc"
-                              codeKey="tctycod"
-                              onCityCodeChange={setSelectedCityCode}
-                              onKeyDown={(e) => {
-                                // Only intercept Enter - leave arrow keys / typeahead
-                                // to the native select for picking options.
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  if (jcNameInputRef.current) {
-                                    jcNameInputRef.current.focus();
-                                  }
+                        {/* -------- CITY + AREA on the same row -------- */}
+                        <div className="el-field-row el-row-2-fields">
+                          {/* CITY (left) */}
+                          <div className="el-field-row-inner el-field-left" style={{marginLeft:"25px"}}>
+                            <span className="el-field-label-right">City :</span>
+                            <div ref={citySelectRef} style={{ width: '200px', maxWidth: '200px', flex: '0 0 auto' }}>
+                              <DynamicSelect
+                                apiEndpoint="/GetActiveCity.php"
+                                apiLinks={apiLinks}
+                                organisation={organisation}
+                                locationNumber={
+                                  getLocationNumber || getLocationnumber()
                                 }
-                              }}
-                            />
+                                value={isInitialLoad ? "" : (formStore.city || "")}
+                                onChange={(selectedCity) => {
+                                  setFormStore((prev) => ({ ...prev, city: selectedCity }));
+                                }}
+                                valueKey="tctydsc"
+                                labelKey="tctydsc"
+                                codeKey="tctycod"
+                                onCityCodeChange={setSelectedCityCode}
+                                placeholder="Please Select City"
+                                onKeyDown={(e) => handleKeyDown(e, areaSelectRef)}
+                              />
+                            </div>
+                          </div>
+
+                          {/* AREA (right, same row) */}
+                          <div className="el-field-row-inner el-field-right">
+                            <span className="el-field-label-right">Area :</span>
+                            <div ref={areaSelectRef}>
+                              <DynamicSelect
+                                apiEndpoint="/GetActiveArea.php"
+                                apiLinks={apiLinks}
+                                organisation={organisation}
+                                locationNumber={
+                                  getLocationNumber || getLocationnumber()
+                                }
+                                value={isInitialLoad ? "" : (formStore.area || "")}
+                                onChange={(selectedArea) => {
+                                  setFormStore((prev) => ({ ...prev, area: selectedArea }));
+                                }}
+                                valueKey="taredsc"
+                                labelKey="taredsc"
+                                codeKey="tarecod"
+                                onCodeChange={(areaCode) => {
+                                  setFormStore((prev) => ({
+                                    ...prev,
+                                    FAreCod: areaCode || "",
+                                  }));
+                                  setSelectedAreaCode(areaCode || "");
+                                }}
+                                placeholder="Please Select Area"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (jcNameInputRef.current) {
+                                      jcNameInputRef.current.focus();
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -1105,7 +1085,6 @@ export default function InstallarMaintenance() {
                 </div>
               </div>
 
-              {/* A/C Code Section */}
               <div className="el-account-code-section">
                 <div className="el-account-code-row">
                   <span className="el-field-label-right">A/C Code :</span>
@@ -1120,7 +1099,6 @@ export default function InstallarMaintenance() {
                       if (e.key === 'Enter') {
                         e.preventDefault();
                         e.stopPropagation();
-                        // Move focus to Save button
                         if (saveButtonRef.current) {
                           saveButtonRef.current.focus();
                         }
@@ -1137,10 +1115,9 @@ export default function InstallarMaintenance() {
                 </div>
               </div>
 
-              {/* Buttons */}
-              <FormButtons 
-                saveText="Save" 
-                returnText="Return" 
+              <FormButtons
+                saveText="Save"
+                returnText="Return"
                 newText="New"
                 onSave={handleSave}
                 onReturn={handleReturn}
@@ -1153,7 +1130,6 @@ export default function InstallarMaintenance() {
         </div>
       </div>
 
-      {/* Installer Search Modal */}
       <InstallerSearchModal
         isOpen={isSearchModalOpen}
         onClose={handleModalClose}

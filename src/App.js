@@ -170,6 +170,8 @@ import InstallmentRecoveryReport from "./Component/Reports/Daily_Jobs_Reports/In
 import InstallmentWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentWiseReport.js"; 
 import MonthWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/MonthWiseReport.js";
 import InstallmentInvestmentStatusReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentInvestmentStatusReport.js";
+import ToDateOutstandingReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/ToDateOutstandingReport.js";
+
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
@@ -413,7 +415,7 @@ function App() {
                 <Route exact path="/ExpenseReportGYM" element={<ExpenseReport />} />
                 <Route exact path="/TechnicianCollectionReport" element={<TechnicianCollectionReport />} />
                 <Route exact path="/InstallmentCollectorRoute" element={<DailySparePartsDemandReport />} />
-                <Route exact path="/InstallmentOutstandingReport" element={<DailySparePartsIssueReport />} />
+                {/* <Route exact path="/InstallmentOutstandingReport" element={<DailySparePartsIssueReport />} /> */}
                 <Route exact path="/InstallmentNilCollectionReport" element={<PurchaseOrderStatusReport />} />
                 <Route exact path="/ProductionOrderStatus" element={<ProductionOrderStatusReport />} />
                 <Route exact path="/DailySalaryRegister" element={<DailySalryRegisterReport />} />
@@ -435,6 +437,7 @@ function App() {
                 <Route exact path="/InstallmentWiseReport" element={<InstallmentWiseReport />} />
                 <Route exact path="/InstallmentMonthWiseReport" element={<MonthWiseReport />} />
                 <Route exact path="/InstallmentInvestmentStatusReport" element={<InstallmentInvestmentStatusReport />} />
+                <Route exact path="/InstallmentOutstandingReport" element={<ToDateOutstandingReport />} />
 
 
                 {/* Rountes for item reports */}
