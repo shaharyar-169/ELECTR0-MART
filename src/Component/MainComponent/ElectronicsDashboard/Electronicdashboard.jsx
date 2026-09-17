@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./electronics.css";
+// import "./electronics.css";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";

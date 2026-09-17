@@ -23,7 +23,7 @@ import './demo.css';
 
 
 const itemListScrollStyle = `
-  .itemlist-vscroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .itemlist-vscroll::-webkit-scrollbar { width: 8px; height: 4px; }
   .itemlist-vscroll::-webkit-scrollbar-track { background: transparent; }
   .itemlist-vscroll::-webkit-scrollbar-thumb {
     background-color: rgba(128,128,128,0.6);
@@ -309,8 +309,7 @@ export default function ItemList() {
     const apiUrl = apiLinks + "/GetSysControl.php";
     const formData = new URLSearchParams({
       // code: organisation.code,
-            code: "DEMOELEC",
-
+      code: "DEMOELEC",
       type: "ItemMaintenance",
 
     }).toString();

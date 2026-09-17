@@ -37,7 +37,7 @@ import ResturentDashboard from "./Component/MainComponent/ResturentDashboard/Res
 import GYMDashboard from "./Component/MainComponent/GYMDashboard/Gym.jsx";
 //////////////////////////// ELECTRONICS DASHBOARD //////////////////////////////
 import ElectronicsDasboard from "./Component/MainComponent/ElectronicsDashboard/Electronicdashboard.jsx";
-
+import InstallmentDashboard from "./Component/MainComponent/ElectronicsDashboard/InstallmentDashboard.jsx";
 //////////////////////////// List reports //////////////////////////////
 import CompanyList from "./Component/Reports/Daily_Jobs_Reports/List/CompanyList1.js";
 import CategoryList from "./Component/Reports/Daily_Jobs_Reports/List/CategoryList.js";
@@ -260,7 +260,7 @@ import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/
 
 /////////////////////////////// AMERICAN TRASECTION FROMA /////////////////////////////
 import InstallarMaintenance from "./Component/FORMS/InstallarMaintenance.jsx";
-
+import EmployeeMaintenance from "./Component/FORMS/EmployeeMaintenance/Employeemaintenance.jsx";
 
 function App() {
   const queryClient = new QueryClient();
@@ -537,12 +537,14 @@ function App() {
                 <Route exact path="/AdminDealer" element={<DashboardAdminDealer />} />
                 <Route exact path="/ResturentDashboard" element={<ResturentDashboard />} />
                 <Route exact path="/GymDashboard" element={<GYMDashboard />} />
-                <Route exact path="/NasirTradersDashboard" element={<ElectronicsDasboard />} />
+                {/* <Route exact path="/NasirTradersDashboard" element={<ElectronicsDasboard />} /> */}
+                <Route exact path="/NasirTradersDashboard" element={<InstallmentDashboard />} />
 
 
 
    {/* Rountes for Forms */}
                 <Route exact path="/InstallationSheet" element={<InstallarMaintenance />} />
+                <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenance />} />
 
 
 

@@ -12,7 +12,7 @@ import {
 import DynamicSelect from "./components/CityDropdown";
 import FormButtons from "./components/FormButton";
 import InstallationCode from "./components/InstallarCode";
-import InstallerSearchModal from "./InstallerSearchModal";
+import SearchModal from "./components/SearchModel";
 
 const STATUS_OPTIONS = ["Active", "Non-Active"];
 
@@ -1130,11 +1130,15 @@ export default function InstallarMaintenance() {
         </div>
       </div>
 
-      <InstallerSearchModal
+      <SearchModal
         isOpen={isSearchModalOpen}
         onClose={handleModalClose}
         onSelectInstaller={handleInstallerSelect}
         apiLinks={apiLinks}
+        apiEndpoint="/GetInstallars.php"
+        title="Select Installar"
+        codeKey="tintcod"
+        descriptionKey="tintdsc"
       />
     </div>
   );
