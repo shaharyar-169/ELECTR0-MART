@@ -96,9 +96,11 @@ const SearchModal = ({
     try {
       const apiUrl = apiLinks + apiEndpoint;
       const formData = new URLSearchParams({
-        [requestCodeParam]: organisation.code,
-        // [requestLocParam]: locationnumber,
-         [requestLocParam]: "001",
+        // [requestCodeParam]: organisation.code,
+        // [requestLocParam]: getLocationNumber || locationnumber,
+
+          [requestCodeParam]: "DEMOELEC",
+        [requestLocParam]: "001",
         ...requestParams,
       }).toString();
 

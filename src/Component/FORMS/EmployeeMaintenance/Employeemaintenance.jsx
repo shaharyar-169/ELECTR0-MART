@@ -15,6 +15,25 @@ import SearchModal from "../components/SearchModel";
 
 const STATUS_OPTIONS = ["Active", "Non-Active"];
 
+// ---------------------------------------------------------------------
+// Server / image & document base paths
+// ---------------------------------------------------------------------
+const API_BASE = "https://crystalsolutions.pk/api";
+
+// Both images and documents live under the SAME root folder:
+//   Images:    https://crystalsolutions.pk/DI/DEMOELEC/<filename>
+//   Documents: https://crystalsolutions.pk/DI/DEMOELEC/<filename>
+const IMAGE_SERVER_BASE = "https://crystalsolutions.pk/DI";
+
+const buildImageBaseForOrg = (orgCode) =>
+  `${IMAGE_SERVER_BASE}/${String(orgCode || "DEMOELEC").trim()}/`;
+
+const IMAGE_BASE_URL = buildImageBaseForOrg("DEMOELEC");
+
+// The organisation code we send to the backend.
+const ORG_CODE = "DEMOELEC";
+const LOC_CODE = "001";
+
 function Field({ label, children, className = "" }) {
   return (
     <div className={`el-field ${className}`}>
@@ -43,81 +62,88 @@ export default function EmployeeMaintenance() {
   const locationnumber = getLocationnumber();
   const user = getUserData();
 
+  const todayISO = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   const [formStore, setFormStore] = useState({
     status: "Active",
-    abb: "",                       // FEmpAbb
-    description: "",               // FEmpNam
-    contactPerson: "",             // FEmpFth
-    email: "",                     // FEmpDsg
-    address: "",                   // FEmpDep
-    address2: "",                  // FAdd001
-    address3: "",                  // FAdd002
-    expiry: "",                    // FNicExp
-    phone: "",                     // FMobNum
-    mobile: "",                    // FMob001
-    mobile2: "",                   // FMob002
-    mobile3: "",                   // (reserved)
-    city: "",
-    area: "",
-    FAreCod: "",
-    nic: "",                       // FNicNum
+    abb: "",
+    description: "",
+    contactPerson: "",
+    email: "",
+    address: "",
+    address2: "",
+    address3: "",
+    expiry: todayISO(),
+    phone: "",
+    mobile: "",
+    mobile2: "",
+    mobile3: "",
+    nic: "",
     jcName: "",
     jcNumber: "",
     epName: "",
     epNumber: "",
     bank: "",
     accountNumber: "",
-    accountCode: "22-03-0",        // FEmpCod
 
-    // ---- Extra fields for SaveEmployee.php ----
-    emailAddress: "",              // FEmlAdd
-    salary: "",                    // FEmpSal
-    overTime: "",                  // FOvrTim
-    cashComm: "",                  // FCshCom
-    creditComm: "",                // FCrtCom
-    insComm: "",                   // FInsCom
+    emailAddress: "",
+    salary: "",
+    overTime: "",
+    cashComm: "",
+    creditComm: "",
+    insComm: "",
 
-    advanceCode: "",               // FAdvCod
-    advanceText: "- ADVANCE",      // FAdvDsc
-    deliveryCode: "",              // FDlvCod
-    deliveryText: "- DELIVERY",    // FDlvDsc
+    advanceCode: "",
+    advanceText: "- ADVANCE",
+    deliveryCode: "",
+    deliveryText: "- DELIVERY",
 
-    commissionCode: "",            // FComCod
-    commissionDescription: "",     // FComDsc
+    commissionCode: "",
+    commissionDescription: "",
 
-    reference1: "",                // FRef001
-    reference2: "",                // FRef002
+    reference1: "",
+    reference2: "",
     reference1Name: "",
     reference2Name: "",
 
-    dobDate: "",                   // FEmpDob
-    joinDate: "",                  // FJonDat
-    leaveDate: "",                 // FLevDat
-    leaveRemarks: "",              // FLevRem
+    dobDate: todayISO(),
+    joinDate: todayISO(),
+    leaveDate: todayISO(),
+    leaveRemarks: "",
 
-    remarks: "",                   // FEmpRem
-    documentName: "",              // FEmpDoc
+    remarks: "",
+    documentName: "",
   });
 
-  // Selected image / document (kept outside formStore — same as before)
   const [selectedImage1, setSelectedImage1] = useState("");
   const [selectedImage2, setSelectedImage2] = useState("");
+  const [photoFileName, setPhotoFileName] = useState("");
 
   const [code, setCode] = useState("");
   const [maxCode, setMaxCode] = useState("");
   const [organisation, setOrganisation] = useState(null);
-  const [selectedCityCode, setSelectedCityCode] = useState("");
-  const [selectedAreaCode, setSelectedAreaCode] = useState("");
-  const [cityOptions, setCityOptions] = useState([]);
-  const [areaOptions, setAreaOptions] = useState([]);
-  const [showDescriptionInUnlabeled, setShowDescriptionInUnlabeled] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
   const codeInputRef = useRef(null);
 
-  // Refs for all form fields for Enter key navigation
+  const fetchCallIdRef = useRef(0);
+  const isSavingRef = useRef(false);
+  const isCoolingDownRef = useRef(false);
+
+  const [employeeList, setEmployeeList] = useState([]);
+  const employeeListRef = useRef([]);
+  const pendingCodeRef = useRef("");
+
+  // Refs
   const statusSelectRef = useRef(null);
   const nicInputRef = useRef(null);
   const descriptionInputRef = useRef(null);
@@ -128,8 +154,6 @@ export default function EmployeeMaintenance() {
   const address3InputRef = useRef(null);
   const phoneInputRef = useRef(null);
   const mobileInputRef = useRef(null);
-  const citySelectRef = useRef(null);
-  const areaSelectRef = useRef(null);
 
   const jcNameInputRef = useRef(null);
   const jcNumberInputRef = useRef(null);
@@ -137,29 +161,32 @@ export default function EmployeeMaintenance() {
   const epNumberInputRef = useRef(null);
   const bankInputRef = useRef(null);
   const accountNumberInputRef = useRef(null);
-  const accountCodeInputRef = useRef(null);
   const saveButtonRef = useRef(null);
   const abbInputRef = useRef(null);
 
-  // Refs for the fields added below Mobile
   const dobDateRef = useRef(null);
   const joinDateRef = useRef(null);
   const leaveDateRef = useRef(null);
   const leaveRemarksRef = useRef(null);
   const creditCommRef = useRef(null);
   const cashCommRef = useRef(null);
+  const insCommRef = useRef(null);
   const salaryRef = useRef(null);
   const overTimeRef = useRef(null);
   const advanceCodeRef = useRef(null);
   const advanceTextRef = useRef(null);
   const deliveryCodeRef = useRef(null);
   const deliveryTextRef = useRef(null);
+  const commissionCodeRef = useRef(null);
   const reference1Ref = useRef(null);
   const reference1NameRef = useRef(null);
   const reference2Ref = useRef(null);
   const reference2NameRef = useRef(null);
   const documentNameRef = useRef(null);
   const remarksRef = useRef(null);
+
+  const photoInputRef = useRef(null);
+  const documentInputRef = useRef(null);
 
   // ============================================================
   // Helpers
@@ -171,22 +198,38 @@ export default function EmployeeMaintenance() {
     return isNaN(parsed) ? "" : parsed;
   };
 
-  const formatDate = (value) => {
-    if (!value) return "";
-    const d = new Date(value);
-    if (isNaN(d.getTime())) return value;
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return `${dd}-${mm}-${yyyy}`;
+  const txt = (value) => String(value ?? "").trim();
+
+  const normaliseCode = (value) => {
+    const digits = String(value ?? "").replace(/\D/g, "");
+    if (!digits) return "";
+    return String(parseInt(digits, 10));
   };
 
-  // Extract new code from any of the response shapes:
-  //   ["051"]              → "051"
-  //   "051"                → "051"
-  //   { code: "051" }      → "051"
-  //   { FIntCod: "051" }   → "051"
-  //   { FEmpCod: "051" }   → "051"
+  const deriveAdvanceDelivery = (rawCode, description) => {
+    const cleanCode = String(rawCode ?? "").replace(/\D/g, "");
+    const upperName = String(description || "").trim().toUpperCase();
+
+    return {
+      advanceCode: cleanCode ? `13-03-0${cleanCode}` : "",
+      advanceText: upperName ? `${upperName} - ADVANCE` : "- ADVANCE",
+      deliveryCode: cleanCode ? `71-02-0${cleanCode}` : "",
+      deliveryText: upperName ? `${upperName} - DELIVERY` : "- DELIVERY",
+      commissionCode: cleanCode ? `22-03-0${cleanCode}` : "",
+      commissionDescription: upperName ? `${upperName} - COMMISSION` : "- COMMISSION",
+    };
+  };
+
+  const toInputDate = (val) => {
+    if (!val) return "";
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return "";
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   const extractNewCode = (data) => {
     if (data === null || data === undefined) return "";
     if (Array.isArray(data)) {
@@ -205,25 +248,103 @@ export default function EmployeeMaintenance() {
     return "";
   };
 
-  // Get organisation data
+  const formatNIC = (value) => {
+    const digits = String(value || "").replace(/\D/g, "");
+    const limitedDigits = digits.slice(0, 13);
+
+    if (limitedDigits.length <= 5) {
+      return limitedDigits;
+    } else if (limitedDigits.length <= 12) {
+      return `${limitedDigits.slice(0, 5)}-${limitedDigits.slice(5)}`;
+    } else {
+      return `${limitedDigits.slice(0, 5)}-${limitedDigits.slice(5, 12)}-${limitedDigits.slice(12, 13)}`;
+    }
+  };
+
+  const buildImageUrl = (value, orgCode) => {
+    const raw = String(value ?? "").trim();
+    if (!raw) return "";
+    if (raw.startsWith("data:")) return raw;
+    if (raw.startsWith("blob:")) return raw;
+    if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+    if (raw.startsWith("/")) {
+      return API_BASE.replace(/\/api$/, "") + raw;
+    }
+    return buildImageBaseForOrg(orgCode || ORG_CODE) + raw;
+  };
+
+  const blankFormStore = () => ({
+    status: "Active",
+    abb: "",
+    description: "",
+    contactPerson: "",
+    email: "",
+    address: "",
+    address2: "",
+    address3: "",
+    expiry: todayISO(),
+    phone: "",
+    mobile: "",
+    mobile2: "",
+    mobile3: "",
+    nic: "",
+    jcName: "",
+    jcNumber: "",
+    epName: "",
+    epNumber: "",
+    bank: "",
+    accountNumber: "",
+
+    emailAddress: "",
+    salary: "",
+    overTime: "",
+    cashComm: "",
+    creditComm: "",
+    insComm: "",
+
+    advanceCode: "",
+    advanceText: "- ADVANCE",
+    deliveryCode: "",
+    deliveryText: "- DELIVERY",
+
+    commissionCode: "",
+    commissionDescription: "",
+
+    reference1: "",
+    reference2: "",
+    reference1Name: "",
+    reference2Name: "",
+
+    dobDate: todayISO(),
+    joinDate: todayISO(),
+    leaveDate: todayISO(),
+    leaveRemarks: "",
+
+    remarks: "",
+    documentName: "",
+  });
+
+  const clearForm = () => {
+    setFormStore(blankFormStore());
+    setSelectedImage1("");
+    setSelectedImage2("");
+    setPhotoFileName("");
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (documentInputRef.current) documentInputRef.current.value = "";
+  };
+
   useEffect(() => {
     const orgData = getOrganisationData();
     setOrganisation(orgData);
   }, []);
 
-  // ------------------------------------------------------------
-  // Fetch the latest Employee code on initial load (NewEmployee.php)
-  // ------------------------------------------------------------
   useEffect(() => {
     if (!organisation) return;
 
     const apiUrl = apiLinks + "/NewEmployee.php";
     const formData = new URLSearchParams({
-      // code: organisation.code,
-         code: "AMRELEC",
-           FLocCod: "001",
-
-      // FLocCod: getLocationNumber || getLocationnumber(),
+      code: ORG_CODE,
+      FLocCod: LOC_CODE,
     }).toString();
 
     axios
@@ -240,12 +361,101 @@ export default function EmployeeMaintenance() {
       });
   }, [organisation, apiLinks, getLocationNumber]);
 
-  // Auto-focus InstallationCode on initial load
+  const loadEmployeeList = () => {
+    if (!organisation) return;
+
+    const apiUrl = apiLinks + "/EmployeeList.php";
+    const formData = new URLSearchParams({
+      code: ORG_CODE,
+      FLocCod: LOC_CODE,
+    }).toString();
+
+    return axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        let rows = [];
+
+        if (Array.isArray(response.data)) {
+          rows = response.data;
+        } else if (typeof response.data === "string") {
+          try {
+            const parsed = JSON.parse(response.data);
+            rows = Array.isArray(parsed) ? parsed : [];
+          } catch (e) {
+            console.error(">>> Could not parse EmployeeList response:", e);
+            rows = [];
+          }
+        } else if (response.data && typeof response.data === "object") {
+          const candidates = [
+            response.data.data,
+            response.data.rows,
+            response.data.result,
+            response.data.records,
+            response.data.list,
+          ];
+          const nested = candidates.find((c) => Array.isArray(c));
+          rows = nested || [];
+        }
+
+        console.log(">>> EmployeeList loaded:", rows.length, "rows");
+
+        employeeListRef.current = rows;
+        setEmployeeList(rows);
+
+        if (pendingCodeRef.current) {
+          const retryCode = pendingCodeRef.current;
+          pendingCodeRef.current = "";
+          fetchInstallationDataByCode(retryCode);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching employee list:", error);
+        employeeListRef.current = [];
+        setEmployeeList([]);
+      });
+  };
+
+  useEffect(() => {
+    loadEmployeeList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organisation, apiLinks, getLocationNumber]);
+
+  useEffect(() => {
+    try {
+      const derived = deriveAdvanceDelivery(code, formStore.description);
+
+      setFormStore((prev) => {
+        if (
+          prev.advanceCode === derived.advanceCode &&
+          prev.deliveryCode === derived.deliveryCode &&
+          prev.advanceText === derived.advanceText &&
+          prev.deliveryText === derived.deliveryText &&
+          prev.commissionCode === derived.commissionCode &&
+          prev.commissionDescription === derived.commissionDescription
+        ) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          advanceCode: derived.advanceCode,
+          deliveryCode: derived.deliveryCode,
+          advanceText: derived.advanceText,
+          deliveryText: derived.deliveryText,
+          commissionCode: derived.commissionCode,
+          commissionDescription: derived.commissionDescription,
+        };
+      });
+    } catch (err) {
+      console.error(">>> auto-fill effect error:", err);
+    }
+  }, [code, formStore.description]);
+
   useEffect(() => {
     if (code && isInitialLoad) {
       const timer = setTimeout(() => {
         if (codeInputRef.current) {
-          const input = codeInputRef.current.querySelector('input');
+          const input = codeInputRef.current.querySelector("input");
           if (input) {
             input.focus();
             input.select();
@@ -258,70 +468,11 @@ export default function EmployeeMaintenance() {
     }
   }, [code, isInitialLoad]);
 
-  // Update accountCode whenever code changes
-  useEffect(() => {
-    if (code) {
-      const formattedCode = `22-03-0${code}`;
-      setFormStore((prev) => ({ ...prev, accountCode: formattedCode }));
-    }
-  }, [code]);
-
-  // Fetch cities for the dropdown
-  useEffect(() => {
-    if (!organisation) return;
-
-    const apiUrl = apiLinks + "/GetActiveCity.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: getLocationNumber || getLocationnumber(),
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setCityOptions(response.data);
-        } else {
-          setCityOptions([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching cities:", error);
-        setCityOptions([]);
-      });
-  }, [organisation, apiLinks, getLocationNumber]);
-
-  // Fetch areas for the dropdown
-  useEffect(() => {
-    if (!organisation) return;
-
-    const apiUrl = apiLinks + "/GetActiveArea.php";
-    const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: getLocationNumber || getLocationnumber(),
-    }).toString();
-
-    axios
-      .post(apiUrl, formData)
-      .then((response) => {
-        if (response.data && Array.isArray(response.data)) {
-          setAreaOptions(response.data);
-        } else {
-          setAreaOptions([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching areas:", error);
-        setAreaOptions([]);
-      });
-  }, [organisation, apiLinks, getLocationNumber]);
-
-  // Show toast notification
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = "success") => {
     console.log("Toast:", message);
 
-    const toast = document.createElement('div');
-    const backgroundColor = type === 'error' ? '#f44336' : '#4CAF50';
+    const toast = document.createElement("div");
+    const backgroundColor = type === "error" ? "#f44336" : "#4CAF50";
     toast.style.cssText = `
       position: fixed;
       top: 20px;
@@ -340,15 +491,15 @@ export default function EmployeeMaintenance() {
     document.body.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.animation = 'slideOut 0.3s ease-in';
+      toast.style.animation = "slideOut 0.3s ease-in";
       setTimeout(() => {
         document.body.removeChild(toast);
       }, 300);
     }, 3000);
 
-    if (!document.getElementById('toast-styles')) {
-      const style = document.createElement('style');
-      style.id = 'toast-styles';
+    if (!document.getElementById("toast-styles")) {
+      const style = document.createElement("style");
+      style.id = "toast-styles";
       style.textContent = `
         @keyframes slideIn {
           from { transform: translateX(100%); opacity: 0; }
@@ -363,129 +514,327 @@ export default function EmployeeMaintenance() {
     }
   };
 
-  // ==========================================================
-  // Fetch employee data by Code (GetEmployee.php)
-  // ==========================================================
+  const findEmployeeInList = (employeeCode) => {
+    const wanted = normaliseCode(employeeCode);
+    if (!wanted) return null;
+
+    const list = employeeListRef.current || [];
+
+    return (
+      list.find((row) => {
+        if (!row || typeof row !== "object") return false;
+        const rowCode = row.Code ?? row.code ?? row.tempcod ?? row.FEmpCod;
+        return normaliseCode(rowCode) === wanted;
+      }) || null
+    );
+  };
+
+  const applyListRowToForm = (row) => {
+    const statusRaw = txt(row.Status);
+    const listEmail = txt(row.Email);
+
+    setFormStore((prev) => ({
+      ...prev,
+
+      status:
+        statusRaw === "A"
+          ? "Active"
+          : statusRaw === "N"
+          ? "Non-Active"
+          : prev.status,
+
+      description: txt(row.Employee),
+      email: txt(row.Designation),
+
+      mobile: txt(row.Mobile),
+      phone: listEmail,
+      emailAddress: listEmail,
+
+      nic: row.NIC ? formatNIC(row.NIC) : "",
+
+      dobDate: row.DOB ? toInputDate(row.DOB) : "",
+      joinDate: row["Join Date"] ? toInputDate(row["Join Date"]) : "",
+    }));
+
+    const rowCode = row.Code ?? row.code ?? row.tempcod ?? row.FEmpCod;
+    if (txt(rowCode) !== "") {
+      setCode(txt(rowCode));
+    }
+  };
+
   const fetchInstallationDataByCode = (installationCode) => {
-    if (!organisation || !installationCode) {
-      showToast("Data not found", 'error');
+    const cleanCode = String(installationCode || "").trim();
+
+    if (!organisation || !cleanCode) {
+      console.warn(">>> Guard: organisation or code missing", {
+        organisation: !!organisation,
+        cleanCode,
+      });
       return;
     }
 
+    clearForm();
+
+    const listRow = findEmployeeInList(cleanCode);
+
+    if (listRow) {
+      console.log(">>> Matched EmployeeList row:", listRow);
+      applyListRowToForm(listRow);
+      showToast("Employee data found", "success");
+    } else if (!(employeeListRef.current || []).length) {
+      console.log(">>> EmployeeList not loaded yet, queueing code:", cleanCode);
+      pendingCodeRef.current = cleanCode;
+    } else {
+      console.warn(">>> No EmployeeList row for code:", cleanCode);
+      showToast("Data not found", "error");
+    }
+
+    const callId = ++fetchCallIdRef.current;
+
     const apiUrl = apiLinks + "/GetEmployee.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FEmpCod: installationCode,
+      code: ORG_CODE,
+      FLocCod: LOC_CODE,
+      FEmpCod: cleanCode,
     }).toString();
+
+    console.log(">>> Requesting GetEmployee for code:", cleanCode);
 
     axios
       .post(apiUrl, formData)
       .then((response) => {
-        if (response.data && response.data.length > 0) {
-          const data = response.data[0];
-
-          let cityName = data.tctycod || "";
-          if (cityName && cityOptions.length > 0) {
-            const matchedCity = cityOptions.find(
-              (city) => String(city.tctycod).trim() === String(cityName).trim()
-            );
-            if (matchedCity) {
-              cityName = matchedCity.tctydsc;
-            }
-          }
-
-          let areaName = "";
-          if (data.tarecod && areaOptions.length > 0) {
-            const matchedArea = areaOptions.find(
-              (area) => String(area.tarecod).trim() === String(data.tarecod).trim()
-            );
-            if (matchedArea) {
-              areaName = matchedArea.taredsc;
-            }
-          }
-
-          setFormStore((prev) => ({
-            ...prev,
-            status: data.tinssts || prev.status,
-            abb: data.tabbdsc || prev.abb,
-            description: data.tintdsc || prev.description,
-            contactPerson: data.tintper || prev.contactPerson,
-            email: data.temladd || prev.email,
-            address: data.tadd001 || prev.address,
-            address2: data.tadd002 || prev.address2,
-            phone: data.tphnnum || prev.phone,
-            mobile: data.tmobnum || prev.mobile,
-            nic: formatNIC(data.tnicnum) || "",
-            jcName: data.tjaznam || prev.jcName,
-            jcNumber: data.tjaznum || prev.jcNumber,
-            epName: data.tespnam || prev.epName,
-            epNumber: data.tespnum || prev.epNumber,
-            bank: data.tbnknam || prev.bank,
-            accountNumber: data.taccnum || prev.accountNumber,
-            city: cityName || prev.city,
-            area: areaName || "",
-            FAreCod: data.tarecod || "",
-          }));
-
-          if (data.tctycod) {
-            setSelectedCityCode(data.tctycod);
-          }
-
-          if (data.tarecod) {
-            setSelectedAreaCode(data.tarecod);
-          }
-
-          showToast("User data found", 'success');
-        } else {
-          setFormStore((prev) => ({
-            ...prev,
-            status: "Active",
-            description: "",
-            contactPerson: "",
-            email: "",
-            address: "",
-            address2: "",
-            address3: "",
-            expiry: "",
-            phone: "",
-            mobile: "",
-            city: "",
-            area: "",
-            FAreCod: "",
-            nic: "",
-            jcName: "",
-            jcNumber: "",
-            epName: "",
-            epNumber: "",
-            bank: "",
-            accountNumber: "",
-            accountCode: `22-03-0${code}`,
-          }));
-
-          setSelectedCityCode("");
-          setSelectedAreaCode("");
-          showToast("Data not found", 'error');
+        if (callId !== fetchCallIdRef.current) {
+          console.log(">>> Ignoring stale response for:", cleanCode);
+          return;
         }
+
+        console.log(">>> RAW response.data:", response.data);
+
+        let rows = [];
+
+        if (Array.isArray(response.data)) {
+          rows = response.data;
+        } else if (response.data && typeof response.data === "object") {
+          const candidates = [
+            response.data.data,
+            response.data.rows,
+            response.data.result,
+            response.data.records,
+            response.data.list,
+          ];
+          const nested = candidates.find((c) => Array.isArray(c));
+          if (nested) {
+            rows = nested;
+          } else {
+            rows = [response.data];
+          }
+        } else if (typeof response.data === "string") {
+          try {
+            const parsed = JSON.parse(response.data);
+            rows = Array.isArray(parsed) ? parsed : [parsed];
+          } catch (e) {
+            console.error(">>> Could not parse string response:", e);
+            rows = [];
+          }
+        }
+
+        const lowerKeys = (obj) => {
+          if (!obj || typeof obj !== "object") return obj;
+          const out = {};
+          Object.keys(obj).forEach((k) => {
+            out[k.toLowerCase()] = obj[k];
+          });
+          return out;
+        };
+        rows = rows.map(lowerKeys);
+
+        const data =
+          rows.find(
+            (r) =>
+              r &&
+              typeof r === "object" &&
+              (r.tempcod !== undefined ||
+                r.tempnam !== undefined ||
+                r.tempsts !== undefined)
+          ) ||
+          (rows.length === 1 && typeof rows[0] === "object" ? rows[0] : undefined);
+
+        console.log(">>> Normalized rows:", rows);
+        console.log(">>> Picked employee object:", data);
+
+        const pickField = (row, candidateKeys) => {
+          if (!row) return undefined;
+          for (const key of candidateKeys) {
+            const val = row[key];
+            if (val !== undefined && val !== null && String(val).trim() !== "") {
+              return val;
+            }
+          }
+          return undefined;
+        };
+
+        if (!data) {
+          console.warn(">>> No employee object in GetEmployee response:", rows);
+          return;
+        }
+
+        setFormStore((prev) => ({
+          ...prev,
+
+          status:
+            data.tempsts === "A"
+              ? "Active"
+              : data.tempsts === "N"
+              ? "Non-Active"
+              : prev.status,
+          abb:
+            txt(pickField(data, ["tempabb", "empabb", "abb", "fempabb"])) ||
+            prev.abb,
+          description: txt(data.tempnam) || prev.description,
+          contactPerson:
+            txt(
+              pickField(data, [
+                "tempfth",
+                "empfth",
+                "fth",
+                "tempfather",
+                "empfathername",
+                "fathername",
+              ])
+            ) || prev.contactPerson,
+          email: txt(data.tempdsg) || prev.email,
+          address:
+            txt(
+              pickField(data, [
+                "tempdep",
+                "empdep",
+                "dep",
+                "department",
+                "tempdept",
+              ])
+            ) || prev.address,
+
+          address2:
+            txt(pickField(data, ["tadd001", "add001", "address1", "addr1"])) ||
+            prev.address2,
+          address3:
+            txt(pickField(data, ["tadd002", "add002", "address2", "addr2"])) ||
+            prev.address3,
+
+          phone: txt(data.tphnnum) || prev.phone,
+          mobile: txt(data.tmobnum) || prev.mobile,
+          mobile2: txt(data.tmob001) || prev.mobile2,
+          mobile3: txt(data.tmob002) || prev.mobile3,
+          emailAddress: txt(data.temladd) || prev.emailAddress,
+
+          nic: data.tnicnum ? formatNIC(data.tnicnum) : prev.nic,
+          expiry: (() => {
+            const raw = pickField(data, [
+              "tnicexp",
+              "nicexp",
+              "expirydate",
+              "empnicexp",
+              "nicexpiry",
+            ]);
+            return raw ? toInputDate(raw) : prev.expiry;
+          })(),
+
+          salary:
+            pickField(data, ["tempsal", "empsal", "salary"]) ?? prev.salary,
+          overTime:
+            pickField(data, ["tovrtim", "ovrtim", "overtime", "overtim"]) ??
+            prev.overTime,
+          cashComm:
+            pickField(data, ["tcshcom", "cshcom", "cashcomm", "cashcommission"]) ??
+            prev.cashComm,
+          creditComm:
+            pickField(data, [
+              "tcrtcom",
+              "crtcom",
+              "creditcomm",
+              "creditcommission",
+            ]) ?? prev.creditComm,
+          insComm: data.tinscom ?? prev.insComm,
+
+          commissionCode: txt(data.tcomcod) || prev.commissionCode,
+          commissionDescription:
+            data["Commission Dsc"] || prev.commissionDescription,
+
+          reference1:
+            txt(pickField(data, ["tmob001", "mob001"])) ||
+            prev.reference1,
+          reference2:
+            txt(pickField(data, ["tmob002", "mob002"])) ||
+            prev.reference2,
+
+          reference1Name:
+            txt(pickField(data, ["tref001", "ref001"])) ||
+            prev.reference1Name,
+          reference2Name:
+            txt(pickField(data, ["tref002", "ref002"])) ||
+            prev.reference2Name,
+
+          dobDate: data.tempdob ? toInputDate(data.tempdob) : prev.dobDate,
+          joinDate: data.tjondat ? toInputDate(data.tjondat) : prev.joinDate,
+          leaveDate: (() => {
+            const raw = pickField(data, [
+              "tlevdat",
+              "levdat",
+              "leavedate",
+              "leftdate",
+            ]);
+            return raw ? toInputDate(raw) : prev.leaveDate;
+          })(),
+          leaveRemarks: txt(data.tlevrem) || prev.leaveRemarks,
+
+          remarks:
+            txt(pickField(data, ["temprem", "emprem", "remarks", "remark"])) ||
+            prev.remarks,
+          documentName: txt(data.tempdoc) || prev.documentName,
+        }));
+
+        if (data.tempcod) {
+          setCode(String(data.tempcod).trim());
+        }
+
+        // Photo — server returns a filename, image lives at:
+        //   https://crystalsolutions.pk/DI/<ORG>/<filename>
+        const picRaw = pickField(data, [
+          "temppic",
+          "tempPic",
+          "fempPic",
+          "fempic",
+          "photo",
+          "image",
+        ]);
+        const picName = String(picRaw ?? "").trim();
+
+        if (picName) {
+          setPhotoFileName(picName);
+
+          if (
+            picName.startsWith("data:") ||
+            picName.startsWith("blob:") ||
+            picName.startsWith("http://") ||
+            picName.startsWith("https://")
+          ) {
+            setSelectedImage1(picName);
+          } else {
+            const url = buildImageBaseForOrg(ORG_CODE) + picName;
+            console.log(">>> Image URL:", url);
+            setSelectedImage1(url);
+          }
+        } else {
+          setPhotoFileName("");
+          setSelectedImage1("");
+        }
+
+        if (data.tempdoc) setSelectedImage2(data.tempdoc);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
-        showToast("Data not found", 'error');
+        if (callId !== fetchCallIdRef.current) return;
+        console.error(">>> GetEmployee error for", cleanCode, ":", error);
       });
-  };
-
-  // Format NIC with automatic hyphens
-  const formatNIC = (value) => {
-    const digits = String(value || "").replace(/\D/g, '');
-    const limitedDigits = digits.slice(0, 13);
-
-    if (limitedDigits.length <= 5) {
-      return limitedDigits;
-    } else if (limitedDigits.length <= 12) {
-      return `${limitedDigits.slice(0, 5)}-${limitedDigits.slice(5)}`;
-    } else {
-      return `${limitedDigits.slice(0, 5)}-${limitedDigits.slice(5, 12)}-${limitedDigits.slice(12, 13)}`;
-    }
   };
 
   const handleNicChange = (e) => {
@@ -494,27 +843,169 @@ export default function EmployeeMaintenance() {
     setFormStore((prev) => ({ ...prev, nic: formattedValue }));
   };
 
+  const handleReferencePhoneChange = (key) => (e) => {
+    const digitsOnly = String(e.target.value || "").replace(/\D/g, "").slice(0, 11);
+    setFormStore((prev) => ({ ...prev, [key]: digitsOnly }));
+  };
+
+  const handleReferencePhoneKeyDown = (e, nextRef) => {
+    const controlKeys = [
+      "Backspace",
+      "Delete",
+      "ArrowLeft",
+      "ArrowRight",
+      "Tab",
+      "Home",
+      "End",
+      "Enter",
+    ];
+
+    if (controlKeys.includes(e.key) || e.ctrlKey || e.metaKey) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleKeyDown(e, nextRef);
+      }
+      return;
+    }
+
+    if (!/[0-9]/.test(e.key)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    const input = e.target;
+    const currentLen = input.value.length;
+    const hasSelection =
+      input.selectionStart !== null &&
+      input.selectionEnd !== null &&
+      input.selectionStart !== input.selectionEnd;
+
+    if (currentLen >= 11 && !hasSelection) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  const handleReferenceNameChange = (key) => (e) => {
+    const value = String(e.target.value || "").slice(0, 40);
+    setFormStore((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handlePhotoButtonClick = () => {
+    if (photoInputRef.current) {
+      photoInputRef.current.click();
+    }
+  };
+
+  const handlePhotoFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showToast("Please select an image file", "error");
+      return;
+    }
+
+    const MAX_BYTES = 5 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      showToast("Image is too large (max 5 MB)", "error");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setSelectedImage1(previewUrl);
+
+    showToast("Image selected", "success");
+  };
+
+  // ----------------------------------------------------------------
+  // Document upload / download
+  // ----------------------------------------------------------------
+  const handleDocumentUploadClick = () => {
+    if (documentInputRef.current) {
+      documentInputRef.current.click();
+    }
+  };
+
+  const handleDocumentFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const MAX_BYTES = 10 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      showToast("Document is too large (max 10 MB)", "error");
+      return;
+    }
+
+    setFormStore((prev) => ({ ...prev, documentName: file.name }));
+
+    showToast("Document selected", "success");
+  };
+
+  // Download the currently-referenced document from the server.
+  // Documents live in the SAME root folder as images:
+  //   https://crystalsolutions.pk/DI/<ORG>/<filename>
+  //
+  // We do NOT use a HEAD probe here — some servers reject HEAD with 405,
+  // which would incorrectly report the file as "not found". Instead we
+  // just trigger the browser's native download via an <a> element.
+  const handleDocumentDownload = () => {
+    const fileName = String(formStore.documentName || "").trim();
+    if (!fileName) {
+      showToast("No document to download", "error");
+      return;
+    }
+
+    const url = `https://crystalsolutions.pk/DI/${ORG_CODE}/${fileName}`;
+    console.log(">>> Downloading document from:", url);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    showToast("Downloading " + fileName, "success");
+  };
+
   const set = (key) => (e) => {
     const value = e.target.value;
     setFormStore((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleInstallerSelect = (installerData) => {
-    if (installerData.code) {
-      setCode(installerData.code);
-      fetchInstallationDataByCode(installerData.code);
-    }
+    if (!installerData) return;
+
+    const selectedCode =
+      installerData.code ??
+      installerData.Code ??
+      installerData.tempcod ??
+      installerData.FEmpCod ??
+      "";
+
+    const clean = String(selectedCode || "").trim();
+    if (!clean) return;
+
+    setCode(clean);
+    fetchInstallationDataByCode(clean);
   };
 
   const handleInstallerCodeChange = (newCode) => {
-    fetchInstallationDataByCode(newCode);
+    const clean = String(newCode || "").trim();
+    if (!clean) return;
+    fetchInstallationDataByCode(clean);
   };
 
   const handleModalClose = () => {
     setIsSearchModalOpen(false);
     setTimeout(() => {
       if (codeInputRef.current) {
-        const input = codeInputRef.current.querySelector('input');
+        const input = codeInputRef.current.querySelector("input");
         if (input) {
           input.focus();
           input.select();
@@ -524,21 +1015,21 @@ export default function EmployeeMaintenance() {
   };
 
   const handleKeyDown = (e, nextRef) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
       if (nextRef && nextRef.current) {
         const element = nextRef.current;
-        if (element.tagName === 'SELECT' || element.tagName === 'INPUT') {
+        if (element.tagName === "SELECT" || element.tagName === "INPUT") {
           element.focus();
-          if (element.tagName === 'INPUT') {
+          if (element.tagName === "INPUT") {
             element.select();
           }
         } else {
-          const input = element.querySelector('input, select');
+          const input = element.querySelector("input, select");
           if (input) {
             input.focus();
-            if (input.tagName === 'INPUT') {
+            if (input.tagName === "INPUT") {
               input.select();
             }
           }
@@ -548,7 +1039,7 @@ export default function EmployeeMaintenance() {
   };
 
   const handleNicEnter = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
       if (descriptionInputRef.current) {
@@ -558,70 +1049,17 @@ export default function EmployeeMaintenance() {
   };
 
   const resetForm = () => {
-    setFormStore({
-      status: "Active",
-      abb: "",
-      description: "",
-      contactPerson: "",
-      email: "",
-      address: "",
-      address2: "",
-      address3: "",
-      expiry: "",
-      phone: "",
-      mobile: "",
-      mobile2: "",
-      mobile3: "",
-      city: "",
-      area: "",
-      FAreCod: "",
-      nic: "",
-      jcName: "",
-      jcNumber: "",
-      epName: "",
-      epNumber: "",
-      bank: "",
-      accountNumber: "",
-      accountCode: `22-03-0${code}`,
+    clearForm();
 
-      emailAddress: "",
-      salary: "",
-      overTime: "",
-      cashComm: "",
-      creditComm: "",
-      insComm: "",
-
-      advanceCode: "",
-      advanceText: "- ADVANCE",
-      deliveryCode: "",
-      deliveryText: "- DELIVERY",
-
-      commissionCode: "",
-      commissionDescription: "",
-
-      reference1: "",
-      reference2: "",
-      reference1Name: "",
-      reference2Name: "",
-
-      dobDate: "",
-      joinDate: "",
-      leaveDate: "",
-      leaveRemarks: "",
-
-      remarks: "",
-      documentName: "",
-    });
-    setSelectedCityCode("");
-    setSelectedAreaCode("");
-    setSelectedImage1("");
-    setSelectedImage2("");
+    setCode("");
+    setMaxCode("");
 
     if (organisation) {
+      setIsFetchingNextCode(true);
       const apiUrl = apiLinks + "/NewEmployee.php";
       const formData = new URLSearchParams({
-        code: organisation.code,
-        FLocCod: getLocationNumber || getLocationnumber(),
+        code: ORG_CODE,
+        FLocCod: LOC_CODE,
       }).toString();
 
       axios
@@ -635,6 +1073,9 @@ export default function EmployeeMaintenance() {
         })
         .catch((error) => {
           console.error("Error fetching next code:", error);
+        })
+        .finally(() => {
+          setIsFetchingNextCode(false);
         });
     }
   };
@@ -645,32 +1086,92 @@ export default function EmployeeMaintenance() {
     return status || "";
   };
 
-  const resolveCityCode = () => {
-    if (selectedCityCode) return selectedCityCode;
-
-    if (formStore.city && cityOptions.length > 0) {
-      const matched = cityOptions.find(
-        (city) =>
-          String(city.tctydsc).trim().toLowerCase() ===
-          String(formStore.city).trim().toLowerCase()
-      );
-      if (matched) return matched.tctycod;
-    }
-
-    return "";
+  const amountForApi = (value) => {
+    const parsed = cleanAmount(value);
+    return parsed === "" ? "0" : String(parsed);
   };
 
-  // ============================================================
-  // SAVE — maps every formStore field to SaveEmployee.php variables
-  // ============================================================
+  const strForApi = (value) => {
+    if (value === null || value === undefined) return "";
+    return String(value).trim();
+  };
+
+  const buildSavePayload = () => ({
+    code: ORG_CODE,
+    FLocCod: LOC_CODE,
+    FUsrId: strForApi(user?.tusrid) || "sohaib",
+
+    FEmpCod: strForApi(code),
+    FEmpSts: mapStatusForApi(formStore.status),
+    FEmpNam: strForApi(formStore.description),
+    FEmpFth: strForApi(formStore.contactPerson),
+    FEmpDsg: strForApi(formStore.email),
+    FEmpDep: strForApi(formStore.address),
+    FEmpAbb: strForApi(formStore.abb),
+
+    FAdd001: strForApi(formStore.address2),
+    FAdd002: strForApi(formStore.address3),
+
+    FMobNum: strForApi(formStore.mobile),
+    FMob001: strForApi(formStore.reference1),
+    FMob002: strForApi(formStore.reference2),
+
+    FEmlAdd: strForApi(formStore.emailAddress) || strForApi(formStore.phone),
+
+    FEmpSal: amountForApi(formStore.salary),
+    FOvrTim: amountForApi(formStore.overTime),
+    FCshCom: amountForApi(formStore.cashComm),
+    FCrtCom: amountForApi(formStore.creditComm),
+    FInsCom: amountForApi(formStore.insComm),
+
+    FAdvCod: strForApi(formStore.advanceCode),
+    FAdvDsc: strForApi(formStore.advanceText),
+    FDlvCod: strForApi(formStore.deliveryCode),
+    FDlvDsc: strForApi(formStore.deliveryText),
+
+      tcomcod: strForApi(formStore.commissionCode),
+    FComDsc: strForApi(formStore.commissionDescription),
+
+    FRef001: strForApi(formStore.reference1Name),
+    FRef002: strForApi(formStore.reference2Name),
+
+    FNicNum: strForApi(formStore.nic).replace(/-/g, ""),
+    FNicExp: formStore.expiry ? toInputDate(formStore.expiry) : "",
+
+    FJonDat: formStore.joinDate ? toInputDate(formStore.joinDate) : "",
+    FLevDat: formStore.leaveDate ? toInputDate(formStore.leaveDate) : "",
+    FEmpDob: formStore.dobDate ? toInputDate(formStore.dobDate) : "",
+
+    FLevRem: strForApi(formStore.leaveRemarks),
+    FEmpRem: strForApi(formStore.remarks),
+
+    FEmpPic: strForApi(photoFileName),
+
+    FEmpDoc: strForApi(formStore.documentName),
+    FEmpDocNam: strForApi(formStore.documentName),
+    FEmpThb: "",
+  });
+
   const handleSave = async () => {
+    if (isSavingRef.current || isCoolingDownRef.current) return;
+    isSavingRef.current = true;
+
     if (!organisation) {
-      showToast("Organisation data not available", 'error');
+      showToast("Organisation data not available", "error");
+      isSavingRef.current = false;
       return;
     }
 
-    if (!code) {
-      showToast("Code is required", 'error');
+    if (isFetchingNextCode) {
+      showToast("Please wait, fetching next code...", "error");
+      isSavingRef.current = false;
+      return;
+    }
+
+    const trimmedCode = String(code || "").trim();
+    if (!trimmedCode) {
+      showToast("Code is required", "error");
+      isSavingRef.current = false;
       return;
     }
 
@@ -679,106 +1180,81 @@ export default function EmployeeMaintenance() {
     try {
       const apiUrl = apiLinks + "/SaveEmployee.php";
 
-      const formDataa = new URLSearchParams();
+      const payload = buildSavePayload();
+      payload.FEmpCod = trimmedCode;
 
-      // -------- Header / location --------
-      formDataa.append("code", organisation.code);
-      formDataa.append("FUsrId", user?.tusrid || "");
-      formDataa.append("FLocCod", locationnumber || getLocationNumber || "");
-
-      // -------- Employee identity --------
-      formDataa.append("FEmpCod", formStore.accountCode || code);
-      formDataa.append("FEmpSts", mapStatusForApi(formStore.status));
-      formDataa.append("FEmpNam", (formStore.description || "").trim());
-      formDataa.append("FEmpFth", (formStore.contactPerson || "").trim());
-      formDataa.append("FEmpDsg", (formStore.email || "").trim());
-      formDataa.append("FEmpDep", (formStore.address || "").trim());
-      formDataa.append("FEmpAbb", (formStore.abb || "").trim());
-
-      // -------- Address --------
-      formDataa.append("FAdd001", (formStore.address2 || "").trim());
-      formDataa.append("FAdd002", (formStore.address3 || "").trim());
-
-      // -------- Contact --------
-      formDataa.append("FMobNum", (formStore.phone || "").trim());
-      formDataa.append("FMob001", (formStore.mobile || "").trim());
-      formDataa.append("FMob002", (formStore.mobile2 || "").trim());
-      formDataa.append("FEmlAdd", (formStore.emailAddress || "").trim());
-
-      // -------- Money --------
-      formDataa.append("FEmpSal", cleanAmount(formStore.salary));
-      formDataa.append("FOvrTim", cleanAmount(formStore.overTime));
-      formDataa.append("FCshCom", cleanAmount(formStore.cashComm));
-      formDataa.append("FCrtCom", cleanAmount(formStore.creditComm));
-      formDataa.append("FInsCom", cleanAmount(formStore.insComm));
-
-      // -------- Advance / Delivery codes --------
-      formDataa.append("FAdvCod", (formStore.advanceCode || "").trim());
-      formDataa.append("FAdvDsc", (formStore.advanceText || "").trim());
-      formDataa.append("FDlvCod", (formStore.deliveryCode || "").trim());
-      formDataa.append("FDlvDsc", (formStore.deliveryText || "").trim());
-
-      // -------- Commission --------
-      formDataa.append("FComCod", (formStore.commissionCode || "").trim());
-      formDataa.append("FComDsc", (formStore.commissionDescription || "").trim());
-
-      // -------- References --------
-      formDataa.append("FRef001", (formStore.reference1 || "").trim());
-      formDataa.append("FRef002", (formStore.reference2 || "").trim());
-
-      // -------- CNIC --------
-      formDataa.append("FNicNum", (formStore.nic || "").replace(/-/g, '').trim());
-      formDataa.append(
-        "FNicExp",
-        formStore.expiry ? formatDate(formStore.expiry) : ""
-      );
-
-      // -------- Dates --------
-      formDataa.append(
-        "FJonDat",
-        formStore.joinDate ? formatDate(formStore.joinDate) : ""
-      );
-      formDataa.append(
-        "FLevDat",
-        formStore.leaveDate ? formatDate(formStore.leaveDate) : ""
-      );
-      formDataa.append(
-        "FEmpDob",
-        formStore.dobDate ? formatDate(formStore.dobDate) : ""
-      );
-
-      // -------- Remarks --------
-      formDataa.append("FLevRem", (formStore.leaveRemarks || "").trim());
-      formDataa.append("FEmpRem", (formStore.remarks || "").trim());
-
-      // -------- Images / Documents --------
-      formDataa.append("FEmpPic", selectedImage1 || "");
-      formDataa.append("FEmpDoc", selectedImage2 || "");
-      formDataa.append("FEmpThb", "");
-
-      const response = await axios.post(apiUrl, formDataa.toString(), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      const formData = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
       });
 
-      if (response.status === 200) {
-        showToast("Form saved successfully!", 'success');
-        resetForm();
-        setIsCoolingDown(true);
-        setTimeout(() => setIsCoolingDown(false), 5000);
+      const photoInput = photoInputRef.current;
+      const pickedPhotoFile =
+        photoInput && photoInput.files && photoInput.files[0];
+
+      if (pickedPhotoFile) {
+        formData.set("FEmpPic", pickedPhotoFile);
+        console.log(
+          ">>> Attaching photo file to FEmpPic:",
+          pickedPhotoFile.name,
+          pickedPhotoFile.size,
+          "bytes"
+        );
       } else {
-        showToast(`Save failed: ${response.status}`, 'error');
+        console.log(">>> No new photo picked, sending FEmpPic as:", payload.FEmpPic);
+      }
+
+      const docInput = documentInputRef.current;
+      const pickedDocFile =
+        docInput && docInput.files && docInput.files[0];
+
+      if (pickedDocFile) {
+        formData.set("FEmpDoc", pickedDocFile);
+        console.log(
+          ">>> Attaching document file to FEmpDoc:",
+          pickedDocFile.name,
+          pickedDocFile.size,
+          "bytes"
+        );
+      } else {
+        console.log(">>> No new doc picked, sending FEmpDoc as:", payload.FEmpDoc);
+      }
+
+      const response = await axios.post(apiUrl, formData, {
+        // Axios sets multipart/form-data boundary automatically.
+      });
+
+      console.log("Save response:", response.status, response.data);
+
+      if (response.status === 200) {
+        showToast("Form saved successfully!", "success");
+        await loadEmployeeList();
+        resetForm();
+        isCoolingDownRef.current = true;
+        setIsCoolingDown(true);
+        setTimeout(() => {
+          isCoolingDownRef.current = false;
+          setIsCoolingDown(false);
+        }, 5000);
+      } else {
+        showToast(`Save failed: ${response.status}`, "error");
       }
     } catch (error) {
       console.error("Error saving data:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+
       let errorMessage = "Error saving data";
-      if (error.response?.data) {
-        errorMessage = error.response.data.message || error.response.data || errorMessage;
+      const data = error.response?.data;
+      if (typeof data === "string" && data.trim()) {
+        errorMessage = data.trim();
+      } else if (data && typeof data === "object") {
+        errorMessage = data.message || data.error || errorMessage;
       }
-      showToast(errorMessage, 'error');
+      showToast(String(errorMessage).slice(0, 200), "error");
     } finally {
       setIsSaving(false);
+      isSavingRef.current = false;
     }
   };
 
@@ -809,11 +1285,10 @@ export default function EmployeeMaintenance() {
 
               <div className="el-scrollable-body">
                 <div className="el-top-bar">
-                  {/* ---- Code ---- */}
                   <div
                     className="el-field-row"
                     onKeyDownCapture={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         e.stopPropagation();
                         fetchInstallationDataByCode(code);
@@ -823,7 +1298,9 @@ export default function EmployeeMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right">Employee Code :</span>
+                    <span className="el-field-label-right">
+                      Employee Code :
+                    </span>
                     <InstallationCode
                       ref={codeInputRef}
                       organisation={organisation}
@@ -841,7 +1318,6 @@ export default function EmployeeMaintenance() {
                     />
                   </div>
 
-                  {/* ---- Abb ---- */}
                   <div className="el-field-row el-field-abb">
                     <span className="el-field-label-right">Abb :</span>
                     <input
@@ -854,7 +1330,6 @@ export default function EmployeeMaintenance() {
                     />
                   </div>
 
-                  {/* ---- Status ---- */}
                   <div className="el-field-row">
                     <span className="el-field-label-right">Status :</span>
                     <select
@@ -876,8 +1351,6 @@ export default function EmployeeMaintenance() {
                   <div className="el-main-content">
                     <section className="el-section">
                       <div className="el-stack">
-
-                        {/* ---- Name (full width) ---- */}
                         <div className="el-field-row">
                           <span className="el-field-label-right">Name :</span>
                           <input
@@ -887,59 +1360,75 @@ export default function EmployeeMaintenance() {
                             placeholder="Name"
                             className="name-field"
                             maxLength={40}
-                            onKeyDown={(e) => handleKeyDown(e, contactPersonInputRef)}
+                            onKeyDown={(e) =>
+                              handleKeyDown(e, contactPersonInputRef)
+                            }
                           />
                         </div>
 
-                        {/* ---- 70% LEFT fields | 30% RIGHT upload ---- */}
                         <div className="el-row-split">
                           <div className="el-row-split-left">
-
                             <div className="el-field-row">
-                              <span className="el-field-label-right">Father Name:</span>
+                              <span className="el-field-label-right">
+                                Father Name:
+                              </span>
                               <input
                                 ref={contactPersonInputRef}
                                 value={formStore.contactPerson}
                                 onChange={set("contactPerson")}
                                 placeholder="Father Name"
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, emailInputRef)}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, emailInputRef)
+                                }
                               />
                             </div>
 
                             <div className="el-field-row">
-                              <span className="el-field-label-right">Designation:</span>
+                              <span className="el-field-label-right">
+                                Designation:
+                              </span>
                               <input
                                 ref={emailInputRef}
                                 value={formStore.email}
                                 onChange={set("email")}
                                 placeholder="e.g. Manager, Engineer, etc."
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, address1InputRef)}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, address1InputRef)
+                                }
                               />
                             </div>
 
                             <div className="el-field-row">
-                              <span className="el-field-label-right">Department:</span>
+                              <span className="el-field-label-right">
+                                Department:
+                              </span>
                               <input
                                 ref={address1InputRef}
                                 value={formStore.address}
                                 onChange={set("address")}
                                 placeholder="e.g. IT, etc."
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, address2InputRef)}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, address2InputRef)
+                                }
                               />
                             </div>
 
                             <div className="el-field-row">
-                              <span className="el-field-label-right">Address:</span>
+                              <span className="el-field-label-right">
+                                Address:
+                              </span>
                               <input
                                 ref={address2InputRef}
                                 value={formStore.address2}
                                 onChange={set("address2")}
                                 placeholder="Address"
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, address3InputRef)}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, address3InputRef)
+                                }
                               />
                             </div>
 
@@ -951,12 +1440,16 @@ export default function EmployeeMaintenance() {
                                 onChange={set("address3")}
                                 placeholder="Address"
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, nicInputRef)}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, nicInputRef)
+                                }
                               />
                             </div>
 
                             <div className="el-field-row el-cnic-row">
-                              <span className="el-field-label-right">CNIC:</span>
+                              <span className="el-field-label-right">
+                                CNIC:
+                              </span>
                               <input
                                 ref={nicInputRef}
                                 value={formStore.nic}
@@ -976,7 +1469,9 @@ export default function EmployeeMaintenance() {
                             </div>
 
                             <div className="el-field-row">
-                              <span className="el-field-label-right">Email:</span>
+                              <span className="el-field-label-right">
+                                Email:
+                              </span>
                               <input
                                 ref={phoneInputRef}
                                 value={formStore.phone}
@@ -984,12 +1479,16 @@ export default function EmployeeMaintenance() {
                                 placeholder="crystalsolution@gmail.com"
                                 className="email-field"
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, mobileInputRef)}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, mobileInputRef)
+                                }
                               />
                             </div>
 
                             <div className="el-field-row">
-                              <span className="el-field-label-right">Mobile:</span>
+                              <span className="el-field-label-right">
+                                Mobile:
+                              </span>
                               <input
                                 ref={mobileInputRef}
                                 type="tel"
@@ -999,21 +1498,58 @@ export default function EmployeeMaintenance() {
                                 className="mobile-field"
                                 maxLength={11}
                                 onKeyDown={(e) => {
-                                  if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                  if (
+                                    !/[0-9]/.test(e.key) &&
+                                    e.key.length === 1
+                                  ) {
                                     e.preventDefault();
                                   }
                                   handleKeyDown(e, dobDateRef);
                                 }}
                               />
                             </div>
-
                           </div>
 
                           <div className="el-row-split-right">
                             <div className="el-photo-box">
-                              <span className="el-photo-placeholder">No Image</span>
+                              {selectedImage1 ? (
+                                <img
+                                  src={selectedImage1}
+                                  alt="Employee"
+                                  className="el-photo-img"
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    objectPosition: "center",
+                                    display: "block",
+                                    borderRadius: "inherit",
+                                  }}
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                  onLoad={(e) => {
+                                    e.currentTarget.style.display = "block";
+                                  }}
+                                />
+                              ) : (
+                                <span className="el-photo-placeholder">
+                                  No Image
+                                </span>
+                              )}
                             </div>
-                            <button type="button" className="el-upload-btn">
+                            <input
+                              ref={photoInputRef}
+                              type="file"
+                              accept="image/*"
+                              style={{ display: "none" }}
+                              onChange={handlePhotoFileChange}
+                            />
+                            <button
+                              type="button"
+                              className="el-upload-btn"
+                              onClick={handlePhotoButtonClick}
+                            >
                               ⬆ Upload
                             </button>
                           </div>
@@ -1021,43 +1557,53 @@ export default function EmployeeMaintenance() {
 
                         <hr className="el-mobile-divider" />
 
-                        {/* ROW 1 — DOB Date | Join Date */}
                         <div className="el-row-split-pair el-row-dob-join">
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">DOB Date:</span>
+                            <span className="el-field-label-right">
+                              DOB Date:
+                            </span>
                             <input
                               ref={dobDateRef}
                               type="date"
                               value={formStore.dobDate || ""}
                               onChange={set("dobDate")}
                               className="el-date-inline"
-                              onKeyDown={(e) => handleKeyDown(e, joinDateRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, joinDateRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Join Date:</span>
+                            <span className="el-field-label-right">
+                              Join Date:
+                            </span>
                             <input
                               ref={joinDateRef}
                               type="date"
                               value={formStore.joinDate || ""}
                               onChange={set("joinDate")}
                               className="el-date-inline"
-                              onKeyDown={(e) => handleKeyDown(e, leaveDateRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, leaveDateRef)
+                              }
                             />
                           </div>
                         </div>
 
-                        {/* ROW 2 — Leave Date | Leave Remarks */}
                         <div className="el-row-split-pair el-row-leave">
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Leave Date:</span>
+                            <span className="el-field-label-right">
+                              Leave Date:
+                            </span>
                             <input
                               ref={leaveDateRef}
                               type="date"
                               value={formStore.leaveDate || ""}
                               onChange={set("leaveDate")}
                               className="el-date-inline"
-                              onKeyDown={(e) => handleKeyDown(e, leaveRemarksRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, leaveRemarksRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-half">
@@ -1068,17 +1614,20 @@ export default function EmployeeMaintenance() {
                               placeholder="Leave Remarks"
                               className="el-remark-field"
                               maxLength={40}
-                              onKeyDown={(e) => handleKeyDown(e, creditCommRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, creditCommRef)
+                              }
                             />
                           </div>
                         </div>
 
                         <hr className="el-mobile-divider" />
 
-                        {/* ROW 3 — Credit Comm | Cash Comm */}
                         <div className="el-row-split-pair">
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Credit Comm:</span>
+                            <span className="el-field-label-right">
+                              Credit Comm:
+                            </span>
                             <input
                               ref={creditCommRef}
                               value={formStore.creditComm || ""}
@@ -1086,11 +1635,15 @@ export default function EmployeeMaintenance() {
                               placeholder="0.00"
                               className="el-num-field"
                               maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, cashCommRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, cashCommRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Cash Comm:</span>
+                            <span className="el-field-label-right">
+                              Cash Comm:
+                            </span>
                             <input
                               ref={cashCommRef}
                               value={formStore.cashComm || ""}
@@ -1098,15 +1651,34 @@ export default function EmployeeMaintenance() {
                               placeholder="0.00"
                               className="el-num-field"
                               maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, salaryRef)}
+                              onKeyDown={(e) => handleKeyDown(e, insCommRef)}
                             />
                           </div>
                         </div>
 
-                        {/* ROW 4 — Salary | Over Time */}
                         <div className="el-row-split-pair">
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Salary:</span>
+                            <span className="el-field-label-right">
+                              Ins Comm:
+                            </span>
+                            <input
+                              ref={insCommRef}
+                              value={formStore.insComm || ""}
+                              onChange={set("insComm")}
+                              placeholder="0.00"
+                              className="el-num-field"
+                              maxLength={20}
+                              onKeyDown={(e) => handleKeyDown(e, salaryRef)}
+                            />
+                          </div>
+                          <div className="el-field-row el-half" />
+                        </div>
+
+                        <div className="el-row-split-pair">
+                          <div className="el-field-row el-half">
+                            <span className="el-field-label-right">
+                              Salary:
+                            </span>
                             <input
                               ref={salaryRef}
                               value={formStore.salary || ""}
@@ -1114,11 +1686,15 @@ export default function EmployeeMaintenance() {
                               placeholder="Salary"
                               className="el-num-field"
                               maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, overTimeRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, overTimeRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Over Time:</span>
+                            <span className="el-field-label-right">
+                              Over Time:
+                            </span>
                             <input
                               ref={overTimeRef}
                               value={formStore.overTime || ""}
@@ -1126,144 +1702,217 @@ export default function EmployeeMaintenance() {
                               placeholder="Over Time"
                               className="el-num-field"
                               maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, advanceCodeRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, advanceCodeRef)
+                              }
                             />
                           </div>
                         </div>
 
-                        {/* ROW 5 — Advance Code | Advance Text */}
                         <div className="el-row-code-pair">
                           <div className="el-field-row el-code-field-cell">
-                            <span className="el-field-label-right">Advance Code:</span>
+                            <span className="el-field-label-right">
+                              Advance Code:
+                            </span>
                             <input
                               ref={advanceCodeRef}
                               value={formStore.advanceCode || ""}
-                              onChange={set("advanceCode")}
+                              readOnly
+                              tabIndex={-1}
                               className="el-code-input"
-                              maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, advanceTextRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, advanceTextRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-remark-field-cell">
                             <input
                               ref={advanceTextRef}
                               value={formStore.advanceText || ""}
-                              onChange={set("advanceText")}
+                              readOnly
+                              tabIndex={-1}
                               placeholder="- ADVANCE"
                               className="el-remark-field"
-                              maxLength={40}
-                              onKeyDown={(e) => handleKeyDown(e, deliveryCodeRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, deliveryCodeRef)
+                              }
                             />
                           </div>
                         </div>
 
-                        {/* ROW 6 — Delivery Code | Delivery Text */}
                         <div className="el-row-code-pair">
                           <div className="el-field-row el-code-field-cell">
-                            <span className="el-field-label-right">Delivery Code:</span>
+                            <span className="el-field-label-right">
+                              Delivery Code:
+                            </span>
                             <input
                               ref={deliveryCodeRef}
                               value={formStore.deliveryCode || ""}
-                              onChange={set("deliveryCode")}
+                              readOnly
+                              tabIndex={-1}
                               className="el-code-input"
-                              maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, deliveryTextRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, deliveryTextRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-remark-field-cell">
                             <input
                               ref={deliveryTextRef}
                               value={formStore.deliveryText || ""}
-                              onChange={set("deliveryText")}
+                              readOnly
+                              tabIndex={-1}
                               placeholder="- DELIVERY"
                               className="el-remark-field"
-                              maxLength={40}
-                              onKeyDown={(e) => handleKeyDown(e, reference1Ref)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, commissionCodeRef)
+                              }
+                            />
+                          </div>
+                        </div>
+
+                        <div className="el-row-code-pair">
+                          <div className="el-field-row el-code-field-cell">
+                            <span className="el-field-label-right">
+                              Comm Code:
+                            </span>
+                            <input
+                              ref={commissionCodeRef}
+                              value={formStore.commissionCode || ""}
+                              readOnly
+                              tabIndex={-1}
+                              className="el-code-input"
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, reference1Ref)
+                              }
+                            />
+                          </div>
+                          <div className="el-field-row el-remark-field-cell">
+                            <input
+                              value={formStore.commissionDescription || ""}
+                              readOnly
+                              tabIndex={-1}
+                              placeholder="- COMMISSION"
+                              className="el-remark-field"
                             />
                           </div>
                         </div>
 
                         <hr className="el-mobile-divider" />
 
-                        {/* ROW 7 — Reference | Reference Name */}
                         <div className="el-row-split-pair">
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Reference:</span>
+                            <span className="el-field-label-right">
+                              Reference:
+                            </span>
                             <input
                               ref={reference1Ref}
+                              type="tel"
+                              inputMode="numeric"
                               value={formStore.reference1 || ""}
-                              onChange={set("reference1")}
+                              onChange={handleReferencePhoneChange("reference1")}
                               placeholder="03XXXXXXXXX"
                               className="el-ref-phone-field"
-                              maxLength={15}
-                              onKeyDown={(e) => handleKeyDown(e, reference1NameRef)}
+                              maxLength={11}
+                              onKeyDown={(e) =>
+                                handleReferencePhoneKeyDown(e, reference1NameRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-half">
                             <input
                               ref={reference1NameRef}
                               value={formStore.reference1Name || ""}
-                              onChange={set("reference1Name")}
+                              onChange={handleReferenceNameChange("reference1Name")}
                               placeholder="Name"
                               className="el-remark-field"
                               maxLength={40}
-                              onKeyDown={(e) => handleKeyDown(e, reference2Ref)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, reference2Ref)
+                              }
                             />
                           </div>
                         </div>
 
-                        {/* ROW 8 — Reference | Reference Name */}
                         <div className="el-row-split-pair">
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Reference:</span>
+                            <span className="el-field-label-right">
+                              Reference:
+                            </span>
                             <input
                               ref={reference2Ref}
+                              type="tel"
+                              inputMode="numeric"
                               value={formStore.reference2 || ""}
-                              onChange={set("reference2")}
+                              onChange={handleReferencePhoneChange("reference2")}
                               placeholder="03XXXXXXXXX"
                               className="el-ref-phone-field"
-                              maxLength={15}
-                              onKeyDown={(e) => handleKeyDown(e, reference2NameRef)}
+                              maxLength={11}
+                              onKeyDown={(e) =>
+                                handleReferencePhoneKeyDown(e, reference2NameRef)
+                              }
                             />
                           </div>
                           <div className="el-field-row el-half">
                             <input
                               ref={reference2NameRef}
                               value={formStore.reference2Name || ""}
-                              onChange={set("reference2Name")}
+                              onChange={handleReferenceNameChange("reference2Name")}
                               placeholder="Name"
                               className="el-remark-field"
                               maxLength={40}
-                              onKeyDown={(e) => handleKeyDown(e, documentNameRef)}
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, documentNameRef)
+                              }
                             />
                           </div>
                         </div>
 
-                        {/* ROW 9 — Document | Upload | Download */}
                         <div className="el-doc-row">
-                          <span className="el-field-label-right el-doc-label">Document:</span>
-                          <div className="el-doc-input-cell">
-                            <input
-                              ref={documentNameRef}
-                              value={formStore.documentName || ""}
-                              onChange={set("documentName")}
-                              placeholder="Click to upload Document"
-                              className="el-doc-input"
-                              maxLength={60}
-                              onKeyDown={(e) => handleKeyDown(e, remarksRef)}
-                            />
-                          </div>
-                          <button type="button" className="el-doc-btn el-doc-upload">
+                          <span className="el-field-label-right el-doc-label">
+                            Document:
+                          </span>
+                         <div className="el-doc-input-cell">
+  <input
+    ref={documentNameRef}
+    value={formStore.documentName || ""}
+    readOnly
+    tabIndex={-1}
+    placeholder="Click to upload Document"
+    className="el-doc-input"
+    maxLength={60}
+    onKeyDown={(e) =>
+      handleKeyDown(e, remarksRef)
+    }
+  />
+</div>
+                          <input
+                            ref={documentInputRef}
+                            type="file"
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg"
+                            style={{ display: "none" }}
+                            onChange={handleDocumentFileChange}
+                          />
+                          <button
+                            type="button"
+                            className="el-doc-btn el-doc-upload"
+                            onClick={handleDocumentUploadClick}
+                          >
                             ⬆ Upload
                           </button>
-                          <button type="button" className="el-doc-btn el-doc-download">
+                          <button
+                            type="button"
+                            className="el-doc-btn el-doc-download"
+                            onClick={handleDocumentDownload}
+                          >
                             ⬇ Download
                           </button>
                         </div>
 
-                        {/* ROW 10 — Remarks (tall) */}
                         <div className="el-field-row el-remarks-row">
-                          <span className="el-field-label-right">Remarks:</span>
+                          <span className="el-field-label-right">
+                            Remarks:
+                          </span>
                           <textarea
                             ref={remarksRef}
                             value={formStore.remarks || ""}
@@ -1272,7 +1921,7 @@ export default function EmployeeMaintenance() {
                             className="el-remarks-textarea"
                             maxLength={255}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
+                              if (e.key === "Enter" && !e.shiftKey) {
                                 e.preventDefault();
                                 if (saveButtonRef.current) {
                                   saveButtonRef.current.focus();
@@ -1281,7 +1930,6 @@ export default function EmployeeMaintenance() {
                             }}
                           />
                         </div>
-
                       </div>
                     </section>
                   </div>
@@ -1296,7 +1944,7 @@ export default function EmployeeMaintenance() {
                 onReturn={handleReturn}
                 onNew={handleNew}
                 saveButtonRef={saveButtonRef}
-                disabled={isSaving || isCoolingDown}
+                disabled={isSaving || isCoolingDown || isFetchingNextCode}
               />
             </form>
           </div>
