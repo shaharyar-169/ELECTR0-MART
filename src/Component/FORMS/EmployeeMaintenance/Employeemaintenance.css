@@ -570,7 +570,12 @@
 .el-upload-btn:hover { opacity: 0.88; }
 
 .el-cnic-row {
-  flex-wrap: nowrap;
+justify-content: flex-end !important;
+}
+.el-cnic-row .el-date-inline {
+  flex: 0 0 117px !important;
+  width: 117px !important;
+  max-width: 117px !important;
 }
 
 .el-inline-label {
@@ -582,7 +587,7 @@
 }
 
 .el-date-inline {
-  height: 28px;
+ height: 28px;
   padding: 0 8px;
   border-radius: 6px;
   border: 1px solid #d8d8d8;
@@ -592,6 +597,12 @@
   color: var(--ink);
   width: 140px;
   flex: 0 0 auto;
+}
+
+.el-row-split-pair .el-half .el-date-inline {
+  width: 140px !important;
+  flex: 0 0 140px !important;
+  max-width: 140px !important;
 }
 
 .el-date-inline:focus {
@@ -667,9 +678,19 @@ hr.el-mobile-divider {
   min-width: 85px;
 }
 
+
+/* Join Date should be right-aligned in its row (DOB left, Join right) */
+.el-row-dob-join .el-half:last-child {
+  justify-content: flex-end;
+}
+
+/* Add a bit of gap between label and input in the Join half */
+.el-row-dob-join .el-half:last-child .el-field-label-right {
+  margin-left: auto;
+}
 /* Number inputs for Comm/Salary */
 .el-num-field {
-  height: 28px;
+   height: 28px;
   padding: 0 10px;
   border-radius: 6px;
   border: 1px solid #d8d8d8;
@@ -681,6 +702,37 @@ hr.el-mobile-divider {
   text-align: right;
 }
 
+/* Number fields (Credit/Cash/Ins Comm, Salary, Over Time)
+   should match the date-field width (140px). */
+.el-row-split-pair .el-half .el-num-field {
+  flex: 0 0 140px !important;
+  width: 140px !important;
+  max-width: 140px !important;
+}
+
+.el-row-split-pair .el-half:last-child {
+  justify-content: flex-end;
+}
+
+.el-row-split-pair .el-half:last-child .el-field-label-right {
+  margin-left: auto;
+}
+
+.el-row-leave .el-half:first-child {
+  flex: 0 0 auto;             /* Leave Date half only takes its content width */
+  width: auto;
+  min-width: 0;
+}
+
+.el-cnic-row .email-field {
+  flex: 0 0 180px !important;
+  width: 180px !important;
+  max-width: 180px !important;
+}
+.el-row-leave .el-half:last-child {
+  flex: 1 1 auto;             /* Leave Remarks takes the rest */
+  margin-left: 5px;          /* small gap between Leave Date and Remarks */
+}
 .el-num-field:focus {
   outline: none;
   border-color: var(--header-blue);

@@ -13,36 +13,6 @@ import FormButtons from "../components/FormButton";
 import InstallationCode from "../components/InstallarCode";
 import SearchModal from "../components/SearchModel";
 
-const STATUS_OPTIONS = ["Active", "Non-Active"];
-
-// ---------------------------------------------------------------------
-// Server / image & document base paths
-// ---------------------------------------------------------------------
-const API_BASE = "https://crystalsolutions.pk/api";
-
-// Both images and documents live under the SAME root folder:
-//   Images:    https://crystalsolutions.pk/DI/DEMOELEC/<filename>
-//   Documents: https://crystalsolutions.pk/DI/DEMOELEC/<filename>
-const IMAGE_SERVER_BASE = "https://crystalsolutions.pk/DI";
-
-const buildImageBaseForOrg = (orgCode) =>
-  `${IMAGE_SERVER_BASE}/${String(orgCode || "DEMOELEC").trim()}/`;
-
-const IMAGE_BASE_URL = buildImageBaseForOrg("DEMOELEC");
-
-// The organisation code we send to the backend.
-const ORG_CODE = "DEMOELEC";
-const LOC_CODE = "001";
-
-function Field({ label, children, className = "" }) {
-  return (
-    <div className={`el-field ${className}`}>
-      <span className="el-field-label">{label}</span>
-      {children}
-    </div>
-  );
-}
-
 export default function EmployeeMaintenance() {
   const {
     isSidebarVisible,
@@ -133,6 +103,23 @@ export default function EmployeeMaintenance() {
   const [isCoolingDown, setIsCoolingDown] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
+  const [isExistingEmployee, setIsExistingEmployee] = useState(false);
+
+  // Dynamic organisation & location codes — derived from the loaded
+  // organisation data and the location number. Fall back to safe defaults
+  // so API calls never fire with an empty code.
+
+  const [orgCode, setOrgCode] = useState(organisation);
+  const [locCode, setLocCode] = useState( locationnumber || getLocationNumber);
+
+  //  const [orgCode, setOrgCode] = useState("DEMOELEC");
+//   const [locCode, setLocCode] = useState( "001");
+
+
+
+  // SysControl — determines which fields are visible
+  const [sysControl, setSysControl] = useState(null);
+
   const codeInputRef = useRef(null);
 
   const fetchCallIdRef = useRef(0);
@@ -146,6 +133,7 @@ export default function EmployeeMaintenance() {
   // Refs
   const statusSelectRef = useRef(null);
   const nicInputRef = useRef(null);
+  const expiryRef = useRef(null);
   const descriptionInputRef = useRef(null);
   const contactPersonInputRef = useRef(null);
   const emailInputRef = useRef(null);
@@ -178,6 +166,7 @@ export default function EmployeeMaintenance() {
   const deliveryCodeRef = useRef(null);
   const deliveryTextRef = useRef(null);
   const commissionCodeRef = useRef(null);
+  const commissionDescriptionRef = useRef(null);
   const reference1Ref = useRef(null);
   const reference1NameRef = useRef(null);
   const reference2Ref = useRef(null);
@@ -187,6 +176,68 @@ export default function EmployeeMaintenance() {
 
   const photoInputRef = useRef(null);
   const documentInputRef = useRef(null);
+
+  const STATUS_OPTIONS = ["Active", "Non-Active"];
+const API_BASE = apiLinks;
+const IMAGE_SERVER_BASE = "https://crystalsolutions.pk/DI";
+
+function buildImageBaseForOrg(orgCode) {
+  return `${IMAGE_SERVER_BASE}/${String(orgCode || "DEMOELEC").trim()}/`;
+}
+
+function Field({ label, children, className = "" }) {
+  return (
+    <div className={`el-field ${className}`}>
+      <span className="el-field-label">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+
+  // Ordered focus chain
+  const FOCUS_CHAIN = [
+    abbInputRef,
+    statusSelectRef,
+    descriptionInputRef,
+    contactPersonInputRef,
+    emailInputRef,
+    address1InputRef,
+    address2InputRef,
+    address3InputRef,
+    nicInputRef,
+    expiryRef,
+    phoneInputRef,
+    mobileInputRef,
+    dobDateRef,
+    joinDateRef,
+    leaveDateRef,
+    leaveRemarksRef,
+    creditCommRef,
+    cashCommRef,
+    insCommRef,
+    salaryRef,
+    overTimeRef,
+    advanceCodeRef,
+    advanceTextRef,
+    deliveryCodeRef,
+    deliveryTextRef,
+    commissionCodeRef,
+    commissionDescriptionRef,
+    reference1Ref,
+    reference1NameRef,
+    reference2Ref,
+    reference2NameRef,
+    documentNameRef,
+    remarksRef,
+  ];
+
+  const vis = (key) => {
+    if (!sysControl) return true;
+    const v = sysControl[key];
+    if (v === undefined || v === null) return true;
+    return String(v).trim().toLowerCase() === "yes";
+  };
 
   // ============================================================
   // Helpers
@@ -261,7 +312,7 @@ export default function EmployeeMaintenance() {
     }
   };
 
-  const buildImageUrl = (value, orgCode) => {
+  const buildImageUrl = (value, codeForImage) => {
     const raw = String(value ?? "").trim();
     if (!raw) return "";
     if (raw.startsWith("data:")) return raw;
@@ -270,7 +321,7 @@ export default function EmployeeMaintenance() {
     if (raw.startsWith("/")) {
       return API_BASE.replace(/\/api$/, "") + raw;
     }
-    return buildImageBaseForOrg(orgCode || ORG_CODE) + raw;
+    return buildImageBaseForOrg(codeForImage || orgCode) + raw;
   };
 
   const blankFormStore = () => ({
@@ -333,18 +384,99 @@ export default function EmployeeMaintenance() {
     if (documentInputRef.current) documentInputRef.current.value = "";
   };
 
+  // ---------------------------------------------------------------
+  // Load organisation and derive orgCode / locCode from it.
+  // ---------------------------------------------------------------
   useEffect(() => {
     const orgData = getOrganisationData();
     setOrganisation(orgData);
+
+    if (orgData) {
+      const derivedOrg =
+        orgData.code ||
+        orgData.organization ||
+        orgData.orgcode ||
+        orgData.OrgCode ||
+        orgData.FOrgCod;
+
+      if (derivedOrg && String(derivedOrg).trim() !== "") {
+        setOrgCode(String(derivedOrg).trim());
+      }
+    }
+
+    // Derive location code. getLocationNumber is a function that
+    // returns the current location; locationnumber is the pre-fetched
+    // value. Prefer the function, fall back to the cached value.
+    let derivedLoc = "";
+    if (typeof getLocationNumber === "function") {
+      try {
+        derivedLoc = getLocationNumber();
+      } catch (e) {
+        console.warn(">>> getLocationNumber() failed:", e);
+      }
+    }
+    if ((!derivedLoc || String(derivedLoc).trim() === "") && locationnumber) {
+      derivedLoc = locationnumber;
+    }
+    if (derivedLoc && String(derivedLoc).trim() !== "") {
+      setLocCode(String(derivedLoc).trim());
+    }
   }, []);
 
+  // ---------------------------------------------------------------
+  // Fetch SysControl once orgCode is known
+  // ---------------------------------------------------------------
   useEffect(() => {
-    if (!organisation) return;
+    if (!organisation || !orgCode) return;
+
+    const apiUrl = apiLinks + "/GetSysControl.php";
+    const formData = new URLSearchParams({
+      code: orgCode,
+      type: "EmployeeMaintenance",
+    }).toString();
+
+    axios
+      .post(apiUrl, formData)
+      .then((response) => {
+        let obj = response.data;
+
+        if (typeof obj === "string") {
+          try {
+            obj = JSON.parse(obj);
+          } catch (e) {
+            console.error(">>> GetSysControl parse error:", e);
+            obj = null;
+          }
+        }
+
+        if (Array.isArray(obj) && obj.length > 0 && typeof obj[0] === "object") {
+          obj = obj[0];
+        }
+
+        if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+          console.log(">>> SysControl loaded:", obj);
+          setSysControl(obj);
+        } else {
+          console.warn(">>> SysControl empty — showing all fields");
+          setSysControl({});
+        }
+      })
+      .catch((error) => {
+        console.error(">>> GetSysControl error:", error);
+        setSysControl({});
+      });
+  }, [organisation, orgCode, apiLinks]);
+
+  // ---------------------------------------------------------------
+  // Fetch the next Employee Code
+  // ---------------------------------------------------------------
+  useEffect(() => {
+    if (!organisation || !orgCode || !locCode) return;
 
     const apiUrl = apiLinks + "/NewEmployee.php";
     const formData = new URLSearchParams({
-      code: ORG_CODE,
-      FLocCod: LOC_CODE,
+      code: orgCode,
+      FLocCod: locCode,
     }).toString();
 
     axios
@@ -359,15 +491,15 @@ export default function EmployeeMaintenance() {
       .catch((error) => {
         console.error("Error fetching next employee code:", error);
       });
-  }, [organisation, apiLinks, getLocationNumber]);
+  }, [organisation, orgCode, locCode, apiLinks, getLocationNumber]);
 
   const loadEmployeeList = () => {
-    if (!organisation) return;
+    if (!organisation || !orgCode || !locCode) return;
 
     const apiUrl = apiLinks + "/EmployeeList.php";
     const formData = new URLSearchParams({
-      code: ORG_CODE,
-      FLocCod: LOC_CODE,
+      code: orgCode,
+      FLocCod: locCode,
     }).toString();
 
     return axios
@@ -418,7 +550,7 @@ export default function EmployeeMaintenance() {
   useEffect(() => {
     loadEmployeeList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organisation, apiLinks, getLocationNumber]);
+  }, [organisation, orgCode, locCode, apiLinks, getLocationNumber]);
 
   useEffect(() => {
     try {
@@ -565,15 +697,18 @@ export default function EmployeeMaintenance() {
   const fetchInstallationDataByCode = (installationCode) => {
     const cleanCode = String(installationCode || "").trim();
 
-    if (!organisation || !cleanCode) {
-      console.warn(">>> Guard: organisation or code missing", {
+    if (!organisation || !orgCode || !locCode || !cleanCode) {
+      console.warn(">>> Guard: organisation/code/loc missing", {
         organisation: !!organisation,
+        orgCode,
+        locCode,
         cleanCode,
       });
       return;
     }
 
     clearForm();
+    setIsExistingEmployee(false);
 
     const listRow = findEmployeeInList(cleanCode);
 
@@ -586,15 +721,15 @@ export default function EmployeeMaintenance() {
       pendingCodeRef.current = cleanCode;
     } else {
       console.warn(">>> No EmployeeList row for code:", cleanCode);
-      showToast("Data not found", "error");
+      showToast("Employee Data Not Found", "error");
     }
 
     const callId = ++fetchCallIdRef.current;
 
     const apiUrl = apiLinks + "/GetEmployee.php";
     const formData = new URLSearchParams({
-      code: ORG_CODE,
-      FLocCod: LOC_CODE,
+      code: orgCode,
+      FLocCod: locCode,
       FEmpCod: cleanCode,
     }).toString();
 
@@ -795,10 +930,9 @@ export default function EmployeeMaintenance() {
 
         if (data.tempcod) {
           setCode(String(data.tempcod).trim());
+          setIsExistingEmployee(true);
         }
 
-        // Photo — server returns a filename, image lives at:
-        //   https://crystalsolutions.pk/DI/<ORG>/<filename>
         const picRaw = pickField(data, [
           "temppic",
           "tempPic",
@@ -820,7 +954,7 @@ export default function EmployeeMaintenance() {
           ) {
             setSelectedImage1(picName);
           } else {
-            const url = buildImageBaseForOrg(ORG_CODE) + picName;
+            const url = buildImageBaseForOrg(orgCode) + picName;
             console.log(">>> Image URL:", url);
             setSelectedImage1(url);
           }
@@ -920,9 +1054,6 @@ export default function EmployeeMaintenance() {
     showToast("Image selected", "success");
   };
 
-  // ----------------------------------------------------------------
-  // Document upload / download
-  // ----------------------------------------------------------------
   const handleDocumentUploadClick = () => {
     if (documentInputRef.current) {
       documentInputRef.current.click();
@@ -944,13 +1075,6 @@ export default function EmployeeMaintenance() {
     showToast("Document selected", "success");
   };
 
-  // Download the currently-referenced document from the server.
-  // Documents live in the SAME root folder as images:
-  //   https://crystalsolutions.pk/DI/<ORG>/<filename>
-  //
-  // We do NOT use a HEAD probe here — some servers reject HEAD with 405,
-  // which would incorrectly report the file as "not found". Instead we
-  // just trigger the browser's native download via an <a> element.
   const handleDocumentDownload = () => {
     const fileName = String(formStore.documentName || "").trim();
     if (!fileName) {
@@ -958,7 +1082,7 @@ export default function EmployeeMaintenance() {
       return;
     }
 
-    const url = `https://crystalsolutions.pk/DI/${ORG_CODE}/${fileName}`;
+    const url = `https://crystalsolutions.pk/DI/${orgCode}/${fileName}`;
     console.log(">>> Downloading document from:", url);
 
     const a = document.createElement("a");
@@ -1014,37 +1138,52 @@ export default function EmployeeMaintenance() {
     }, 100);
   };
 
-  const handleKeyDown = (e, nextRef) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      e.stopPropagation();
-      if (nextRef && nextRef.current) {
-        const element = nextRef.current;
-        if (element.tagName === "SELECT" || element.tagName === "INPUT") {
-          element.focus();
-          if (element.tagName === "INPUT") {
-            element.select();
-          }
-        } else {
-          const input = element.querySelector("input, select");
-          if (input) {
-            input.focus();
-            if (input.tagName === "INPUT") {
-              input.select();
-            }
-          }
-        }
-      }
+  // Find and focus the next visible field, given a list of candidate refs
+  // (in priority order).
+  const focusFirstVisible = (refs) => {
+    for (const ref of refs) {
+      const el = ref?.current;
+      if (!el) continue;
+      if (!el.isConnected) continue;
+      if (el.disabled) continue;
+      if (el.offsetParent === null) continue;
+
+      el.focus();
+      if (el.tagName === "INPUT") el.select();
+      return true;
     }
+    return false;
+  };
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    // 1) Try the explicitly-passed next ref first.
+    if (nextRef && focusFirstVisible([nextRef])) return;
+
+    // 2) Fallback: walk the FOCUS_CHAIN from the currently focused element.
+    const active = document.activeElement;
+    const currentIdx = FOCUS_CHAIN.findIndex((r) => r.current === active);
+    if (currentIdx === -1) return;
+
+    focusFirstVisible(FOCUS_CHAIN.slice(currentIdx + 1));
   };
 
   const handleNicEnter = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
-      if (descriptionInputRef.current) {
-        descriptionInputRef.current.focus();
-      }
+      handleKeyDown(e);
+    }
+  };
+
+  const handleExpiryEnter = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+      handleKeyDown(e);
     }
   };
 
@@ -1053,13 +1192,14 @@ export default function EmployeeMaintenance() {
 
     setCode("");
     setMaxCode("");
+    setIsExistingEmployee(false);
 
-    if (organisation) {
+    if (organisation && orgCode && locCode) {
       setIsFetchingNextCode(true);
       const apiUrl = apiLinks + "/NewEmployee.php";
       const formData = new URLSearchParams({
-        code: ORG_CODE,
-        FLocCod: LOC_CODE,
+        code: orgCode,
+        FLocCod: locCode,
       }).toString();
 
       axios
@@ -1097,8 +1237,8 @@ export default function EmployeeMaintenance() {
   };
 
   const buildSavePayload = () => ({
-    code: ORG_CODE,
-    FLocCod: LOC_CODE,
+    code: orgCode,
+    FLocCod: locCode,
     FUsrId: strForApi(user?.tusrid) || "sohaib",
 
     FEmpCod: strForApi(code),
@@ -1116,7 +1256,9 @@ export default function EmployeeMaintenance() {
     FMob001: strForApi(formStore.reference1),
     FMob002: strForApi(formStore.reference2),
 
-    FEmlAdd: strForApi(formStore.emailAddress) || strForApi(formStore.phone),
+    // Email field binds to formStore.phone — emailAddress is only a
+    // fallback from the loaded list, so phone takes priority.
+    FEmlAdd: strForApi(formStore.phone) || strForApi(formStore.emailAddress),
 
     FEmpSal: amountForApi(formStore.salary),
     FOvrTim: amountForApi(formStore.overTime),
@@ -1220,14 +1362,17 @@ export default function EmployeeMaintenance() {
         console.log(">>> No new doc picked, sending FEmpDoc as:", payload.FEmpDoc);
       }
 
-      const response = await axios.post(apiUrl, formData, {
-        // Axios sets multipart/form-data boundary automatically.
-      });
+      const response = await axios.post(apiUrl, formData, {});
 
       console.log("Save response:", response.status, response.data);
 
       if (response.status === 200) {
-        showToast("Form saved successfully!", "success");
+        showToast(
+          isExistingEmployee
+            ? "Employee Updated Successfully"
+            : "Employee Added Successfully",
+          "success"
+        );
         await loadEmployeeList();
         resetForm();
         isCoolingDownRef.current = true;
@@ -1292,9 +1437,14 @@ export default function EmployeeMaintenance() {
                         e.preventDefault();
                         e.stopPropagation();
                         fetchInstallationDataByCode(code);
-                        if (abbInputRef.current) {
-                          abbInputRef.current.focus();
-                        }
+
+                        focusFirstVisible([
+                          abbInputRef,
+                          statusSelectRef,
+                          descriptionInputRef,
+                          contactPersonInputRef,
+                          emailInputRef,
+                        ]);
                       }
                     }}
                   >
@@ -1318,17 +1468,19 @@ export default function EmployeeMaintenance() {
                     />
                   </div>
 
-                  <div className="el-field-row el-field-abb">
-                    <span className="el-field-label-right">Abb :</span>
-                    <input
-                      ref={abbInputRef}
-                      value={formStore.abb}
-                      onChange={set("abb")}
-                      placeholder="Enter Abb"
-                      maxLength={20}
-                      onKeyDown={(e) => handleKeyDown(e, statusSelectRef)}
-                    />
-                  </div>
+                  {vis("Abbreviation") && (
+                    <div className="el-field-row el-field-abb">
+                      <span className="el-field-label-right">Abb :</span>
+                      <input
+                        ref={abbInputRef}
+                        value={formStore.abb}
+                        onChange={set("abb")}
+                        placeholder="Enter Abb"
+                        maxLength={20}
+                        onKeyDown={(e) => handleKeyDown(e, statusSelectRef)}
+                      />
+                    </div>
+                  )}
 
                   <div className="el-field-row">
                     <span className="el-field-label-right">Status :</span>
@@ -1368,568 +1520,675 @@ export default function EmployeeMaintenance() {
 
                         <div className="el-row-split">
                           <div className="el-row-split-left">
-                            <div className="el-field-row">
-                              <span className="el-field-label-right">
-                                Father Name:
-                              </span>
-                              <input
-                                ref={contactPersonInputRef}
-                                value={formStore.contactPerson}
-                                onChange={set("contactPerson")}
-                                placeholder="Father Name"
-                                maxLength={40}
-                                onKeyDown={(e) =>
-                                  handleKeyDown(e, emailInputRef)
-                                }
-                              />
-                            </div>
-
-                            <div className="el-field-row">
-                              <span className="el-field-label-right">
-                                Designation:
-                              </span>
-                              <input
-                                ref={emailInputRef}
-                                value={formStore.email}
-                                onChange={set("email")}
-                                placeholder="e.g. Manager, Engineer, etc."
-                                maxLength={40}
-                                onKeyDown={(e) =>
-                                  handleKeyDown(e, address1InputRef)
-                                }
-                              />
-                            </div>
-
-                            <div className="el-field-row">
-                              <span className="el-field-label-right">
-                                Department:
-                              </span>
-                              <input
-                                ref={address1InputRef}
-                                value={formStore.address}
-                                onChange={set("address")}
-                                placeholder="e.g. IT, etc."
-                                maxLength={40}
-                                onKeyDown={(e) =>
-                                  handleKeyDown(e, address2InputRef)
-                                }
-                              />
-                            </div>
-
-                            <div className="el-field-row">
-                              <span className="el-field-label-right">
-                                Address:
-                              </span>
-                              <input
-                                ref={address2InputRef}
-                                value={formStore.address2}
-                                onChange={set("address2")}
-                                placeholder="Address"
-                                maxLength={40}
-                                onKeyDown={(e) =>
-                                  handleKeyDown(e, address3InputRef)
-                                }
-                              />
-                            </div>
-
-                            <div className="el-field-row">
-                              <span className="el-field-label-right"></span>
-                              <input
-                                ref={address3InputRef}
-                                value={formStore.address3 || ""}
-                                onChange={set("address3")}
-                                placeholder="Address"
-                                maxLength={40}
-                                onKeyDown={(e) =>
-                                  handleKeyDown(e, nicInputRef)
-                                }
-                              />
-                            </div>
-
-                            <div className="el-field-row el-cnic-row">
-                              <span className="el-field-label-right">
-                                CNIC:
-                              </span>
-                              <input
-                                ref={nicInputRef}
-                                value={formStore.nic}
-                                onChange={handleNicChange}
-                                placeholder="CNIC (35XXX-XXXXXXX-X)"
-                                className="cnic-field"
-                                onKeyDown={handleNicEnter}
-                                maxLength={15}
-                              />
-                              <span className="el-inline-label">Expiry:</span>
-                              <input
-                                type="date"
-                                value={formStore.expiry || ""}
-                                onChange={set("expiry")}
-                                className="el-date-inline"
-                              />
-                            </div>
-
-                            <div className="el-field-row">
-                              <span className="el-field-label-right">
-                                Email:
-                              </span>
-                              <input
-                                ref={phoneInputRef}
-                                value={formStore.phone}
-                                onChange={set("phone")}
-                                placeholder="crystalsolution@gmail.com"
-                                className="email-field"
-                                maxLength={40}
-                                onKeyDown={(e) =>
-                                  handleKeyDown(e, mobileInputRef)
-                                }
-                              />
-                            </div>
-
-                            <div className="el-field-row">
-                              <span className="el-field-label-right">
-                                Mobile:
-                              </span>
-                              <input
-                                ref={mobileInputRef}
-                                type="tel"
-                                value={formStore.mobile}
-                                onChange={set("mobile")}
-                                placeholder="03XXXXXXXXX"
-                                className="mobile-field"
-                                maxLength={11}
-                                onKeyDown={(e) => {
-                                  if (
-                                    !/[0-9]/.test(e.key) &&
-                                    e.key.length === 1
-                                  ) {
-                                    e.preventDefault();
+                            {vis("FatherName") && (
+                              <div className="el-field-row">
+                                <span className="el-field-label-right">
+                                  Father Name:
+                                </span>
+                                <input
+                                  ref={contactPersonInputRef}
+                                  value={formStore.contactPerson}
+                                  onChange={set("contactPerson")}
+                                  placeholder="Father Name"
+                                  maxLength={40}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, emailInputRef)
                                   }
-                                  handleKeyDown(e, dobDateRef);
+                                />
+                              </div>
+                            )}
+
+                            {vis("Designation") && (
+                              <div className="el-field-row">
+                                <span className="el-field-label-right">
+                                  Designation:
+                                </span>
+                                <input
+                                  ref={emailInputRef}
+                                  value={formStore.email}
+                                  onChange={set("email")}
+                                  placeholder="e.g. Manager, Engineer, etc."
+                                  maxLength={40}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, address1InputRef)
+                                  }
+                                />
+                              </div>
+                            )}
+
+                            {vis("Department") && (
+                              <div className="el-field-row">
+                                <span className="el-field-label-right">
+                                  Department:
+                                </span>
+                                <input
+                                  ref={address1InputRef}
+                                  value={formStore.address}
+                                  onChange={set("address")}
+                                  placeholder="e.g. IT, etc."
+                                  maxLength={40}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, address2InputRef)
+                                  }
+                                />
+                              </div>
+                            )}
+
+                            {vis("Address") && (
+                              <>
+                                <div className="el-field-row">
+                                  <span className="el-field-label-right">
+                                    Address:
+                                  </span>
+                                  <input
+                                    ref={address2InputRef}
+                                    value={formStore.address2}
+                                    onChange={set("address2")}
+                                    placeholder="Address"
+                                    maxLength={40}
+                                    onKeyDown={(e) =>
+                                      handleKeyDown(e, address3InputRef)
+                                    }
+                                  />
+                                </div>
+
+                                <div className="el-field-row">
+                                  <span className="el-field-label-right"></span>
+                                  <input
+                                    ref={address3InputRef}
+                                    value={formStore.address3 || ""}
+                                    onChange={set("address3")}
+                                    placeholder="Address"
+                                    maxLength={40}
+                                    onKeyDown={(e) =>
+                                      handleKeyDown(e, nicInputRef)
+                                    }
+                                  />
+                                </div>
+                              </>
+                            )}
+
+                            {/* CNIC row — also hosts Email when CNIC is hidden */}
+                            {(vis("CNIC") || vis("CNICExpiry") || vis("Email")) && (
+                              <div className="el-field-row el-cnic-row">
+                                {vis("CNIC") && (
+                                  <>
+                                    <span className="el-field-label-right">
+                                      CNIC:
+                                    </span>
+                                    <input
+                                      ref={nicInputRef}
+                                      value={formStore.nic}
+                                      onChange={handleNicChange}
+                                      placeholder="CNIC (35XXX-XXXXXXX-X)"
+                                      className="cnic-field"
+                                      onKeyDown={handleNicEnter}
+                                      maxLength={15}
+                                    />
+                                  </>
+                                )}
+
+                                {!vis("CNIC") && vis("Email") && (
+                                  <>
+                                    <span className="el-field-label-right">
+                                      Email:
+                                    </span>
+                                    <input
+                                      ref={phoneInputRef}
+                                      value={formStore.phone}
+                                      onChange={set("phone")}
+                                      placeholder="crystalsolution@gmail.com"
+                                      className="email-field"
+                                      maxLength={40}
+                                      onKeyDown={(e) =>
+                                        handleKeyDown(e, mobileInputRef)
+                                      }
+                                    />
+                                  </>
+                                )}
+
+                                {vis("CNICExpiry") && (
+                                  <>
+                                    <span className="el-inline-label">
+                                      Expiry:
+                                    </span>
+                                    <input
+                                      ref={expiryRef}
+                                      type="date"
+                                      value={formStore.expiry || ""}
+                                      onChange={set("expiry")}
+                                      className="el-date-inline"
+                                      onKeyDown={handleExpiryEnter}
+                                    />
+                                  </>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Email's own row — only when CNIC is visible */}
+                            {vis("Email") && vis("CNIC") && (
+                              <div className="el-field-row">
+                                <span className="el-field-label-right">
+                                  Email:
+                                </span>
+                                <input
+                                  ref={phoneInputRef}
+                                  value={formStore.phone}
+                                  onChange={set("phone")}
+                                  placeholder="crystalsolution@gmail.com"
+                                  className="email-field"
+                                  maxLength={40}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, mobileInputRef)
+                                  }
+                                />
+                              </div>
+                            )}
+
+                            {vis("Mobile") && (
+                              <div className="el-field-row">
+                                <span className="el-field-label-right">
+                                  Mobile:
+                                </span>
+                                <input
+                                  ref={mobileInputRef}
+                                  type="tel"
+                                  value={formStore.mobile}
+                                  onChange={set("mobile")}
+                                  placeholder="03XXXXXXXXX"
+                                  className="mobile-field"
+                                  maxLength={11}
+                                  onKeyDown={(e) => {
+                                    if (
+                                      !/[0-9]/.test(e.key) &&
+                                      e.key.length === 1
+                                    ) {
+                                      e.preventDefault();
+                                    }
+                                    handleKeyDown(e, dobDateRef);
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {vis("Picture") && (
+                            <div className="el-row-split-right">
+                              <div
+                                className="el-photo-box"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  overflow: "hidden",
+                                  backgroundColor: "#f5f5f5",
                                 }}
+                              >
+                                {selectedImage1 ? (
+                                  <img
+                                    src={selectedImage1}
+                                    alt="Employee"
+                                    className="el-photo-img"
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "contain",
+                                      objectPosition: "center",
+                                      display: "block",
+                                      borderRadius: "inherit",
+                                    }}
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                    onLoad={(e) => {
+                                      e.currentTarget.style.display = "block";
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="el-photo-placeholder">
+                                    No Image
+                                  </span>
+                                )}
+                              </div>
+                              <input
+                                ref={photoInputRef}
+                                type="file"
+                                accept="image/*"
+                                style={{ display: "none" }}
+                                onChange={handlePhotoFileChange}
+                              />
+                              <button
+                                type="button"
+                                className="el-upload-btn"
+                                onClick={handlePhotoButtonClick}
+                              >
+                                ⬆ Upload
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        <hr className="el-mobile-divider" />
+
+                        {(vis("DOB") || vis("JoinDate")) && (
+                          <div className="el-row-split-pair el-row-dob-join">
+                            {vis("DOB") && (
+                              <div className="el-field-row el-half">
+                                <span className="el-field-label-right">
+                                  DOB Date:
+                                </span>
+                                <input
+                                  ref={dobDateRef}
+                                  type="date"
+                                  value={formStore.dobDate || ""}
+                                  onChange={set("dobDate")}
+                                  className="el-date-inline"
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, joinDateRef)
+                                  }
+                                />
+                              </div>
+                            )}
+                            {vis("JoinDate") && (
+                              <div className="el-field-row el-half">
+                                <span className="el-field-label-right">
+                                  Join Date:
+                                </span>
+                                <input
+                                  ref={joinDateRef}
+                                  type="date"
+                                  value={formStore.joinDate || ""}
+                                  onChange={set("joinDate")}
+                                  className="el-date-inline"
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, leaveDateRef)
+                                  }
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {(vis("LeaveDate") || vis("LeaveRemarks")) && (
+                          <div className="el-row-split-pair el-row-leave">
+                            {vis("LeaveDate") && (
+                              <div className="el-field-row el-half">
+                                <span className="el-field-label-right">
+                                  Leave Date:
+                                </span>
+                                <input
+                                  ref={leaveDateRef}
+                                  type="date"
+                                  value={formStore.leaveDate || ""}
+                                  onChange={set("leaveDate")}
+                                  className="el-date-inline"
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, leaveRemarksRef)
+                                  }
+                                />
+                              </div>
+                            )}
+                            {vis("LeaveRemarks") && (
+                              <div className="el-field-row el-half">
+                                <input
+                                  ref={leaveRemarksRef}
+                                  value={formStore.leaveRemarks || ""}
+                                  onChange={set("leaveRemarks")}
+                                  placeholder="Leave Remarks"
+                                  className="el-remark-field"
+                                  maxLength={40}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, creditCommRef)
+                                  }
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <hr className="el-mobile-divider" />
+
+                        {(vis("CreditCommission") || vis("CashCommission")) && (
+                          <div className="el-row-split-pair">
+                            {vis("CreditCommission") && (
+                              <div className="el-field-row el-half">
+                                <span className="el-field-label-right">
+                                  Credit Comm:
+                                </span>
+                                <input
+                                  ref={creditCommRef}
+                                  value={formStore.creditComm || ""}
+                                  onChange={set("creditComm")}
+                                  placeholder="0.00"
+                                  className="el-num-field"
+                                  maxLength={20}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, cashCommRef)
+                                  }
+                                />
+                              </div>
+                            )}
+                            {vis("CashCommission") && (
+                              <div className="el-field-row el-half">
+                                <span className="el-field-label-right">
+                                  Cash Comm:
+                                </span>
+                                <input
+                                  ref={cashCommRef}
+                                  value={formStore.cashComm || ""}
+                                  onChange={set("cashComm")}
+                                  placeholder="0.00"
+                                  className="el-num-field"
+                                  maxLength={20}
+                                  onKeyDown={(e) => handleKeyDown(e, insCommRef)}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {vis("InstallmentCommission") && (
+                          <div className="el-row-split-pair">
+                            <div className="el-field-row el-half">
+                              <span className="el-field-label-right">
+                                Ins Comm:
+                              </span>
+                              <input
+                                ref={insCommRef}
+                                value={formStore.insComm || ""}
+                                onChange={set("insComm")}
+                                placeholder="0.00"
+                                className="el-num-field"
+                                maxLength={20}
+                                onKeyDown={(e) => handleKeyDown(e, salaryRef)}
+                              />
+                            </div>
+                            <div className="el-field-row el-half" />
+                          </div>
+                        )}
+
+                        {(vis("Salary") || vis("OverTIme")) && (
+                          <div className="el-row-split-pair">
+                            {vis("Salary") && (
+                              <div className="el-field-row el-half">
+                                <span className="el-field-label-right">
+                                  Salary:
+                                </span>
+                                <input
+                                  ref={salaryRef}
+                                  value={formStore.salary || ""}
+                                  onChange={set("salary")}
+                                  placeholder="Salary"
+                                  className="el-num-field"
+                                  maxLength={20}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, overTimeRef)
+                                  }
+                                />
+                              </div>
+                            )}
+                            {vis("OverTIme") && (
+                              <div className="el-field-row el-half">
+                                <span className="el-field-label-right">
+                                  Over Time:
+                                </span>
+                                <input
+                                  ref={overTimeRef}
+                                  value={formStore.overTime || ""}
+                                  onChange={set("overTime")}
+                                  placeholder="Over Time"
+                                  className="el-num-field"
+                                  maxLength={20}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, advanceCodeRef)
+                                  }
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {vis("AdvanceCode") && (
+                          <div className="el-row-code-pair">
+                            <div className="el-field-row el-code-field-cell">
+                              <span className="el-field-label-right">
+                                Advance Code:
+                              </span>
+                              <input
+                                ref={advanceCodeRef}
+                                value={formStore.advanceCode || ""}
+                                readOnly
+                                tabIndex={-1}
+                                className="el-code-input"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, advanceTextRef)
+                                }
+                              />
+                            </div>
+                            <div className="el-field-row el-remark-field-cell">
+                              <input
+                                ref={advanceTextRef}
+                                value={formStore.advanceText || ""}
+                                readOnly
+                                tabIndex={-1}
+                                placeholder="- ADVANCE"
+                                className="el-remark-field"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, deliveryCodeRef)
+                                }
                               />
                             </div>
                           </div>
+                        )}
 
-                          <div className="el-row-split-right">
-                            <div className="el-photo-box">
-                              {selectedImage1 ? (
-                                <img
-                                  src={selectedImage1}
-                                  alt="Employee"
-                                  className="el-photo-img"
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    objectPosition: "center",
-                                    display: "block",
-                                    borderRadius: "inherit",
-                                  }}
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                  }}
-                                  onLoad={(e) => {
-                                    e.currentTarget.style.display = "block";
-                                  }}
-                                />
-                              ) : (
-                                <span className="el-photo-placeholder">
-                                  No Image
-                                </span>
-                              )}
+                        {vis("DeliveryCode") && (
+                          <div className="el-row-code-pair">
+                            <div className="el-field-row el-code-field-cell">
+                              <span className="el-field-label-right">
+                                Delivery Code:
+                              </span>
+                              <input
+                                ref={deliveryCodeRef}
+                                value={formStore.deliveryCode || ""}
+                                readOnly
+                                tabIndex={-1}
+                                className="el-code-input"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, deliveryTextRef)
+                                }
+                              />
+                            </div>
+                            <div className="el-field-row el-remark-field-cell">
+                              <input
+                                ref={deliveryTextRef}
+                                value={formStore.deliveryText || ""}
+                                readOnly
+                                tabIndex={-1}
+                                placeholder="- DELIVERY"
+                                className="el-remark-field"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, commissionCodeRef)
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {vis("CommissionCode") && (
+                          <div className="el-row-code-pair">
+                            <div className="el-field-row el-code-field-cell">
+                              <span className="el-field-label-right">
+                                Comm Code:
+                              </span>
+                              <input
+                                ref={commissionCodeRef}
+                                value={formStore.commissionCode || ""}
+                                readOnly
+                                tabIndex={-1}
+                                className="el-code-input"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, commissionDescriptionRef)
+                                }
+                              />
+                            </div>
+                            <div className="el-field-row el-remark-field-cell">
+                              <input
+                                ref={commissionDescriptionRef}
+                                value={formStore.commissionDescription || ""}
+                                readOnly
+                                tabIndex={-1}
+                                placeholder="- COMMISSION"
+                                className="el-remark-field"
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, reference1Ref)
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {(vis("Reference1") || vis("Reference2")) && (
+                          <hr className="el-mobile-divider" />
+                        )}
+
+                        {vis("Reference1") && (
+                          <div className="el-row-split-pair">
+                            <div className="el-field-row el-half">
+                              <span className="el-field-label-right">
+                                Reference:
+                              </span>
+                              <input
+                                ref={reference1Ref}
+                                type="tel"
+                                inputMode="numeric"
+                                value={formStore.reference1 || ""}
+                                onChange={handleReferencePhoneChange("reference1")}
+                                placeholder="03XXXXXXXXX"
+                                className="el-ref-phone-field"
+                                maxLength={11}
+                                onKeyDown={(e) =>
+                                  handleReferencePhoneKeyDown(e, reference1NameRef)
+                                }
+                              />
+                            </div>
+                            <div className="el-field-row el-half">
+                              <input
+                                ref={reference1NameRef}
+                                value={formStore.reference1Name || ""}
+                                onChange={handleReferenceNameChange("reference1Name")}
+                                placeholder="Name"
+                                className="el-remark-field"
+                                maxLength={40}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, reference2Ref)
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {vis("Reference2") && (
+                          <div className="el-row-split-pair">
+                            <div className="el-field-row el-half">
+                              <span className="el-field-label-right">
+                                Reference:
+                              </span>
+                              <input
+                                ref={reference2Ref}
+                                type="tel"
+                                inputMode="numeric"
+                                value={formStore.reference2 || ""}
+                                onChange={handleReferencePhoneChange("reference2")}
+                                placeholder="03XXXXXXXXX"
+                                className="el-ref-phone-field"
+                                maxLength={11}
+                                onKeyDown={(e) =>
+                                  handleReferencePhoneKeyDown(e, reference2NameRef)
+                                }
+                              />
+                            </div>
+                            <div className="el-field-row el-half">
+                              <input
+                                ref={reference2NameRef}
+                                value={formStore.reference2Name || ""}
+                                onChange={handleReferenceNameChange("reference2Name")}
+                                placeholder="Name"
+                                className="el-remark-field"
+                                maxLength={40}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, documentNameRef)
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {vis("Document") && (
+                          <div className="el-doc-row">
+                            <span className="el-field-label-right el-doc-label">
+                              Document:
+                            </span>
+                            <div className="el-doc-input-cell">
+                              <input
+                                ref={documentNameRef}
+                                value={formStore.documentName || ""}
+                                readOnly
+                                tabIndex={-1}
+                                placeholder="Click to upload Document"
+                                className="el-doc-input"
+                                maxLength={60}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, remarksRef)
+                                }
+                              />
                             </div>
                             <input
-                              ref={photoInputRef}
+                              ref={documentInputRef}
                               type="file"
-                              accept="image/*"
+                              accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg"
                               style={{ display: "none" }}
-                              onChange={handlePhotoFileChange}
+                              onChange={handleDocumentFileChange}
                             />
                             <button
                               type="button"
-                              className="el-upload-btn"
-                              onClick={handlePhotoButtonClick}
+                              className="el-doc-btn el-doc-upload"
+                              onClick={handleDocumentUploadClick}
                             >
                               ⬆ Upload
                             </button>
+                            <button
+                              type="button"
+                              className="el-doc-btn el-doc-download"
+                              onClick={handleDocumentDownload}
+                            >
+                              ⬇ Download
+                            </button>
                           </div>
-                        </div>
+                        )}
 
-                        <hr className="el-mobile-divider" />
-
-                        <div className="el-row-split-pair el-row-dob-join">
-                          <div className="el-field-row el-half">
+                        {vis("Remarks") && (
+                          <div className="el-field-row el-remarks-row">
                             <span className="el-field-label-right">
-                              DOB Date:
+                              Remarks:
                             </span>
-                            <input
-                              ref={dobDateRef}
-                              type="date"
-                              value={formStore.dobDate || ""}
-                              onChange={set("dobDate")}
-                              className="el-date-inline"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, joinDateRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Join Date:
-                            </span>
-                            <input
-                              ref={joinDateRef}
-                              type="date"
-                              value={formStore.joinDate || ""}
-                              onChange={set("joinDate")}
-                              className="el-date-inline"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, leaveDateRef)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="el-row-split-pair el-row-leave">
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Leave Date:
-                            </span>
-                            <input
-                              ref={leaveDateRef}
-                              type="date"
-                              value={formStore.leaveDate || ""}
-                              onChange={set("leaveDate")}
-                              className="el-date-inline"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, leaveRemarksRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-half">
-                            <input
-                              ref={leaveRemarksRef}
-                              value={formStore.leaveRemarks || ""}
-                              onChange={set("leaveRemarks")}
-                              placeholder="Leave Remarks"
-                              className="el-remark-field"
-                              maxLength={40}
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, creditCommRef)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <hr className="el-mobile-divider" />
-
-                        <div className="el-row-split-pair">
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Credit Comm:
-                            </span>
-                            <input
-                              ref={creditCommRef}
-                              value={formStore.creditComm || ""}
-                              onChange={set("creditComm")}
-                              placeholder="0.00"
-                              className="el-num-field"
-                              maxLength={20}
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, cashCommRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Cash Comm:
-                            </span>
-                            <input
-                              ref={cashCommRef}
-                              value={formStore.cashComm || ""}
-                              onChange={set("cashComm")}
-                              placeholder="0.00"
-                              className="el-num-field"
-                              maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, insCommRef)}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="el-row-split-pair">
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Ins Comm:
-                            </span>
-                            <input
-                              ref={insCommRef}
-                              value={formStore.insComm || ""}
-                              onChange={set("insComm")}
-                              placeholder="0.00"
-                              className="el-num-field"
-                              maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, salaryRef)}
-                            />
-                          </div>
-                          <div className="el-field-row el-half" />
-                        </div>
-
-                        <div className="el-row-split-pair">
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Salary:
-                            </span>
-                            <input
-                              ref={salaryRef}
-                              value={formStore.salary || ""}
-                              onChange={set("salary")}
-                              placeholder="Salary"
-                              className="el-num-field"
-                              maxLength={20}
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, overTimeRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Over Time:
-                            </span>
-                            <input
-                              ref={overTimeRef}
-                              value={formStore.overTime || ""}
-                              onChange={set("overTime")}
-                              placeholder="Over Time"
-                              className="el-num-field"
-                              maxLength={20}
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, advanceCodeRef)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="el-row-code-pair">
-                          <div className="el-field-row el-code-field-cell">
-                            <span className="el-field-label-right">
-                              Advance Code:
-                            </span>
-                            <input
-                              ref={advanceCodeRef}
-                              value={formStore.advanceCode || ""}
-                              readOnly
-                              tabIndex={-1}
-                              className="el-code-input"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, advanceTextRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-remark-field-cell">
-                            <input
-                              ref={advanceTextRef}
-                              value={formStore.advanceText || ""}
-                              readOnly
-                              tabIndex={-1}
-                              placeholder="- ADVANCE"
-                              className="el-remark-field"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, deliveryCodeRef)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="el-row-code-pair">
-                          <div className="el-field-row el-code-field-cell">
-                            <span className="el-field-label-right">
-                              Delivery Code:
-                            </span>
-                            <input
-                              ref={deliveryCodeRef}
-                              value={formStore.deliveryCode || ""}
-                              readOnly
-                              tabIndex={-1}
-                              className="el-code-input"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, deliveryTextRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-remark-field-cell">
-                            <input
-                              ref={deliveryTextRef}
-                              value={formStore.deliveryText || ""}
-                              readOnly
-                              tabIndex={-1}
-                              placeholder="- DELIVERY"
-                              className="el-remark-field"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, commissionCodeRef)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="el-row-code-pair">
-                          <div className="el-field-row el-code-field-cell">
-                            <span className="el-field-label-right">
-                              Comm Code:
-                            </span>
-                            <input
-                              ref={commissionCodeRef}
-                              value={formStore.commissionCode || ""}
-                              readOnly
-                              tabIndex={-1}
-                              className="el-code-input"
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, reference1Ref)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-remark-field-cell">
-                            <input
-                              value={formStore.commissionDescription || ""}
-                              readOnly
-                              tabIndex={-1}
-                              placeholder="- COMMISSION"
-                              className="el-remark-field"
-                            />
-                          </div>
-                        </div>
-
-                        <hr className="el-mobile-divider" />
-
-                        <div className="el-row-split-pair">
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Reference:
-                            </span>
-                            <input
-                              ref={reference1Ref}
-                              type="tel"
-                              inputMode="numeric"
-                              value={formStore.reference1 || ""}
-                              onChange={handleReferencePhoneChange("reference1")}
-                              placeholder="03XXXXXXXXX"
-                              className="el-ref-phone-field"
-                              maxLength={11}
-                              onKeyDown={(e) =>
-                                handleReferencePhoneKeyDown(e, reference1NameRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-half">
-                            <input
-                              ref={reference1NameRef}
-                              value={formStore.reference1Name || ""}
-                              onChange={handleReferenceNameChange("reference1Name")}
-                              placeholder="Name"
-                              className="el-remark-field"
-                              maxLength={40}
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, reference2Ref)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="el-row-split-pair">
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">
-                              Reference:
-                            </span>
-                            <input
-                              ref={reference2Ref}
-                              type="tel"
-                              inputMode="numeric"
-                              value={formStore.reference2 || ""}
-                              onChange={handleReferencePhoneChange("reference2")}
-                              placeholder="03XXXXXXXXX"
-                              className="el-ref-phone-field"
-                              maxLength={11}
-                              onKeyDown={(e) =>
-                                handleReferencePhoneKeyDown(e, reference2NameRef)
-                              }
-                            />
-                          </div>
-                          <div className="el-field-row el-half">
-                            <input
-                              ref={reference2NameRef}
-                              value={formStore.reference2Name || ""}
-                              onChange={handleReferenceNameChange("reference2Name")}
-                              placeholder="Name"
-                              className="el-remark-field"
-                              maxLength={40}
-                              onKeyDown={(e) =>
-                                handleKeyDown(e, documentNameRef)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="el-doc-row">
-                          <span className="el-field-label-right el-doc-label">
-                            Document:
-                          </span>
-                         <div className="el-doc-input-cell">
-  <input
-    ref={documentNameRef}
-    value={formStore.documentName || ""}
-    readOnly
-    tabIndex={-1}
-    placeholder="Click to upload Document"
-    className="el-doc-input"
-    maxLength={60}
-    onKeyDown={(e) =>
-      handleKeyDown(e, remarksRef)
-    }
-  />
-</div>
-                          <input
-                            ref={documentInputRef}
-                            type="file"
-                            accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg"
-                            style={{ display: "none" }}
-                            onChange={handleDocumentFileChange}
-                          />
-                          <button
-                            type="button"
-                            className="el-doc-btn el-doc-upload"
-                            onClick={handleDocumentUploadClick}
-                          >
-                            ⬆ Upload
-                          </button>
-                          <button
-                            type="button"
-                            className="el-doc-btn el-doc-download"
-                            onClick={handleDocumentDownload}
-                          >
-                            ⬇ Download
-                          </button>
-                        </div>
-
-                        <div className="el-field-row el-remarks-row">
-                          <span className="el-field-label-right">
-                            Remarks:
-                          </span>
-                          <textarea
-                            ref={remarksRef}
-                            value={formStore.remarks || ""}
-                            onChange={set("remarks")}
-                            placeholder="Remarks"
-                            className="el-remarks-textarea"
-                            maxLength={255}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault();
-                                if (saveButtonRef.current) {
-                                  saveButtonRef.current.focus();
+                            <textarea
+                              ref={remarksRef}
+                              value={formStore.remarks || ""}
+                              onChange={set("remarks")}
+                              placeholder="Remarks"
+                              className="el-remarks-textarea"
+                              maxLength={255}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault();
+                                  if (saveButtonRef.current) {
+                                    saveButtonRef.current.focus();
+                                  }
                                 }
-                              }
-                            }}
-                          />
-                        </div>
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </section>
                   </div>
