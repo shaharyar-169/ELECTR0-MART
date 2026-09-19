@@ -94,6 +94,7 @@ export default function EmployeeMaintenance() {
   const [selectedImage1, setSelectedImage1] = useState("");
   const [selectedImage2, setSelectedImage2] = useState("");
   const [photoFileName, setPhotoFileName] = useState("");
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const [code, setCode] = useState("");
   const [maxCode, setMaxCode] = useState("");
@@ -105,22 +106,13 @@ export default function EmployeeMaintenance() {
   const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
   const [isExistingEmployee, setIsExistingEmployee] = useState(false);
 
-  // Dynamic organisation & location codes — derived from the loaded
-  // organisation data and the location number. Fall back to safe defaults
-  // so API calls never fire with an empty code.
+  const [orgCode, setOrgCode] = useState("DEMOELEC");
+  const [locCode, setLocCode] = useState("001");
 
-  const [orgCode, setOrgCode] = useState(organisation);
-  const [locCode, setLocCode] = useState( locationnumber || getLocationNumber);
-
-  //  const [orgCode, setOrgCode] = useState("DEMOELEC");
-//   const [locCode, setLocCode] = useState( "001");
-
-
-
-  // SysControl — determines which fields are visible
   const [sysControl, setSysControl] = useState(null);
 
   const codeInputRef = useRef(null);
+  const wasFetchingCodeRef = useRef(false);
 
   const fetchCallIdRef = useRef(0);
   const isSavingRef = useRef(false);
@@ -178,22 +170,21 @@ export default function EmployeeMaintenance() {
   const documentInputRef = useRef(null);
 
   const STATUS_OPTIONS = ["Active", "Non-Active"];
-const API_BASE = apiLinks;
-const IMAGE_SERVER_BASE = "https://crystalsolutions.pk/DI";
+  const API_BASE = apiLinks;
+  const IMAGE_SERVER_BASE = "https://crystalsolutions.pk/DI";
 
-function buildImageBaseForOrg(orgCode) {
-  return `${IMAGE_SERVER_BASE}/${String(orgCode || "DEMOELEC").trim()}/`;
-}
+  function buildImageBaseForOrg(orgCode) {
+    return `${IMAGE_SERVER_BASE}/${String(orgCode || "DEMOELEC").trim()}/`;
+  }
 
-function Field({ label, children, className = "" }) {
-  return (
-    <div className={`el-field ${className}`}>
-      <span className="el-field-label">{label}</span>
-      {children}
-    </div>
-  );
-}
-
+  function Field({ label, children, className = "" }) {
+    return (
+      <div className={`el-field ${className}`}>
+        <span className="el-field-label">{label}</span>
+        {children}
+      </div>
+    );
+  }
 
   // Ordered focus chain
   const FOCUS_CHAIN = [
@@ -242,6 +233,40 @@ function Field({ label, children, className = "" }) {
   // ============================================================
   // Helpers
   // ============================================================
+
+  const formatWithCommas = (value) => {
+    const raw = String(value ?? "").trim();
+    if (raw === "") return "";
+
+    const cleaned = raw.replace(/[^0-9.]/g, "");
+
+    const firstDot = cleaned.indexOf(".");
+    let intPart;
+    let decPart = "";
+
+    if (firstDot === -1) {
+      intPart = cleaned;
+    } else {
+      intPart = cleaned.slice(0, firstDot);
+      decPart = cleaned.slice(firstDot + 1).replace(/\./g, "");
+    }
+
+    const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    return decPart !== "" ? `${grouped}.${decPart}` : grouped;
+  };
+
+  const stripCommas = (value) => {
+    const raw = String(value ?? "").trim();
+    if (raw === "") return "";
+    return raw.replace(/,/g, "");
+  };
+
+  const handleMoneyChange = (key) => (e) => {
+    const formatted = formatWithCommas(e.target.value);
+    setFormStore((prev) => ({ ...prev, [key]: formatted }));
+  };
+
   const cleanAmount = (value) => {
     if (value === null || value === undefined || value === "") return "";
     const num = String(value).replace(/,/g, "").trim();
@@ -384,9 +409,6 @@ function Field({ label, children, className = "" }) {
     if (documentInputRef.current) documentInputRef.current.value = "";
   };
 
-  // ---------------------------------------------------------------
-  // Load organisation and derive orgCode / locCode from it.
-  // ---------------------------------------------------------------
   useEffect(() => {
     const orgData = getOrganisationData();
     setOrganisation(orgData);
@@ -404,9 +426,6 @@ function Field({ label, children, className = "" }) {
       }
     }
 
-    // Derive location code. getLocationNumber is a function that
-    // returns the current location; locationnumber is the pre-fetched
-    // value. Prefer the function, fall back to the cached value.
     let derivedLoc = "";
     if (typeof getLocationNumber === "function") {
       try {
@@ -423,9 +442,6 @@ function Field({ label, children, className = "" }) {
     }
   }, []);
 
-  // ---------------------------------------------------------------
-  // Fetch SysControl once orgCode is known
-  // ---------------------------------------------------------------
   useEffect(() => {
     if (!organisation || !orgCode) return;
 
@@ -467,9 +483,6 @@ function Field({ label, children, className = "" }) {
       });
   }, [organisation, orgCode, apiLinks]);
 
-  // ---------------------------------------------------------------
-  // Fetch the next Employee Code
-  // ---------------------------------------------------------------
   useEffect(() => {
     if (!organisation || !orgCode || !locCode) return;
 
@@ -599,6 +612,22 @@ function Field({ label, children, className = "" }) {
       return () => clearTimeout(timer);
     }
   }, [code, isInitialLoad]);
+
+  // After a successful save, resetForm() clears code and then fires
+  // NewEmployee.php to fetch the NEXT code. When that new code arrives
+  // (isFetchingNextCode flips back to false), focus the Employee Code
+  // input and select the value so the user can immediately type.
+  useEffect(() => {
+    if (isFetchingNextCode) {
+      wasFetchingCodeRef.current = true;
+      return;
+    }
+    if (wasFetchingCodeRef.current && !isFetchingNextCode && code) {
+      wasFetchingCodeRef.current = false;
+      focusEmployeeCode();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFetchingNextCode, code]);
 
   const showToast = (message, type = "success") => {
     console.log("Toast:", message);
@@ -874,22 +903,26 @@ function Field({ label, children, className = "" }) {
             return raw ? toInputDate(raw) : prev.expiry;
           })(),
 
-          salary:
-            pickField(data, ["tempsal", "empsal", "salary"]) ?? prev.salary,
-          overTime:
+          salary: formatWithCommas(
+            pickField(data, ["tempsal", "empsal", "salary"]) ?? prev.salary
+          ),
+          overTime: formatWithCommas(
             pickField(data, ["tovrtim", "ovrtim", "overtime", "overtim"]) ??
-            prev.overTime,
-          cashComm:
+              prev.overTime
+          ),
+          cashComm: formatWithCommas(
             pickField(data, ["tcshcom", "cshcom", "cashcomm", "cashcommission"]) ??
-            prev.cashComm,
-          creditComm:
+              prev.cashComm
+          ),
+          creditComm: formatWithCommas(
             pickField(data, [
               "tcrtcom",
               "crtcom",
               "creditcomm",
               "creditcommission",
-            ]) ?? prev.creditComm,
-          insComm: data.tinscom ?? prev.insComm,
+            ]) ?? prev.creditComm
+          ),
+          insComm: formatWithCommas(data.tinscom ?? prev.insComm),
 
           commissionCode: txt(data.tcomcod) || prev.commissionCode,
           commissionDescription:
@@ -1138,8 +1171,6 @@ function Field({ label, children, className = "" }) {
     }, 100);
   };
 
-  // Find and focus the next visible field, given a list of candidate refs
-  // (in priority order).
   const focusFirstVisible = (refs) => {
     for (const ref of refs) {
       const el = ref?.current;
@@ -1160,10 +1191,8 @@ function Field({ label, children, className = "" }) {
     e.preventDefault();
     e.stopPropagation();
 
-    // 1) Try the explicitly-passed next ref first.
     if (nextRef && focusFirstVisible([nextRef])) return;
 
-    // 2) Fallback: walk the FOCUS_CHAIN from the currently focused element.
     const active = document.activeElement;
     const currentIdx = FOCUS_CHAIN.findIndex((r) => r.current === active);
     if (currentIdx === -1) return;
@@ -1179,11 +1208,46 @@ function Field({ label, children, className = "" }) {
     }
   };
 
-  const handleExpiryEnter = (e) => {
+  // Focus Employee Code input and select its value.
+  const focusEmployeeCode = () => {
+    if (codeInputRef.current) {
+      const input = codeInputRef.current.querySelector("input");
+      if (input) {
+        input.focus();
+        input.setSelectionRange(0, input.value.length);
+      }
+    }
+  };
+
+  // Date change handler — keeps the year to 4 digits only.
+  const handleDateChange = (key) => (e) => {
+    const value = String(e.target.value || "");
+
+    if (!value) {
+      setFormStore((prev) => ({ ...prev, [key]: "" }));
+      return;
+    }
+
+    const match = value.match(/^(\d{4,})-(\d{2})-(\d{2})$/);
+    if (match) {
+      const [, year, month, day] = match;
+      const trimmedYear = year.slice(0, 4);
+      setFormStore((prev) => ({
+        ...prev,
+        [key]: `${trimmedYear}-${month}-${day}`,
+      }));
+      return;
+    }
+
+    setFormStore((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // Date keydown — only handles Enter to move focus.
+  const handleDateKeyDown = (e, nextRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
-      handleKeyDown(e);
+      handleKeyDown(e, nextRef);
     }
   };
 
@@ -1227,7 +1291,7 @@ function Field({ label, children, className = "" }) {
   };
 
   const amountForApi = (value) => {
-    const parsed = cleanAmount(value);
+    const parsed = cleanAmount(stripCommas(value));
     return parsed === "" ? "0" : String(parsed);
   };
 
@@ -1256,8 +1320,6 @@ function Field({ label, children, className = "" }) {
     FMob001: strForApi(formStore.reference1),
     FMob002: strForApi(formStore.reference2),
 
-    // Email field binds to formStore.phone — emailAddress is only a
-    // fallback from the loaded list, so phone takes priority.
     FEmlAdd: strForApi(formStore.phone) || strForApi(formStore.emailAddress),
 
     FEmpSal: amountForApi(formStore.salary),
@@ -1608,7 +1670,6 @@ function Field({ label, children, className = "" }) {
                               </>
                             )}
 
-                            {/* CNIC row — also hosts Email when CNIC is hidden */}
                             {(vis("CNIC") || vis("CNICExpiry") || vis("Email")) && (
                               <div className="el-field-row el-cnic-row">
                                 {vis("CNIC") && (
@@ -1656,16 +1717,15 @@ function Field({ label, children, className = "" }) {
                                       ref={expiryRef}
                                       type="date"
                                       value={formStore.expiry || ""}
-                                      onChange={set("expiry")}
+                                      onChange={handleDateChange("expiry")}
                                       className="el-date-inline"
-                                      onKeyDown={handleExpiryEnter}
+                                      onKeyDown={(e) => handleDateKeyDown(e)}
                                     />
                                   </>
                                 )}
                               </div>
                             )}
 
-                            {/* Email's own row — only when CNIC is visible */}
                             {vis("Email") && vis("CNIC") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">
@@ -1722,7 +1782,12 @@ function Field({ label, children, className = "" }) {
                                   justifyContent: "center",
                                   overflow: "hidden",
                                   backgroundColor: "#f5f5f5",
+                                  cursor: selectedImage1 ? "pointer" : "default",
                                 }}
+                                onClick={() => {
+                                  if (selectedImage1) setIsImageModalOpen(true);
+                                }}
+                                title={selectedImage1 ? "Click to view full size" : ""}
                               >
                                 {selectedImage1 ? (
                                   <img
@@ -1781,10 +1846,10 @@ function Field({ label, children, className = "" }) {
                                   ref={dobDateRef}
                                   type="date"
                                   value={formStore.dobDate || ""}
-                                  onChange={set("dobDate")}
+                                  onChange={handleDateChange("dobDate")}
                                   className="el-date-inline"
                                   onKeyDown={(e) =>
-                                    handleKeyDown(e, joinDateRef)
+                                    handleDateKeyDown(e, joinDateRef)
                                   }
                                 />
                               </div>
@@ -1798,10 +1863,10 @@ function Field({ label, children, className = "" }) {
                                   ref={joinDateRef}
                                   type="date"
                                   value={formStore.joinDate || ""}
-                                  onChange={set("joinDate")}
+                                  onChange={handleDateChange("joinDate")}
                                   className="el-date-inline"
                                   onKeyDown={(e) =>
-                                    handleKeyDown(e, leaveDateRef)
+                                    handleDateKeyDown(e, leaveDateRef)
                                   }
                                 />
                               </div>
@@ -1820,10 +1885,10 @@ function Field({ label, children, className = "" }) {
                                   ref={leaveDateRef}
                                   type="date"
                                   value={formStore.leaveDate || ""}
-                                  onChange={set("leaveDate")}
+                                  onChange={handleDateChange("leaveDate")}
                                   className="el-date-inline"
                                   onKeyDown={(e) =>
-                                    handleKeyDown(e, leaveRemarksRef)
+                                    handleDateKeyDown(e, leaveRemarksRef)
                                   }
                                 />
                               </div>
@@ -1858,7 +1923,7 @@ function Field({ label, children, className = "" }) {
                                 <input
                                   ref={creditCommRef}
                                   value={formStore.creditComm || ""}
-                                  onChange={set("creditComm")}
+                                  onChange={handleMoneyChange("creditComm")}
                                   placeholder="0.00"
                                   className="el-num-field"
                                   maxLength={20}
@@ -1876,7 +1941,7 @@ function Field({ label, children, className = "" }) {
                                 <input
                                   ref={cashCommRef}
                                   value={formStore.cashComm || ""}
-                                  onChange={set("cashComm")}
+                                  onChange={handleMoneyChange("cashComm")}
                                   placeholder="0.00"
                                   className="el-num-field"
                                   maxLength={20}
@@ -1896,7 +1961,7 @@ function Field({ label, children, className = "" }) {
                               <input
                                 ref={insCommRef}
                                 value={formStore.insComm || ""}
-                                onChange={set("insComm")}
+                                onChange={handleMoneyChange("insComm")}
                                 placeholder="0.00"
                                 className="el-num-field"
                                 maxLength={20}
@@ -1917,7 +1982,7 @@ function Field({ label, children, className = "" }) {
                                 <input
                                   ref={salaryRef}
                                   value={formStore.salary || ""}
-                                  onChange={set("salary")}
+                                  onChange={handleMoneyChange("salary")}
                                   placeholder="Salary"
                                   className="el-num-field"
                                   maxLength={20}
@@ -1935,7 +2000,7 @@ function Field({ label, children, className = "" }) {
                                 <input
                                   ref={overTimeRef}
                                   value={formStore.overTime || ""}
-                                  onChange={set("overTime")}
+                                  onChange={handleMoneyChange("overTime")}
                                   placeholder="Over Time"
                                   className="el-num-field"
                                   maxLength={20}
@@ -2220,6 +2285,66 @@ function Field({ label, children, className = "" }) {
         codeKey="Code"
         descriptionKey="Employee"
       />
+
+      {/* Fullscreen image preview modal */}
+      {isImageModalOpen && selectedImage1 && (
+        <div
+          onClick={() => setIsImageModalOpen(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            zIndex: 99999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "zoom-out",
+          }}
+        >
+          <img
+            src={selectedImage1}
+            alt="Employee preview"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "92vw",
+              maxHeight: "92vh",
+              objectFit: "contain",
+              borderRadius: "6px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+              backgroundColor: "#fff",
+              cursor: "default",
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setIsImageModalOpen(false)}
+            style={{
+              position: "absolute",
+              top: "16px",
+              right: "20px",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              border: "none",
+              background: "rgba(255,255,255,0.15)",
+              color: "#fff",
+              fontSize: "22px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1,
+            }}
+            aria-label="Close preview"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 }
