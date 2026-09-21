@@ -106,8 +106,11 @@ export default function EmployeeMaintenance() {
   const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
   const [isExistingEmployee, setIsExistingEmployee] = useState(false);
 
-  const [orgCode, setOrgCode] = useState("DEMOELEC");
-  const [locCode, setLocCode] = useState("001");
+  // const [orgCode, setOrgCode] = useState("DEMOELEC");
+  // const [locCode, setLocCode] = useState("001");
+
+  const [orgCode, setOrgCode] = useState(organisation);
+  const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
 
   const [sysControl, setSysControl] = useState(null);
 
@@ -262,10 +265,48 @@ export default function EmployeeMaintenance() {
     return raw.replace(/,/g, "");
   };
 
-  const handleMoneyChange = (key) => (e) => {
-    const formatted = formatWithCommas(e.target.value);
-    setFormStore((prev) => ({ ...prev, [key]: formatted }));
-  };
+ const handleMoneyChange = (key) => (e) => {
+  const input = e.target;
+  const rawValue = String(input.value ?? "");
+  const selectionStart = input.selectionStart ?? rawValue.length;
+
+  // Count how many digits (0-9) appear BEFORE the cursor in the raw
+  // (user-typed) value. This is the number of digits the caret should
+  // sit after once we re-format.
+  const digitsBeforeCursor = rawValue
+    .slice(0, selectionStart)
+    .replace(/\D/g, "").length;
+
+  const formatted = formatWithCommas(rawValue);
+
+  setFormStore((prev) => ({ ...prev, [key]: formatted }));
+
+  // After React re-renders the input with the formatted value, walk
+  // through the formatted string and place the caret right after the
+  // same number of digits that were before the cursor in the raw input.
+  requestAnimationFrame(() => {
+    if (!input) return;
+    let digitCount = 0;
+    let newCaret = formatted.length;
+    for (let i = 0; i < formatted.length; i++) {
+      if (/[0-9]/.test(formatted[i])) {
+        digitCount++;
+        if (digitCount === digitsBeforeCursor) {
+          newCaret = i + 1;
+          break;
+        }
+      }
+    }
+    // If there were no digits before the cursor, keep caret at start.
+    if (digitsBeforeCursor === 0) newCaret = 0;
+
+    try {
+      input.setSelectionRange(newCaret, newCaret);
+    } catch (err) {
+      // Some browsers throw on range ops during animation frames.
+    }
+  });
+};
 
   const cleanAmount = (value) => {
     if (value === null || value === undefined || value === "") return "";
@@ -961,9 +1002,34 @@ export default function EmployeeMaintenance() {
           documentName: txt(data.tempdoc) || prev.documentName,
         }));
 
-        if (data.tempcod) {
-          setCode(String(data.tempcod).trim());
+        // if (data.tempcod) {
+        //   setCode(String(data.tempcod).trim());
+        //   setIsExistingEmployee(true);
+        // }
+
+                if (data.tempcod) {
+          const cleanEmpCode = String(data.tempcod).trim();
+          const cleanDescription = txt(data.tempnam);
+
+          setCode(cleanEmpCode);
           setIsExistingEmployee(true);
+
+          // Re-derive Advance / Delivery / Commission fields NOW,
+          // because the description may just have arrived in this same
+          // response and the deriveAdvanceDelivery effect that watches
+          // [code, description] may fire before this state settles —
+          // which was leaving Advance Text / Delivery Text as "- ADVANCE"
+          // / "- DELIVERY" instead of "HAMZA - ADVANCE" / "HAMZA - DELIVERY".
+          const derived = deriveAdvanceDelivery(cleanEmpCode, cleanDescription);
+          setFormStore((prev) => ({
+            ...prev,
+            advanceCode: derived.advanceCode,
+            advanceText: derived.advanceText,
+            deliveryCode: derived.deliveryCode,
+            deliveryText: derived.deliveryText,
+            commissionCode: derived.commissionCode,
+            commissionDescription: derived.commissionDescription,
+          }));
         }
 
         const picRaw = pickField(data, [
@@ -1493,7 +1559,7 @@ export default function EmployeeMaintenance() {
               <div className="el-scrollable-body">
                 <div className="el-top-bar">
                   <div
-                    className="el-field-row"
+                    className="el-field-row " 
                     onKeyDownCapture={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -1510,8 +1576,8 @@ export default function EmployeeMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right">
-                      Employee Code :
+                    <span className="el-field-label-right" style={{marginLeft:'27px'}}>
+                      Code :
                     </span>
                     <InstallationCode
                       ref={codeInputRef}
@@ -1585,7 +1651,7 @@ export default function EmployeeMaintenance() {
                             {vis("FatherName") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">
-                                  Father Name:
+                                  Father Name :
                                 </span>
                                 <input
                                   ref={contactPersonInputRef}
@@ -1603,7 +1669,7 @@ export default function EmployeeMaintenance() {
                             {vis("Designation") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">
-                                  Designation:
+                                  Designation :
                                 </span>
                                 <input
                                   ref={emailInputRef}
@@ -1621,7 +1687,7 @@ export default function EmployeeMaintenance() {
                             {vis("Department") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">
-                                  Department:
+                                  Department :
                                 </span>
                                 <input
                                   ref={address1InputRef}
@@ -1640,7 +1706,7 @@ export default function EmployeeMaintenance() {
                               <>
                                 <div className="el-field-row">
                                   <span className="el-field-label-right">
-                                    Address:
+                                    Address :
                                   </span>
                                   <input
                                     ref={address2InputRef}
@@ -1675,7 +1741,7 @@ export default function EmployeeMaintenance() {
                                 {vis("CNIC") && (
                                   <>
                                     <span className="el-field-label-right">
-                                      CNIC:
+                                      CNIC :
                                     </span>
                                     <input
                                       ref={nicInputRef}
@@ -1711,7 +1777,7 @@ export default function EmployeeMaintenance() {
                                 {vis("CNICExpiry") && (
                                   <>
                                     <span className="el-inline-label">
-                                      Expiry:
+                                      Expiry :
                                     </span>
                                     <input
                                       ref={expiryRef}
@@ -1729,7 +1795,7 @@ export default function EmployeeMaintenance() {
                             {vis("Email") && vis("CNIC") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">
-                                  Email:
+                                  Email :
                                 </span>
                                 <input
                                   ref={phoneInputRef}
@@ -1748,7 +1814,7 @@ export default function EmployeeMaintenance() {
                             {vis("Mobile") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">
-                                  Mobile:
+                                  Mobile :
                                 </span>
                                 <input
                                   ref={mobileInputRef}
@@ -1838,9 +1904,9 @@ export default function EmployeeMaintenance() {
                         {(vis("DOB") || vis("JoinDate")) && (
                           <div className="el-row-split-pair el-row-dob-join">
                             {vis("DOB") && (
-                              <div className="el-field-row el-half">
+                              <div className="el-field-row el-half"  style={{marginLeft:'10px'}}>
                                 <span className="el-field-label-right">
-                                  DOB Date:
+                                  DOB Date :
                                 </span>
                                 <input
                                   ref={dobDateRef}
@@ -1855,9 +1921,9 @@ export default function EmployeeMaintenance() {
                               </div>
                             )}
                             {vis("JoinDate") && (
-                              <div className="el-field-row el-half">
+                              <div className="el-field-row el-half" >
                                 <span className="el-field-label-right">
-                                  Join Date:
+                                  Join Date :
                                 </span>
                                 <input
                                   ref={joinDateRef}
@@ -1877,9 +1943,9 @@ export default function EmployeeMaintenance() {
                         {(vis("LeaveDate") || vis("LeaveRemarks")) && (
                           <div className="el-row-split-pair el-row-leave">
                             {vis("LeaveDate") && (
-                              <div className="el-field-row el-half">
+                              <div className="el-field-row el-half" style={{marginLeft:"10px"}}>
                                 <span className="el-field-label-right">
-                                  Leave Date:
+                                  Leave Date :
                                 </span>
                                 <input
                                   ref={leaveDateRef}
@@ -1918,7 +1984,7 @@ export default function EmployeeMaintenance() {
                             {vis("CreditCommission") && (
                               <div className="el-field-row el-half">
                                 <span className="el-field-label-right">
-                                  Credit Comm:
+                                  Credit Comm :
                                 </span>
                                 <input
                                   ref={creditCommRef}
@@ -1936,7 +2002,7 @@ export default function EmployeeMaintenance() {
                             {vis("CashCommission") && (
                               <div className="el-field-row el-half">
                                 <span className="el-field-label-right">
-                                  Cash Comm:
+                                  Cash Comm :
                                 </span>
                                 <input
                                   ref={cashCommRef}
@@ -1977,7 +2043,7 @@ export default function EmployeeMaintenance() {
                             {vis("Salary") && (
                               <div className="el-field-row el-half">
                                 <span className="el-field-label-right">
-                                  Salary:
+                                  Salary :
                                 </span>
                                 <input
                                   ref={salaryRef}
@@ -1995,7 +2061,7 @@ export default function EmployeeMaintenance() {
                             {vis("OverTIme") && (
                               <div className="el-field-row el-half">
                                 <span className="el-field-label-right">
-                                  Over Time:
+                                  Over Time :
                                 </span>
                                 <input
                                   ref={overTimeRef}
@@ -2017,7 +2083,7 @@ export default function EmployeeMaintenance() {
                           <div className="el-row-code-pair">
                             <div className="el-field-row el-code-field-cell">
                               <span className="el-field-label-right">
-                                Advance Code:
+                                Advance Code :
                               </span>
                               <input
                                 ref={advanceCodeRef}
@@ -2050,7 +2116,7 @@ export default function EmployeeMaintenance() {
                           <div className="el-row-code-pair">
                             <div className="el-field-row el-code-field-cell">
                               <span className="el-field-label-right">
-                                Delivery Code:
+                                Delivery Code :
                               </span>
                               <input
                                 ref={deliveryCodeRef}
@@ -2120,7 +2186,7 @@ export default function EmployeeMaintenance() {
                           <div className="el-row-split-pair">
                             <div className="el-field-row el-half">
                               <span className="el-field-label-right">
-                                Reference:
+                                Reference :
                               </span>
                               <input
                                 ref={reference1Ref}
@@ -2156,7 +2222,7 @@ export default function EmployeeMaintenance() {
                           <div className="el-row-split-pair">
                             <div className="el-field-row el-half">
                               <span className="el-field-label-right">
-                                Reference:
+                                Reference :
                               </span>
                               <input
                                 ref={reference2Ref}
@@ -2191,7 +2257,7 @@ export default function EmployeeMaintenance() {
                         {vis("Document") && (
                           <div className="el-doc-row">
                             <span className="el-field-label-right el-doc-label">
-                              Document:
+                              Document :
                             </span>
                             <div className="el-doc-input-cell">
                               <input
@@ -2234,7 +2300,7 @@ export default function EmployeeMaintenance() {
                         {vis("Remarks") && (
                           <div className="el-field-row el-remarks-row">
                             <span className="el-field-label-right">
-                              Remarks:
+                              Remarks :
                             </span>
                             <textarea
                               ref={remarksRef}

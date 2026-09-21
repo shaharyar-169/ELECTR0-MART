@@ -624,8 +624,8 @@ justify-content: flex-end !important;
 
 .el-field-row input.cnic-field {
   flex: 0 0 auto;
-  width: 180px !important;
-  max-width: 180px !important;
+  width: 175px !important;
+  max-width: 175px !important;
 }
 
 .el-field-row input.email-field,
@@ -661,6 +661,7 @@ hr.el-mobile-divider {
   display: flex;
   align-items: center;
   gap: 8px;
+ 
 }
 
 .el-row-split-pair .el-half .el-field-label-right {
@@ -753,6 +754,7 @@ hr.el-mobile-divider {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: -8px;
 }
 
 .el-code-field-cell .el-field-label-right {
