@@ -261,6 +261,7 @@ import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/
 /////////////////////////////// AMERICAN TRASECTION FROMA /////////////////////////////
 import InstallarMaintenance from "./Component/FORMS/InstallarMaintenance.jsx";
 import EmployeeMaintenance from "./Component/FORMS/EmployeeMaintenance/Employeemaintenance.jsx";
+import CustomerMaintenance from "./Component/FORMS/CustomerMaintenance/CustomerMaintenance.jsx";
 
 function App() {
   const queryClient = new QueryClient();
@@ -545,6 +546,7 @@ function App() {
    {/* Rountes for Forms */}
                 <Route exact path="/InstallationSheet" element={<InstallarMaintenance />} />
                 <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenance />} />
+                <Route exact path="/CustomerMaintenance" element={<CustomerMaintenance />} />
 
 
 
