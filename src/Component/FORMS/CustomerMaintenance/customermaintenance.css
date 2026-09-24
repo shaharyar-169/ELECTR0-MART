@@ -733,7 +733,8 @@ hr.el-mobile-divider {
 }
 
 .el-row-split-pair .el-half {
-  flex: 1 1 50%;
+   flex: 0 0 50%;
+  max-width: 50%;
   min-width: 0;
   display: flex;
   align-items: center;

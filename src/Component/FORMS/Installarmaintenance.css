@@ -519,6 +519,10 @@
   .el-account-code-row .el-field-label-right { min-width: 80px; }
 }
 
+/* .code-alignment{
+  margin-left: 24px !important;
+} */
+
 @media (max-width: 768px) {
   .el-row-2-fields {
     flex-direction: column;

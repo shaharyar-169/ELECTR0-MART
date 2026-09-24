@@ -349,12 +349,12 @@ export default function ItemList() {
       FCmpCod: Companyselectdata,
       FTypCod: Typeselectdata, 
       FDsgCod: Designselectdata,
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      FYerDsc: yeardescription || getyeardescription,
-      // code: "AMRELEC",
-      // FLocCod: "001",
-      // FYerDsc: "2025-2025",
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      // FYerDsc: yeardescription || getyeardescription,
+      code: "DEMOINS",
+      FLocCod: "001",
+      FYerDsc: "2025-2025",
     }).toString();
 
     axios

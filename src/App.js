@@ -262,6 +262,7 @@ import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/
 import InstallarMaintenance from "./Component/FORMS/InstallarMaintenance.jsx";
 import EmployeeMaintenance from "./Component/FORMS/EmployeeMaintenance/Employeemaintenance.jsx";
 import CustomerMaintenance from "./Component/FORMS/CustomerMaintenance/CustomerMaintenance.jsx";
+import SalesmanMaintenance from "./Component/FORMS/SalesmanMaintenance/SalesmanMaintenance.jsx";
 
 function App() {
   const queryClient = new QueryClient();
@@ -547,6 +548,7 @@ function App() {
                 <Route exact path="/InstallationSheet" element={<InstallarMaintenance />} />
                 <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenance />} />
                 <Route exact path="/CustomerMaintenance" element={<CustomerMaintenance />} />
+                <Route exact path="/AmericanSalesmanMaintenance" element={<SalesmanMaintenance />} />
 
 
 

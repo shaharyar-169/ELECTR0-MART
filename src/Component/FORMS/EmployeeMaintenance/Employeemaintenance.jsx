@@ -106,11 +106,11 @@ export default function EmployeeMaintenance() {
   const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
   const [isExistingEmployee, setIsExistingEmployee] = useState(false);
 
-  // const [orgCode, setOrgCode] = useState("DEMOELEC");
-  // const [locCode, setLocCode] = useState("001");
+  const [orgCode, setOrgCode] = useState("DEMOELEC");
+  const [locCode, setLocCode] = useState("001");
 
-  const [orgCode, setOrgCode] = useState(organisation);
-  const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
+  // const [orgCode, setOrgCode] = useState(organisation);
+  // const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
 
   const [sysControl, setSysControl] = useState(null);
 
@@ -1237,34 +1237,57 @@ export default function EmployeeMaintenance() {
     }, 100);
   };
 
-  const focusFirstVisible = (refs) => {
-    for (const ref of refs) {
-      const el = ref?.current;
-      if (!el) continue;
-      if (!el.isConnected) continue;
-      if (el.disabled) continue;
-      if (el.offsetParent === null) continue;
+ const focusFirstVisible = (refs) => {
+  for (const ref of refs) {
+    const el = ref?.current;
+    if (!el) continue;
+    if (!el.isConnected) continue;
 
-      el.focus();
-      if (el.tagName === "INPUT") el.select();
-      return true;
+    // If ref points to React component → dig into DOM
+    let target = el;
+    if (!el.tagName) {
+      if (typeof el.querySelector === "function") {
+        target = el.querySelector("input, select, textarea");
+      } else {
+        continue;
+      }
+    }
+
+    if (!target || !target.isConnected) continue;
+    if (target.disabled) continue;
+    if (target.offsetParent === null) continue;
+
+    target.focus();
+    if (target.tagName === "INPUT") {
+      try { target.select(); } catch (err) {}
+    }
+    return true;
+  }
+  return false;
+};
+
+ const handleKeyDown = (e, nextRef) => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (nextRef && focusFirstVisible([nextRef])) return;
+
+  const active = document.activeElement;
+  const currentIdx = FOCUS_CHAIN.findIndex((r) => {
+    const el = r?.current;
+    if (!el) return false;
+    if (el === active) return true;
+    if (!el.tagName && typeof el.querySelector === "function") {
+      const inner = el.querySelector("input, select, textarea");
+      return inner === active;
     }
     return false;
-  };
+  });
 
-  const handleKeyDown = (e, nextRef) => {
-    if (e.key !== "Enter") return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (nextRef && focusFirstVisible([nextRef])) return;
-
-    const active = document.activeElement;
-    const currentIdx = FOCUS_CHAIN.findIndex((r) => r.current === active);
-    if (currentIdx === -1) return;
-
-    focusFirstVisible(FOCUS_CHAIN.slice(currentIdx + 1));
-  };
+  if (currentIdx === -1) return;
+  focusFirstVisible(FOCUS_CHAIN.slice(currentIdx + 1));
+};
 
   const handleNicEnter = (e) => {
     if (e.key === "Enter") {
@@ -1576,7 +1599,7 @@ export default function EmployeeMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right" style={{marginLeft:'27px'}}>
+                    <span className="el-field-label-right  code-alignment" >
                       Code :
                     </span>
                     <InstallationCode
@@ -2149,7 +2172,7 @@ export default function EmployeeMaintenance() {
                           <div className="el-row-code-pair">
                             <div className="el-field-row el-code-field-cell">
                               <span className="el-field-label-right">
-                                Comm Code:
+                                Comm Code :
                               </span>
                               <input
                                 ref={commissionCodeRef}

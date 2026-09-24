@@ -142,19 +142,16 @@
 // export default InstallationCode;
 
 
+
+
+
+
+
+
+
 import React, { useEffect, forwardRef, useCallback } from "react";
 import axios from "axios";
 
-/**
- * InstallationCode
- * -----------------
- * Supports two code layouts:
- *
- *   • codeFormat="short"  →  "001", "098", "123"        (pads to 3 digits)
- *   • codeFormat="long"   →  "14-01-0005", "14-01-0011" (pads last segment to 4 digits)
- *
- * Default is "short" for backward-compatibility.
- */
 const InstallationCode = forwardRef(({
   organisation,
   apiLinks,
@@ -165,61 +162,49 @@ const InstallationCode = forwardRef(({
   setCode,
   onDoubleClick,
   onCodeChange,
+  onKeyDown,
   maxCode,
   onMaxCodeChange,
-  codeFormat = "short",       // "short" | "long"
+  codeFormat = "short",
+  codePrefix = "14-01",
 }, ref) => {
 
-  // ---- Format helpers ----
+  // Normalize prefix once
+  const normalizedPrefix = (() => {
+    const digits = String(codePrefix || "").replace(/\D/g, "");
+    if (!digits) return "14-01";
+    if (digits.length <= 2) return digits.padStart(2, "0");
+    const parts = digits.match(/.{1,2}/g) || [];
+    return parts.join("-");
+  })();
 
- const padCode = useCallback((val) => {
-  if (!val && val !== 0) return val;
+  // ---- Format helper ----
+  const padCode = useCallback((val) => {
+    if (!val && val !== 0) return val;
 
-  if (codeFormat === "long") {
-    const raw = String(val).trim();
+    if (codeFormat === "long") {
+      const raw = String(val).trim();
+      let counterDigits = "";
 
-    // ── 1. Already formatted like "14-01-0005" ──
-    if (raw.includes("-")) {
-      const parts = raw.split("-");
-      const last = String(parts[parts.length - 1] || "").replace(/\D/g, "");
-      parts[parts.length - 1] = last.padStart(4, "0");
-      return parts.join("-");
+      if (raw.includes("-")) {
+        const parts = raw.split("-");
+        counterDigits = String(parts[parts.length - 1] || "").replace(/\D/g, "");
+      } else {
+        const digits = raw.replace(/\D/g, "");
+        const prefixDigits = normalizedPrefix.replace(/\D/g, "");
+        const stripped = prefixDigits && digits.startsWith(prefixDigits)
+          ? digits.slice(prefixDigits.length)
+          : digits;
+        counterDigits = stripped;
+      }
+
+      counterDigits = counterDigits.slice(0, 4).padStart(4, "0");
+      return `${normalizedPrefix}-${counterDigits}`;
     }
 
-    // ── 2. Digits only, e.g. "14010005" or "14010011" ──
-    const digits = raw.replace(/\D/g, "");
-
-    if (digits.length === 0) return "";
-
-    // If ≤ 4 digits → just pad last segment
-    if (digits.length <= 4) {
-      return digits.padStart(4, "0");
-    }
-
-    // Take the last 4 digits as the counter (0005, 0011, ...)
-    const counter = digits.slice(-4).padStart(4, "0");
-
-    // Everything before the counter is the prefix (e.g. "1401")
-    const prefixDigits = digits.slice(0, digits.length - 4);
-
-    // Group prefix in 2s → "14-01"
-    // If prefix is odd length, keep the leading digit(s) as first group.
-    let groupedPrefix = "";
-    if (prefixDigits.length <= 2) {
-      groupedPrefix = prefixDigits.padStart(2, "0");
-    } else {
-      // e.g. "1401" → ["14","01"]
-      const parts = prefixDigits.match(/.{1,2}/g) || [];
-      groupedPrefix = parts.join("-");
-    }
-
-    return `${groupedPrefix}-${counter}`;
-  }
-
-  // ── Short format (legacy) ──
-  const digits = String(val).replace(/\D/g, "");
-  return digits.padStart(3, "0");
-}, [codeFormat]);
+    const digits = String(val).replace(/\D/g, "");
+    return digits.padStart(3, "0");
+  }, [codeFormat, normalizedPrefix]);
 
   // ---- Fetch next code ----
   useEffect(() => {
@@ -228,8 +213,8 @@ const InstallationCode = forwardRef(({
     const apiUrl = apiLinks + apiEndpoint;
 
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: getLocationNumber || getLocationnumber(),
+      code: "AMRELEC",
+      FLocCod: "001",
     }).toString();
 
     axios
@@ -266,53 +251,102 @@ const InstallationCode = forwardRef(({
   ]);
 
   // ---- Manual typing ----
+ const handleCodeChange = (e) => {
+  const value = e.target.value;
 
-  const handleCodeChange = (e) => {
-    const value = e.target.value;
+  if (codeFormat === "long") {
+    const prefixWithDash = `${normalizedPrefix}-`;
 
-    if (codeFormat === "long") {
-      // Allow digits and dashes only, cap at 12 chars ("14-01-0005")
-      if (/^[0-9-]*$/.test(value) && value.length <= 12) {
-        setCode(value);
-      }
+    let counterPart = "";
+
+    if (value.startsWith(prefixWithDash)) {
+      counterPart = value.slice(prefixWithDash.length);
     } else {
-      // Short — digits only, max 3
-      if (value.length <= 3) {
-        setCode(value);
+      let digits = value.replace(/\D/g, "");
+      const prefixDigits = normalizedPrefix.replace(/\D/g, "");
+      if (prefixDigits && digits.startsWith(prefixDigits)) {
+        digits = digits.slice(prefixDigits.length);
       }
+      counterPart = digits;
     }
-  };
 
+    // Digits only from the counter portion
+    let counterDigits = counterPart.replace(/\D/g, "");
+
+    // ⭐ Strip leading zeros, cap significant digits at 4
+    const significant = counterDigits.replace(/^0+/, "");
+    counterDigits = significant.slice(0, 4);
+
+    const rebuilt = counterDigits === ""
+      ? `${normalizedPrefix}-`
+      : `${normalizedPrefix}-${counterDigits.padStart(4, "0")}`;
+
+    if (rebuilt !== code) {
+      setCode(rebuilt);
+    }
+  } else {
+    const digits = value.replace(/\D/g, "");
+    if (digits.length <= 3) {
+      setCode(digits);
+    }
+  }
+};
+
+  // Blur — finalize
   const handleBlur = () => {
     if (code) {
-      setCode(padCode(code));
+      const padded = padCode(code);
+      setCode(padded);
+      if (onCodeChange && padded !== code) {
+        onCodeChange(padded);
+      }
     }
   };
 
-  // ---- Stepper (+/-) ----
+  // Enter — pad, fire onCodeChange, then forward to parent's onKeyDown
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
 
+      const padded = padCode(code);
+      setCode(padded);
+      if (onCodeChange) {
+        onCodeChange(padded);
+      }
+
+      if (onKeyDown) {
+        onKeyDown(e);
+      }
+      return;
+    }
+
+    if (onKeyDown) {
+      onKeyDown(e);
+    }
+  };
+
+  // ---- Stepper ----
   const bumpCode = (amount) => {
     if (!code) return;
 
     let newCode;
 
     if (codeFormat === "long") {
-      // Work on the last segment only
       const parts = String(code).split("-");
       const last = parseInt(parts[parts.length - 1], 10);
       if (isNaN(last)) return;
 
       let newLast = last + amount;
 
-      // Don't increment above maxCode's last segment
       if (amount > 0 && maxCode) {
         const maxParts = String(maxCode).split("-");
         const maxLast = parseInt(maxParts[maxParts.length - 1], 10);
         if (!isNaN(maxLast) && newLast > maxLast) return;
       }
 
-      parts[parts.length - 1] = String(newLast).padStart(4, "0");
-      newCode = parts.join("-");
+      const counterStr = String(newLast).padStart(4, "0");
+      newCode = `${normalizedPrefix}-${counterStr}`;
     } else {
       const numericCode = parseInt(code, 10);
       if (isNaN(numericCode)) return;
@@ -337,6 +371,7 @@ const InstallationCode = forwardRef(({
         value={code}
         onChange={handleCodeChange}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         onFocus={(e) => e.target.select()}
         onDoubleClick={onDoubleClick}
         placeholder="Code"
@@ -350,3 +385,7 @@ const InstallationCode = forwardRef(({
 });
 
 export default InstallationCode;
+
+
+
+

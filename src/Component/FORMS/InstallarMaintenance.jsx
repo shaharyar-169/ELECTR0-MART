@@ -52,7 +52,7 @@ export default function InstallarMaintenance() {
     mobile: "",
     city: "",
     area: "",
-    FAreCod: "",          // ← NEW: holds selected Area code for Save API
+    FAreCod: "",
     nic: "",
     jcName: "",
     jcNumber: "",
@@ -66,6 +66,11 @@ export default function InstallarMaintenance() {
   const [code, setCode] = useState("");
   const [maxCode, setMaxCode] = useState("");
   const [organisation, setOrganisation] = useState(null);
+
+  // ⭐ Organisation + Location codes (replaces hardcoded "AMRELEC" / "001")
+  const [orgCode, setOrgCode] = useState("DEMOELEC");
+  const [locCode, setLocCode] = useState("001");
+
   const [selectedCityCode, setSelectedCityCode] = useState("");
   console.log('CITYCODE', selectedCityCode)
   const [selectedAreaCode, setSelectedAreaCode] = useState("");
@@ -77,6 +82,10 @@ export default function InstallarMaintenance() {
   const [isSaving, setIsSaving] = useState(false);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  // ⭐ NEW: tracks whether current record is an existing installer
+  const [isExistingInstaller, setIsExistingInstaller] = useState(false);
+
   const codeInputRef = useRef(null);
 
   // Refs for all form fields for Enter key navigation
@@ -105,10 +114,30 @@ export default function InstallarMaintenance() {
   console.log("SelectedCityCode", selectedCityCode);
   console.log("SelectedAreaCode", selectedAreaCode);
 
-  // Get organisation data
+  // Get organisation data + populate orgCode / locCode
   useEffect(() => {
     const orgData = getOrganisationData();
     setOrganisation(orgData);
+
+    if (orgData) {
+      const derivedOrg =
+        orgData.code || orgData.organization || orgData.orgcode ||
+        orgData.OrgCode || orgData.FOrgCod;
+      if (derivedOrg && String(derivedOrg).trim() !== "") {
+        setOrgCode(String(derivedOrg).trim());
+      }
+    }
+
+    let derivedLoc = "";
+    if (typeof getLocationNumber === "function") {
+      try { derivedLoc = getLocationNumber(); } catch (e) {}
+    }
+    if (!derivedLoc && typeof getLocationnumber === "function") {
+      try { derivedLoc = getLocationnumber(); } catch (e) {}
+    }
+    if (derivedLoc && String(derivedLoc).trim() !== "") {
+      setLocCode(String(derivedLoc).trim());
+    }
   }, []);
 
   // Auto-focus InstallationCode on initial load
@@ -143,8 +172,8 @@ export default function InstallarMaintenance() {
 
     const apiUrl = apiLinks + "/GetActiveCity.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: getLocationNumber || getLocationnumber(),
+      code: orgCode,
+      FLocCod: locCode,
     }).toString();
 
     axios
@@ -161,7 +190,7 @@ export default function InstallarMaintenance() {
         console.error("Error fetching cities:", error);
         setCityOptions([]);
       });
-  }, [organisation, apiLinks, getLocationNumber]);
+  }, [organisation, apiLinks, getLocationNumber, orgCode, locCode]);
 
   // Fetch areas for the dropdown
   useEffect(() => {
@@ -169,8 +198,8 @@ export default function InstallarMaintenance() {
 
     const apiUrl = apiLinks + "/GetActiveArea.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: getLocationNumber || getLocationnumber(),
+      code: orgCode,
+      FLocCod: locCode,
     }).toString();
 
     axios
@@ -186,7 +215,7 @@ export default function InstallarMaintenance() {
         console.error("Error fetching areas:", error);
         setAreaOptions([]);
       });
-  }, [organisation, apiLinks, getLocationNumber]);
+  }, [organisation, apiLinks, getLocationNumber, orgCode, locCode]);
 
   // Show toast notification
   const showToast = (message, type = 'success') => {
@@ -236,7 +265,7 @@ export default function InstallarMaintenance() {
   };
 
   // ==========================================================
-  // Fetch installation data by Code  ---  FIXED 3 FIELDS
+  // Fetch installation data by Code
   // ==========================================================
   const fetchInstallationDataByCode = (installationCode) => {
     if (!organisation || !installationCode) {
@@ -246,7 +275,7 @@ export default function InstallarMaintenance() {
 
     const apiUrl = apiLinks + "/GetInstallar.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
+      code: orgCode,
       FIntCod: installationCode,
     }).toString();
 
@@ -278,7 +307,6 @@ export default function InstallarMaintenance() {
             }
           }
 
-          // ---------- FIXED MAPPING ----------
           setFormStore((prev) => ({
             ...prev,
             status: data.tinssts || prev.status,
@@ -301,19 +329,18 @@ export default function InstallarMaintenance() {
             FAreCod: data.tarecod || "",
           }));
 
-          // Update selected city code
           if (data.tctycod) {
             setSelectedCityCode(data.tctycod);
           }
 
-          // Update selected area code
           if (data.tarecod) {
             setSelectedAreaCode(data.tarecod);
           }
 
-          showToast("User data found", 'success');
+          // ⭐ Mark as existing + show "Found" toast
+          setIsExistingInstaller(true);
+          showToast("Installar Found", 'success');
         } else {
-          // No data found - clear form fields
           setFormStore((prev) => ({
             status: "Active",
             description: "",
@@ -338,7 +365,10 @@ export default function InstallarMaintenance() {
 
           setSelectedCityCode("");
           setSelectedAreaCode("");
-          showToast("Data not found", 'error');
+
+          // ⭐ Mark as new + show "Not Found" toast
+          setIsExistingInstaller(false);
+          showToast("Installar Not Found", 'error');
 
           console.warn("No data found for installation code:", installationCode);
         }
@@ -350,7 +380,7 @@ export default function InstallarMaintenance() {
   };
 
   // ==========================================================
-  // Fetch installation data by NIC  ---  FIXED 3 FIELDS
+  // Fetch installation data by NIC
   // ==========================================================
   const fetchInstallationDataByNIC = (nicNumber) => {
     if (!organisation || !nicNumber) {
@@ -361,11 +391,11 @@ export default function InstallarMaintenance() {
 
     const cleanNic = nicNumber.replace(/-/g, '');
     console.log("[NIC Lookup] Input NIC:", nicNumber, "| Cleaned NIC:", cleanNic);
-    console.log("[NIC Lookup] Organisation code:", organisation.code);
+    console.log("[NIC Lookup] Organisation code:", orgCode);
 
     const apiUrl = apiLinks + "/GetInstallarbyCNIC.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
+      code: orgCode,
       FNicNum: cleanNic,
     }).toString();
 
@@ -390,7 +420,6 @@ export default function InstallarMaintenance() {
             }
           }
 
-          // Find the area name from area code
           let areaName = "";
           if (data.tarecod && areaOptions.length > 0) {
             const matchedArea = areaOptions.find(
@@ -401,7 +430,6 @@ export default function InstallarMaintenance() {
             }
           }
 
-          // ---------- FIXED MAPPING ----------
           setFormStore((prev) => ({
             ...prev,
             status: data.tinssts || prev.status,
@@ -436,7 +464,9 @@ export default function InstallarMaintenance() {
             setCode(data.tintcod);
           }
 
-          showToast("User data found", 'success');
+          // ⭐ Mark as existing + show "Found" toast
+          setIsExistingInstaller(true);
+          showToast("Installar Found", 'success');
         } else {
           console.warn("[NIC Lookup] No data found. response.data:", response.data);
 
@@ -464,7 +494,10 @@ export default function InstallarMaintenance() {
 
           setSelectedCityCode("");
           setSelectedAreaCode("");
-          showToast("Data not found", 'error');
+
+          // ⭐ Mark as new + show "Not Found" toast
+          setIsExistingInstaller(false);
+          showToast("Installar Not Found", 'error');
 
           console.warn("[NIC Lookup] No data found for NIC:", nicNumber);
         }
@@ -564,6 +597,7 @@ export default function InstallarMaintenance() {
     }
   };
 
+  // ⭐ resetForm — clears flag + focuses Code
   const resetForm = () => {
     setFormStore({
       status: "Active",
@@ -589,11 +623,25 @@ export default function InstallarMaintenance() {
     setSelectedCityCode("");
     setSelectedAreaCode("");
 
+    // ⭐ Reset the "existing" flag — new form = new installer
+    setIsExistingInstaller(false);
+
+    // ⭐ Focus + select the Code field immediately
+    setTimeout(() => {
+      if (codeInputRef.current) {
+        const input = codeInputRef.current.querySelector('input');
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }
+    }, 150);
+
     if (organisation) {
       const apiUrl = apiLinks + "/NewInstallar.php";
       const formData = new URLSearchParams({
-        code: organisation.code,
-        FLocCod: getLocationNumber || getLocationnumber(),
+        code: orgCode,
+        FLocCod: locCode,
       }).toString();
 
       axios
@@ -611,6 +659,17 @@ export default function InstallarMaintenance() {
             if (newCode) {
               setCode(String(newCode));
               setMaxCode(String(newCode));
+
+              // ⭐ Re-focus + select after the new code arrives
+              setTimeout(() => {
+                if (codeInputRef.current) {
+                  const input = codeInputRef.current.querySelector('input');
+                  if (input) {
+                    input.focus();
+                    input.select();
+                  }
+                }
+              }, 100);
             }
           }
         })
@@ -668,7 +727,7 @@ export default function InstallarMaintenance() {
       const apiUrl = apiLinks + "/SaveInstallar.php";
 
       const payload = {
-        code: organisation.code,
+        code: orgCode,
         FUsrId: "sohaib" || "",
         FIntCod: code,
         FIntDsc: (formStore.description || "").trim(),
@@ -677,7 +736,7 @@ export default function InstallarMaintenance() {
         FPhnNum: (formStore.phone || "").trim(),
         FMobNum: (formStore.mobile || "").trim(),
         FCtyCod: cityCodeToSend || "",
-        FAreCod: (formStore.FAreCod || "").trim(),   // ← NEW: Area code sent to Save API
+        FAreCod: (formStore.FAreCod || "").trim(),
         FInsCod: formStore.accountCode || "",
         FInsSts: mapStatusForApi(formStore.status),
         FNicNum: (formStore.nic || "").replace(/-/g, '').trim(),
@@ -706,8 +765,28 @@ export default function InstallarMaintenance() {
 
       if (response.status === 200) {
         console.log("Save successful:", response.data);
-        showToast("Form saved successfully!", 'success');
+
+        // ⭐ Context-aware toast — updated vs new
+        showToast(
+          isExistingInstaller
+            ? "Installar Updated Successfully"
+            : "New Installar Added Successfully",
+          'success'
+        );
+
         resetForm();
+
+        // ⭐ Focus + select the Code field after save
+        setTimeout(() => {
+          if (codeInputRef.current) {
+            const input = codeInputRef.current.querySelector('input');
+            if (input) {
+              input.focus();
+              input.select();
+            }
+          }
+        }, 150);
+
         setIsCoolingDown(true);
         setTimeout(() => setIsCoolingDown(false), 5000);
       } else {
@@ -759,7 +838,7 @@ export default function InstallarMaintenance() {
               <div className="el-scrollable-body">
                 <div className="el-top-bar">
                   <div
-                    className="el-field-row"
+                    className="el-field-row "
                     onKeyDownCapture={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -771,7 +850,7 @@ export default function InstallarMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right">Code :</span>
+                    <span className="el-field-label-right code-alignment">Code :</span>
                     <InstallationCode
                       ref={codeInputRef}
                       organisation={organisation}
@@ -786,6 +865,7 @@ export default function InstallarMaintenance() {
                       onCodeChange={handleInstallerCodeChange}
                       maxCode={maxCode}
                       onMaxCodeChange={setMaxCode}
+                      codeFormat="short"
                     />
                   </div>
 
