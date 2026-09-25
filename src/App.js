@@ -259,10 +259,11 @@ import TaxSaleRegisterReport from "./Component/Reports/Daily_Jobs_Reports/Utilit
 import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/UtilitiesReport/CollectorWiseCustomerSearch.js";
 
 /////////////////////////////// AMERICAN TRASECTION FROMA /////////////////////////////
-import InstallarMaintenance from "./Component/FORMS/InstallarMaintenance.jsx";
+import InstallarMaintenance from "./Component/FORMS/InstallarMiantenance/InstallarMaintenance.jsx";
 import EmployeeMaintenance from "./Component/FORMS/EmployeeMaintenance/Employeemaintenance.jsx";
 import CustomerMaintenance from "./Component/FORMS/CustomerMaintenance/CustomerMaintenance.jsx";
 import SalesmanMaintenance from "./Component/FORMS/SalesmanMaintenance/SalesmanMaintenance.jsx";
+import TechnicianMaintenance from "./Component/FORMS/TechnicianMaintenance/TechnicianMaintenance.jsx";
 
 function App() {
   const queryClient = new QueryClient();
@@ -544,11 +545,12 @@ function App() {
 
 
 
-   {/* Rountes for Forms */}
+               {/* Rountes for Forms */}
                 <Route exact path="/InstallationSheet" element={<InstallarMaintenance />} />
                 <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenance />} />
                 <Route exact path="/CustomerMaintenance" element={<CustomerMaintenance />} />
-                <Route exact path="/AmericanSalesmanMaintenance" element={<SalesmanMaintenance />} />
+                <Route exact path="/SalesManMaintenance" element={<SalesmanMaintenance />} />
+                <Route exact path="/TechnicianMaintenance1" element={<TechnicianMaintenance />} />
 
 
 

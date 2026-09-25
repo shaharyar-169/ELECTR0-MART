@@ -166,13 +166,13 @@
 }
 
 .el-top-bar .el-field-row:first-child {
-  max-width: 160px;
-  flex: 0 0 160px;
+  max-width: 120px;
+  flex: 0 0 120px;
   margin-left: 8px;
 }
 
 .el-top-bar .el-field-row:last-child {
-  max-width: 140px;
+  max-width: 180px;
   flex: 0 0 auto;
 }
 
@@ -590,8 +590,11 @@
 
 .el-field-row input.mobile-field {
   flex: 0 0 auto;
-  width: 150px !important;
-  max-width: 150px !important;
+  width: 175px !important;
+  max-width: 175px !important;
+}
+.code-alignment{
+    margin-left: 52px !important;
 }
 
 hr.el-mobile-divider {
@@ -763,6 +766,8 @@ hr.el-mobile-divider {
 .el-row-leave .el-half .el-field-label-right {
   min-width: 85px;
 }
+
+
 
 .el-row-dob-join .el-half:last-child {
   justify-content: flex-end;
@@ -1093,7 +1098,7 @@ hr.el-mobile-divider {
   .el-top-bar .el-field-row:first-child,
   .el-top-bar .el-field-row:last-child {
     max-width: none;
-    flex: 1 1 160px;
+    flex: 1 1 180px;
   }
   .el-top-bar .el-field-row.el-field-abb {
     max-width: none;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./Employeemaintenance.css";
 import { useTheme } from "../../../ThemeContext";
+import "./Employeemaintenance.css";
 import axios from "axios";
 import {
   getUserData,
@@ -106,11 +106,11 @@ export default function EmployeeMaintenance() {
   const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
   const [isExistingEmployee, setIsExistingEmployee] = useState(false);
 
-  const [orgCode, setOrgCode] = useState("DEMOELEC");
-  const [locCode, setLocCode] = useState("001");
+  // const [orgCode, setOrgCode] = useState("DEMOELEC");
+  // const [locCode, setLocCode] = useState("001");
 
-  // const [orgCode, setOrgCode] = useState(organisation);
-  // const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
+  const [orgCode, setOrgCode] = useState(organisation);
+  const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
 
   const [sysControl, setSysControl] = useState(null);
 
@@ -1599,7 +1599,7 @@ export default function EmployeeMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right  code-alignment" >
+                    <span className="el-field-label-right " >
                       Code :
                     </span>
                     <InstallationCode
@@ -1763,7 +1763,7 @@ export default function EmployeeMaintenance() {
                               <div className="el-field-row el-cnic-row">
                                 {vis("CNIC") && (
                                   <>
-                                    <span className="el-field-label-right">
+                                    <span className="el-field-label-right  CNIC_field_setting ">
                                       CNIC :
                                     </span>
                                     <input
@@ -1927,7 +1927,7 @@ export default function EmployeeMaintenance() {
                         {(vis("DOB") || vis("JoinDate")) && (
                           <div className="el-row-split-pair el-row-dob-join">
                             {vis("DOB") && (
-                              <div className="el-field-row el-half"  style={{marginLeft:'10px'}}>
+                              <div className="el-field-row el-half" >
                                 <span className="el-field-label-right">
                                   DOB Date :
                                 </span>
@@ -1966,7 +1966,7 @@ export default function EmployeeMaintenance() {
                         {(vis("LeaveDate") || vis("LeaveRemarks")) && (
                           <div className="el-row-split-pair el-row-leave">
                             {vis("LeaveDate") && (
-                              <div className="el-field-row el-half" style={{marginLeft:"10px"}}>
+                              <div className="el-field-row el-half" >
                                 <span className="el-field-label-right">
                                   Leave Date :
                                 </span>
@@ -2045,7 +2045,7 @@ export default function EmployeeMaintenance() {
                           <div className="el-row-split-pair">
                             <div className="el-field-row el-half">
                               <span className="el-field-label-right">
-                                Ins Comm:
+                                Ins Comm :
                               </span>
                               <input
                                 ref={insCommRef}

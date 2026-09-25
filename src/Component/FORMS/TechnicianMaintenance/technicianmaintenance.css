@@ -1,5 +1,5 @@
 /* ============================================================
-   CUSTOMER MAINTENANCE — viewport-fit
+   TECHNICIAN MAINTENANCE — viewport-fit
    (design, layout, colors, fonts, positions all unchanged)
    ============================================================ */
 
@@ -165,15 +165,14 @@
   margin-bottom: 0;
 }
 
-/* ⭐ Code field — wider to fit "14-01-0011" */
 .el-top-bar .el-field-row:first-child {
-  max-width: 160px;         /* ← increased from 95px */
-  flex: 0 0 160px;          /* ← fixed width so it never shrinks */
-  margin-left: 8px;
+  max-width: 120px;
+  flex: 0 0 120px;
+  margin-left: 70px !important;
 }
 
 .el-top-bar .el-field-row:last-child {
-  max-width: 140px;
+  max-width: 180px;
   flex: 0 0 auto;
 }
 
@@ -193,7 +192,7 @@
   font-weight: 500;
   height: 28px;
   font-size: 12px;
-  width: 110px !important;
+  width: 100%;
   min-width: 0;
 }
 
@@ -231,11 +230,9 @@
   padding: 0 10px;
 }
 
-/* Man / Ref / Sts — same width */
 .el-top-bar .el-field-row.el-field-abb {
   max-width: 130px;
   flex: 0 0 auto;
-  margin-left: 50px !important;
 }
 
 .el-top-bar .el-field-row.el-field-abb input {
@@ -351,7 +348,22 @@
   font-size: 11px;
 }
 
-/* Fixed width fields */
+/* ⭐ Uniform left label column across every row in the form
+   (Comm Code row added here so its label lines up with the
+   DOB Date / Join Date / Leave Date / Max Job labels below it) */
+.el-stack .el-field-row > .el-field-label-right,
+.el-stack .el-row-split-pair .el-half > .el-field-label-right,
+.el-stack .el-row-three .el-third > .el-field-label-right,
+.el-stack .el-row-leave .el-half > .el-field-label-right,
+.el-stack .el-doc-row > .el-field-label-right,
+.el-stack .el-remarks-row > .el-field-label-right,
+.el-stack .el-row-code-pair .el-code-field-cell > .el-field-label-right {
+  min-width: 110px;
+  width: 110px;
+  flex: 0 0 110px;
+  text-align: right;
+}
+
 .fixed-width-field {
   max-width: 250px !important;
   width: 250px !important;
@@ -364,10 +376,9 @@
 }
 
 .el-field-row select {
-  max-width: 100px !important;
+  max-width: 250px;
 }
 
-/* Two-field rows */
 .el-row-2-fields {
   display: flex;
   justify-content: space-between;
@@ -581,10 +592,11 @@
   width: auto;
 }
 
+/* ⭐ CNIC width now matches Email width (250px) */
 .el-field-row input.cnic-field {
-  flex: 0 0 auto;
-  width: 175px !important;
-  max-width: 175px !important;
+  flex: 0 0 250px !important;
+  width: 250px !important;
+  max-width: 250px !important;
 }
 
 .el-field-row input.email-field {
@@ -595,11 +607,14 @@
 
 .el-field-row input.mobile-field {
   flex: 0 0 auto;
-  width: 150px !important;
-  max-width: 150px !important;
+  width: 175px !important;
+  max-width: 175px !important;
 }
 
-/* Divider */
+.code-alignment {
+  margin-left: 52px !important;
+}
+
 hr.el-mobile-divider {
   border: none;
   border-top: 2px solid #8f8f8f;
@@ -734,16 +749,12 @@ hr.el-mobile-divider {
 }
 
 .el-row-split-pair .el-half {
-   flex: 0 0 50%;
+  flex: 0 0 50%;
   max-width: 50%;
   min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.el-row-split-pair .el-half .el-field-label-right {
-  min-width: 95px;
 }
 
 .el-row-split-pair .el-half input {
@@ -765,17 +776,125 @@ hr.el-mobile-divider {
   margin-left: auto;
 }
 
-.el-row-dob-join .el-half .el-field-label-right,
-.el-row-leave .el-half .el-field-label-right {
-  min-width: 85px;
-}
-
 .el-row-dob-join .el-half:last-child {
   justify-content: flex-end;
 }
 
 .el-row-dob-join .el-half:last-child .el-field-label-right {
   margin-left: auto;
+}
+
+/* ⭐ Leave row — Leave Date fixed 50%, 10px gap, Remarks fills the rest
+   (Leave Remarks label removed — field now styled like the Comm Code adjacent field) */
+.el-row-leave {
+  gap: 10px;
+}
+
+.el-row-leave .el-half:first-child {
+  flex: 0 0 1 !important;
+  max-width: 50%;
+}
+
+.el-row-leave .el-half:last-child {
+  flex: 1 1 auto;
+  max-width: none;
+  justify-content: flex-start;
+}
+
+.el-row-leave .el-half:last-child input {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+/* ============================================================
+   THREE-COLUMN ROW — Max Job / Type / Commission
+   ⭐ FIXED widths — none of the three columns will expand or
+   shrink when a sibling is hidden or shrinks. Each column keeps
+   its exact width regardless of available space.
+   ============================================================ */
+
+.el-row-three {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-left: 8px !important;
+}
+
+.el-row-three .el-third {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.leave-date {
+  margin-left: 10px !important;
+}
+
+.leavedate {
+  margin-left: -9px !important;
+}
+
+/* ⭐ Max Job — FIXED 210px */
+.el-row-three .el-third:nth-child(1) {
+  flex: 0 0 210px;
+  width: 210px;
+  max-width: 210px;
+  margin-left: -8px;
+}
+
+/* ⭐ Type — FIXED 190px */
+.el-row-three .el-third:nth-child(2) {
+  flex: 0 0 220px;
+  width: 220px;
+  max-width: 220px;
+}
+
+/* ⭐ Commission — FIXED 220px, pinned to right edge */
+.el-row-three .el-third:nth-child(3) {
+  flex: 0 0 220px;
+  width: 220px;
+  max-width: 220px;
+  margin-left: auto;
+}
+
+.el-row-three .el-third .el-field-label-right {
+  min-width: 110px;
+  width: 110px;
+  flex: 0 0 110px;
+  text-align: right;
+  font-size: 12px;
+}
+
+.el-row-three .el-third input,
+.el-row-three .el-third select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  font-size: 12px;
+  color: var(--ink);
+  font-family: "Verdana", Geneva, Tahoma, sans-serif;
+}
+
+.el-row-three .el-third input:focus,
+.el-row-three .el-third select:focus {
+  outline: none;
+  border-color: var(--header-blue);
+  box-shadow: 0 0 0 3px rgba(31, 90, 168, 0.12);
+}
+
+.el-row-three .el-third .el-num-field {
+  text-align: right;
+  width: 100%;
+  max-width: none;
+  flex: 1 1 auto;
 }
 
 /* ============================================================
@@ -797,7 +916,6 @@ hr.el-mobile-divider {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 17px !important;
 }
 
 .witnes-field-width {
@@ -883,7 +1001,7 @@ hr.el-mobile-divider {
 }
 
 /* ============================================================
-   CODE PAIR ROWS (kept for compatibility)
+   CODE PAIR ROWS
    ============================================================ */
 
 .el-row-code-pair {
@@ -891,19 +1009,16 @@ hr.el-mobile-divider {
   align-items: center;
   gap: 8px;
   width: 100%;
+  margin-left: 8px !important;
 }
 
+/* ⭐ Removed margin-left: -8px so Comm Code label lines up with Name */
 .el-code-field-cell {
   flex: 0 0 33%;
   max-width: 33%;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: -8px;
-}
-
-.el-code-field-cell .el-field-label-right {
-  min-width: 95px;
 }
 
 .el-code-field-cell .el-code-input {
@@ -980,11 +1095,6 @@ hr.el-mobile-divider {
   align-items: center;
   gap: 8px;
   width: 100%;
-}
-
-.el-doc-row .el-doc-label {
-  min-width: 95px;
-  flex-shrink: 0;
 }
 
 .el-doc-input-cell {
@@ -1100,7 +1210,7 @@ hr.el-mobile-divider {
   .el-top-bar .el-field-row:first-child,
   .el-top-bar .el-field-row:last-child {
     max-width: none;
-    flex: 1 1 160px;
+    flex: 1 1 180px;
   }
   .el-top-bar .el-field-row.el-field-abb {
     max-width: none;
@@ -1145,11 +1255,35 @@ hr.el-mobile-divider {
   .el-row-split-pair .el-half {
     flex: 1 1 100%;
     width: 100%;
+    max-width: 100%;
   }
   .el-row-split-pair .el-half:last-child {
     justify-content: flex-start;
   }
   .el-row-split-pair .el-half:last-child .el-field-label-right {
+    margin-left: 0;
+  }
+
+  .el-row-leave {
+    gap: 4px;
+  }
+  .el-row-leave .el-half:first-child,
+  .el-row-leave .el-half:last-child {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .el-row-three {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .el-row-three .el-third,
+  .el-row-three .el-third:nth-child(1),
+  .el-row-three .el-third:nth-child(2),
+  .el-row-three .el-third:nth-child(3) {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
     margin-left: 0;
   }
 

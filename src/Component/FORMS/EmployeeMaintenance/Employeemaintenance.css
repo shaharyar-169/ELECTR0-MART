@@ -341,9 +341,9 @@
 
 /* Fixed width for specific fields - Phone No, NIC #, JC #, EP # */
 .fixed-width-field {
-  max-width: 250px !important;
-  width: 250px !important;
-  flex: 0 0 auto !important;
+  max-width: 150px !important;
+  width: 150px !important;
+  flex: 0 0 150px !important;
 }
 
 /* Area field width matches Mobile No width (right side of 2-field row) */
@@ -583,7 +583,7 @@ justify-content: flex-end !important;
   font-weight: 700;
   color: var(--ink);
   white-space: nowrap;
-  margin-left: 42px !important;
+  /* margin-left: 42px !important; */
 }
 
 .el-date-inline {
@@ -621,14 +621,13 @@ justify-content: flex-end !important;
   max-width: none;
   width: auto;
 }
-.code-alignment{
-  margin-left: 45px !important;
-}
+
 
 .el-field-row input.cnic-field {
-  flex: 0 0 210px !important;
-  width: 210px !important;
-  max-width: 210px !important;
+  flex: 0 0 162px !important;
+  width: 162px !important;
+  max-width: 162px !important;
+ 
 }
 
 .el-field-row input.email-field,

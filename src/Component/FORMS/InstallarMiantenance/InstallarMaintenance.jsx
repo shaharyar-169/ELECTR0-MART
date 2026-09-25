@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Installarmaintenance.css";
-import { useTheme } from "../../ThemeContext";
+import { useTheme } from "../../../ThemeContext";
 import axios from "axios";
 import {
   getUserData,
   getOrganisationData,
   getLocationnumber,
   getYearDescription,
-} from "../../Component/Auth";
+} from "../../Auth";
 
-import DynamicSelect from "./components/CityDropdown";
-import FormButtons from "./components/FormButton";
-import InstallationCode from "./components/InstallarCode";
-import SearchModal from "./components/SearchModel";
+import DynamicSelect from "../components/CityDropdown";
+import FormButtons from "../components/FormButton";
+import InstallationCode from "../components/InstallarCode";
+import SearchModal from "../components/SearchModel";
 
 const STATUS_OPTIONS = ["Active", "Non-Active"];
 
@@ -41,6 +41,8 @@ export default function InstallarMaintenance() {
     getfontstyle,
   } = useTheme();
 
+   const locationnumber = getLocationnumber();
+
   const [formStore, setFormStore] = useState({
     status: "Active",
     description: "",
@@ -68,8 +70,12 @@ export default function InstallarMaintenance() {
   const [organisation, setOrganisation] = useState(null);
 
   // ⭐ Organisation + Location codes (replaces hardcoded "AMRELEC" / "001")
-  const [orgCode, setOrgCode] = useState("DEMOELEC");
-  const [locCode, setLocCode] = useState("001");
+  // const [orgCode, setOrgCode] = useState("DEMOELEC");
+  // const [locCode, setLocCode] = useState("001");
+
+  const [orgCode, setOrgCode] = useState(organisation);
+  const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
+
 
   const [selectedCityCode, setSelectedCityCode] = useState("");
   console.log('CITYCODE', selectedCityCode)
@@ -850,7 +856,7 @@ export default function InstallarMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right code-alignment">Code :</span>
+                    <span className="el-field-label-right">Code :</span>
                     <InstallationCode
                       ref={codeInputRef}
                       organisation={organisation}
@@ -974,7 +980,7 @@ export default function InstallarMaintenance() {
                         </div>
 
                         <div className="el-field-row el-row-2-fields">
-                          <div className="el-field-row-inner el-field-left">
+                          <div className="el-field-row-inner el-field-left" style={{marginLeft:"37px"}}>
                             <span className="el-field-label-right">
                               Phone No :
                             </span>
@@ -1018,7 +1024,7 @@ export default function InstallarMaintenance() {
                         {/* -------- CITY + AREA on the same row -------- */}
                         <div className="el-field-row el-row-2-fields">
                           {/* CITY (left) */}
-                          <div className="el-field-row-inner el-field-left" style={{marginLeft:"25px"}}>
+                          <div className="el-field-row-inner el-field-left" style={{marginLeft:"40px"}}>
                             <span className="el-field-label-right">City :</span>
                             <div ref={citySelectRef} style={{ width: '200px', maxWidth: '200px', flex: '0 0 auto' }}>
                               <DynamicSelect
@@ -1166,7 +1172,7 @@ export default function InstallarMaintenance() {
               </div>
 
               <div className="el-account-code-section">
-                <div className="el-account-code-row">
+                <div className="el-account-code-row" style={{marginLeft:'17px'}}>
                   <span className="el-field-label-right">A/C Code :</span>
                   <input
                     ref={accountCodeInputRef}

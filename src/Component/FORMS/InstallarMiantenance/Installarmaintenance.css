@@ -164,10 +164,7 @@
 .el-top-bar .el-field-row:first-child {
   max-width: 100px;
   flex: 0 0 auto;
-
-
-  
-  margin-left: 20px; 
+   margin-left: 20px; 
   }
 
 .el-top-bar .el-field-row:last-child {
@@ -519,9 +516,9 @@
   .el-account-code-row .el-field-label-right { min-width: 80px; }
 }
 
-/* .code-alignment{
-  margin-left: 24px !important;
-} */
+.code-alignment{
+  margin-left: 50px !important;
+}
 
 @media (max-width: 768px) {
   .el-row-2-fields {
