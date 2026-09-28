@@ -2136,69 +2136,69 @@ const isMatchedRow = (item) => {
                                 </div>
                             </div>
 
-                            <div id="lastDiv" style={{ marginRight: "1px" }}>
-                                <label for="searchInput" style={{ marginRight: "5px" }}>
-                                    <span
-                                        style={{
-                                            fontSize: getdatafontsize,
-                                            fontFamily: getfontstyle,
-                                            fontWeight: "bold",
-                                        }}
-                                    >
-                                        Search :
-                                    </span>{" "}
-                                </label>
-                                <div style={{ position: "relative", display: "inline-block" }}>
-                                    <input
-                                        ref={input2Ref}
-                                        onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-                                        type="text"
-                                        id="searchsubmit"
-                                        placeholder="Item description"
-                                        value={searchQuery}
-                                        autoComplete="off"
-                                        style={{
-                                            marginRight: "20px",
-                                            width: "200px",
-                                            height: "24px",
-                                            fontSize: getdatafontsize,
-                                            fontFamily: getfontstyle,
-                                            color: fontcolor,
-                                            backgroundColor: getcolor,
-                                            border: `1px solid ${fontcolor}`,
-                                            outline: "none",
-                                            paddingLeft: "10px",
-                                            paddingRight: "25px", // space for the clear icon
-                                        }}
-                                        onFocus={(e) =>
-                                            (e.currentTarget.style.border = "2px solid red")
-                                        }
-                                        onBlur={(e) =>
-                                            (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                                        }
-                                        onChange={(e) =>
-                                            setSearchQuery((e.target.value || "").toUpperCase())
-                                        }
-                                    />
-                                    {searchQuery && (
-                                        <span
-                                            onClick={() => setSearchQuery("")}
-                                            style={{
-                                                position: "absolute",
-                                                right: "30px",
-                                                top: "50%",
-                                                transform: "translateY(-50%)",
-                                                cursor: "pointer",
-                                                fontSize: "20px",
-                                                color: fontcolor,
-                                                userSelect: "none",
-                                            }}
-                                        >
-                                            ×
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
+                             <div id="lastDiv" style={{ marginRight: "5px" }}>
+                <label for="searchInput" style={{ marginRight: "5px" }}>
+                  <span
+                    style={{
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Search :
+                  </span>{" "}
+                </label>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <input
+                    ref={input2Ref}
+                    onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+                    type="text"
+                    id="searchsubmit"
+                    placeholder="Search"
+                    value={searchQuery}
+                    autoComplete="off"
+                    style={{
+                      marginRight: "20px",
+                      width: "200px",
+                      height: "24px",
+                      fontSize: getdatafontsize,
+                      fontFamily: getfontstyle,
+                      color: fontcolor,
+                      backgroundColor: getcolor,
+                      border: `1px solid ${fontcolor}`,
+                      outline: "none",
+                      paddingLeft: "10px",
+                      paddingRight: "25px", // space for the clear icon
+                    }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.border = "2px solid red")
+                    }
+                    onBlur={(e) =>
+                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
+                    }
+                    onChange={(e) =>
+                      setSearchQuery((e.target.value || "").toUpperCase())
+                    }
+                  />
+                  {searchQuery && (
+                    <span
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute",
+                        right: "30px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "20px",
+                        color: fontcolor,
+                        userSelect: "none",
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </div>
+              </div>
                         </div>
                     </div>
                     <div>

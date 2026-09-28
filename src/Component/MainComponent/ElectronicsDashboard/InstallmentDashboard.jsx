@@ -1,26 +1,147 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./InstallmentDashboard.css"; // Imported custom styling
+import "./InstallmentDashboard.css";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import DatePicker from "react-datepicker";
-import { 
-  BsCalendar, 
-  BsPeople, 
-  BsCheckCircle, 
-  BsCurrencyDollar, 
-  BsWallet2, 
-  BsPieChart, 
+import {
+  BsCalendar,
+  BsPeople,
+  BsCheckCircle,
+  BsCurrencyDollar,
+  BsWallet2,
+  BsPieChart,
   BsExclamationTriangle,
   BsBagCheck,
   BsArrowUpRight,
-  BsFilter
+  BsFilter,
+  BsPerson,
+  BsClockHistory,
+  BsGraphUp,
+  BsCashStack,
+  BsArrowRepeat,
+  BsPersonPlus,
+  BsPersonX,
+  BsPersonCheck,
+  BsArrowUp,
+  BsArrowDown,
+  BsChevronDown,
 } from "react-icons/bs";
 import { getOrganisationData, getUserData } from "../../Auth";
 import { useTheme } from "../../../ThemeContext";
 
-export default function InstallmentDashboard() {
+/* ------------------------------------------------------------------
+   REUSABLE UI COMPONENTS
+------------------------------------------------------------------ */
 
+const DonutChart = ({ percentage, size = 60, strokeWidth = 6, color = "#22c55e" }) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="donut-wrapper" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          className="donut-bg"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        <circle
+          className="donut-progress"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+          stroke={color}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </svg>
+      <span className="donut-label" style={{ color: color }}>{Math.round(percentage)}%</span>
+    </div>
+  );
+};
+
+const SegmentDonut = ({ segments, size = 100, strokeWidth = 18, centerLabel, centerValue }) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  let accumulated = 0;
+
+  return (
+    <div className="segment-donut-wrapper" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+          stroke="#e2e8f0"
+        />
+        {segments.map((seg, idx) => {
+          const segLength = (seg.value / 100) * circumference;
+          const offset = -accumulated;
+          accumulated += segLength;
+          return (
+            <circle
+              key={idx}
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              strokeWidth={strokeWidth}
+              fill="none"
+              stroke={seg.color}
+              strokeDasharray={`${segLength} ${circumference - segLength}`}
+              strokeDashoffset={offset}
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+            />
+          );
+        })}
+      </svg>
+      <div className="segment-donut-center">
+        <span className="segment-center-label">{centerLabel}</span>
+        <span className="segment-center-value">{centerValue}</span>
+      </div>
+    </div>
+  );
+};
+
+const ProgressBar = ({ percentage, color = "#3b82f6" }) => (
+  <div className="progress-bar-track">
+    <div
+      className="progress-bar-fill"
+      style={{ width: `${Math.min(percentage, 100)}%`, backgroundColor: color }}
+    ></div>
+  </div>
+);
+
+const StatusBadge = ({ status }) => {
+  const statusClasses = {
+    "On Track": "badge-green",
+    "Completed": "badge-green",
+    "Partially Paid": "badge-yellow",
+    "Pending": "badge-orange",
+    "Overdue": "badge-red",
+  };
+  return (
+    <span className={`status-badge ${statusClasses[status] || "badge-gray"}`}>
+      {status}
+    </span>
+  );
+};
+
+/* ------------------------------------------------------------------
+   MAIN COMPONENT
+------------------------------------------------------------------ */
+
+export default function InstallmentDashboard() {
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -37,719 +158,560 @@ export default function InstallmentDashboard() {
     getnavbarbackgroundcolor,
   } = useTheme();
 
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState({
+    totalCustomers: 0,
+    activeInstallments: 0,
+    closedAccounts: 0,
+    newAccounts: 0,
+    expiredAccounts: 0,
+    totalCollectors: 0,
+    totalInstallments: 0,
+    totalReceivable: 0,
+    collectionAmount: 0,
+    outstandingAmount: 0,
+
+    installmentBreakdown: {
+      installment: [],
+      amount: [],
+      totalCustomers: { total: 0, segments: [0, 0, 0, 0] },
+      totalInstallments: { total: 0, segments: [0, 0, 0, 0] },
+      totalCustomersAmount: { total: 0, segments: [0, 0, 0, 0] },
+      totalInstallmentsAmount: { total: 0, segments: [0, 0, 0, 0] },
+    },
+
+    collectorPerformance: [],
+    todayCollection: {
+      totalCustomers: 0,
+      totalCollected: 0,
+      avgCollected: 0,
+      collectionPercentage: 0,
+      customers: [],
+    },
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setDashboardData({
+          totalCustomers: 1248,
+          activeInstallments: 1086,
+          closedAccounts: 128,
+          newAccounts: 34,
+          expiredAccounts: 17,
+          totalCollectors: 5,
+          totalInstallments: 2450,
+          totalReceivable: 5200000,
+          collectionAmount: 3800000,
+          outstandingAmount: 320000,
+
+          installmentBreakdown: {
+            installment: [
+              { label: "1 Month",  value: 171, amount: "Rs. 564,434.67" },
+              { label: "2 Months", value: 56,  amount: "Rs. 67,467.67" },
+              { label: "3 Months", value: 7,   amount: "Rs. 546.40" },
+              { label: "3+",       value: 4,   amount: "Rs. 65,464" },
+            ],
+            amount: [
+              { label: "1 Month",  value: 67, amount: "Rs. 564,434.67" },
+              { label: "2 Months", value: 7,  amount: "Rs. 67,467.67" },
+              { label: "3 Months", value: 7,  amount: "Rs. 546.40" },
+              { label: "3+",       value: 4,  amount: "Rs. 65,464" },
+            ],
+            totalCustomers:          { total: 234, segments: [73, 24, 3, 2] },
+            totalInstallments:       { total: 304, segments: [68, 22, 6, 4] },
+            totalCustomersAmount:    { total: 234, segments: [73, 24, 3, 2] },
+            totalInstallmentsAmount: { total: 304, segments: [68, 22, 6, 4] },
+          },
+
+          collectorPerformance: [
+            { collector: "Ahmed", todayCustomerNo: 12, todayCollection: 185000, assignedCustomers: 62, toCollect: 50, collected: 48, remaining: 12, target: 1400000, expected: 1100000, collectedAmt: 980000, receivable: 420000, collectionPct: 70 },
+            { collector: "Hamza", todayCustomerNo: 9,  todayCollection: 142000, assignedCustomers: 48, toCollect: 45, collected: 41, remaining: 17, target: 1100000, expected: 900000, collectedAmt: 780000, receivable: 310000, collectionPct: 71 },
+            { collector: "Ali",   todayCustomerNo: 7,  todayCollection: 98000,  assignedCustomers: 56, toCollect: 41, collected: 51, remaining: 21, target: 900000,  expected: 720000, collectedAmt: 540000, receivable: 280000, collectionPct: 60 },
+            { collector: "Zain",  todayCustomerNo: 5,  todayCollection: 65000,  assignedCustomers: 58, toCollect: 62, collected: 30, remaining: 25, target: 800000,  expected: 620000, collectedAmt: 420000, receivable: 320000, collectionPct: 52 },
+            { collector: "Bilal", todayCustomerNo: 4,  todayCollection: 48000,  assignedCustomers: 44, toCollect: 48, collected: 38, remaining: 28, target: 600000,  expected: 480000, collectedAmt: 360000, receivable: 160000, collectionPct: 60 },
+          ],
+
+          todayCollection: {
+            totalCustomers: 28,
+            totalCollected: 490000,
+            avgCollected: 37400,
+            collectionPercentage: 79,
+            customers: [
+              { name: "Ali Raza", collected: 78000, remaining: 22000, pct: 78, total: 100000 },
+              { name: "Hamza Khan", collected: 65000, remaining: 15000, pct: 81, total: 80000 },
+              { name: "Faisal Ahmed", collected: 52000, remaining: 18000, pct: 74, total: 70000 },
+              { name: "Sana Ahmed", collected: 48000, remaining: 12000, pct: 80, total: 60000 },
+              { name: "Hassan Abbas", collected: 42000, remaining: 18000, pct: 70, total: 60000 },
+            ],
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [apiLinks]);
+
+  const formatCurrency = (value) => {
+    if (value >= 1000000) return `Rs. ${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `Rs. ${(value / 1000).toFixed(0)}K`;
+    return `Rs. ${value}`;
+  };
+
+  const formatFullCurrency = (value) => {
+    return "Rs. " + value.toLocaleString();
+  };
+
   const contentStyle = {
-    minHeight: "100vh",
-    background: "#e5e6e6",
+    height: "100vh",
+    background: "#f8f8f8",
     fontFamily: "Inter, system-ui, sans-serif",
     fontSize: "12px",
     width: "100%",
     maxWidth: "1920px",
     marginTop: "-55px",
-    height: "100vh",
     overflowY: "auto",
     overflowX: "hidden",
     position: "relative",
     zIndex: 1,
     boxSizing: "border-box",
-    padding: "28px 32px",
+    padding: "15px 15px 110px 15px",
     transition: "background 0.3s ease, color 0.3s ease",
   };
 
+  if (loading) {
+    return (
+      <div style={contentStyle} className="d-flex justify-content-center align-items-center">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
+
+  const d = dashboardData;
+
   return (
     <div style={contentStyle}>
-      <div className="dashboard-container">
-        
-        {/* TOP ROW: KPI STAT CARDS */}
-        <div className="top-stats-row">
-          <div className="stat-card">
-            <div className="stat-icon-wrapper blue"><BsPeople /></div>
-            <div className="stat-details">
-              <span className="stat-label">Total Customers</span>
-              <span className="stat-value">1,248</span>
-              <span className="stat-change">+ 6.8% vs Apr</span>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-wrapper teal"><BsCheckCircle /></div>
-            <div className="stat-details">
-              <span className="stat-label">Active Installments</span>
-              <span className="stat-value">1,086</span>
-              <span className="stat-change">+ 5.4% vs Apr</span>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-wrapper dark-blue"><BsCurrencyDollar /></div>
-            <div className="stat-details">
-              <span className="stat-label">Total Installment Amount</span>
-              <span className="stat-value">Rs. 12.80M</span>
-              <span className="stat-change">+ 8.2% vs Apr</span>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-wrapper green"><BsWallet2 /></div>
-            <div className="stat-details">
-              <span className="stat-label">Total Collections (MTD)</span>
-              <span className="stat-value">Rs. 3.80M</span>
-              <span className="stat-change">+ 12.6% vs Apr</span>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-wrapper orange"><BsPieChart /></div>
-            <div className="stat-details">
-              <span className="stat-label">Installment Status</span>
-              <span className="stat-value">Rs. 2.45M</span>
-              <span className="stat-change">+ 10.5% vs Apr</span>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-wrapper red"><BsExclamationTriangle /></div>
-            <div className="stat-details">
-              <span className="stat-label">Month Status</span>
-              <span className="stat-value">Rs. 420K</span>
-              <span className="stat-change">+ 2.1% vs Apr</span>
-            </div>
-          </div>
-        </div>
-
-        {/* SECOND ROW: MONTHLY COLLECTION PERFORMANCE & CUSTOMER DETAILS */}
-        <div className="dashboard-grid-2">
-          {/* Left Box: Monthly Performance */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Monthly Installment Collection Performance</span>
-              <button className="card-header-btn">Days Remaining: 3</button>
-            </div>
-
-            <div className="metrics-strip">
-              <div className="metric-item">
-                <div className="metric-title">Monthly Target</div>
-                <div className="metric-val blue">Rs. 5.20M</div>
-              </div>
-              <div className="metric-item">
-                <div className="metric-title">Expected Till Today</div>
-                <div className="metric-val amber">Rs. 4.10M</div>
-              </div>
-              <div className="metric-item">
-                <div className="metric-title">Collected</div>
-                <div className="metric-val green">Rs. 3.80M</div>
-              </div>
-              <div className="metric-item">
-                <div className="metric-title">Receivable</div>
-                <div className="metric-val amber">Rs. 1.40M</div>
-              </div>
-              <div className="metric-item">
-                <div className="metric-title">Outstanding</div>
-                <div className="metric-val red">Rs. 320K</div>
-              </div>
-            </div>
-
-            <div className="chart-row">
-              <div className="donut-box">
-                <div className="donut-wrapper">
-                  <svg width="70" height="70" viewBox="0 0 36 36">
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none" stroke="#e5e7eb" strokeWidth="3.8"
-                    />
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none" stroke="#059669" strokeWidth="3.8"
-                      strokeDasharray="73, 100"
-                    />
-                  </svg>
-                  <div className="donut-inner-text">
-                    <div className="donut-percentage">73%</div>
-                    <div className="donut-sub">Collected</div>
-                  </div>
-                </div>
-                <div className="donut-legend">
-                  <div><span className="legend-dot" style={{background: '#059669'}}></span>Collected 73%</div>
-                  <div><span className="legend-dot" style={{background: '#d1d5db'}}></span>Remaining 27%</div>
-                </div>
-              </div>
-
-              <div className="horizontal-bars-container">
-                <div className="bar-group">
-                  <span className="bar-label">Target</span>
-                  <div className="bar-track">
-                    <div className="bar-fill" style={{width: '100%', backgroundColor: '#2563eb'}}></div>
-                  </div>
-                  <span className="bar-value">5.20M</span>
-                </div>
-                <div className="bar-group">
-                  <span className="bar-label">Expected</span>
-                  <div className="bar-track">
-                    <div className="bar-fill" style={{width: '78%', backgroundColor: '#f59e0b'}}></div>
-                  </div>
-                  <span className="bar-value">4.10M</span>
-                </div>
-                <div className="bar-group">
-                  <span className="bar-label">Collected</span>
-                  <div className="bar-track">
-                    <div className="bar-fill" style={{width: '73%', backgroundColor: '#10b981'}}></div>
-                  </div>
-                  <span className="bar-value">3.80M</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Box: Customer Collection Details Table */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Customer Collection Details</span>
-              <button className="card-header-btn">View All Customers</button>
-            </div>
-            <div style={{overflowX: 'auto'}}>
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Customer</th>
-                    <th>Ref / ID</th>
-                    <th>Target (Rs.)</th>
-                    <th>Expected (Rs.)</th>
-                    <th>Collected (Rs.)</th>
-                    <th>Receivable (Rs.)</th>
-                    <th>Outstanding (Rs.)</th>
-                    <th>Collection %</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Ali Raza</td>
-                    <td>CUST-1001</td>
-                    <td>84,000</td>
-                    <td>64,000</td>
-                    <td>60,000</td>
-                    <td>20,000</td>
-                    <td>4,000</td>
-                    <td>76%</td>
-                    <td><span className="status-pill on-track">On Track</span></td>
-                  </tr>
-                  <tr>
-                    <td>Usman Khan</td>
-                    <td>CUST-1002</td>
-                    <td>65,000</td>
-                    <td>54,000</td>
-                    <td>40,000</td>
-                    <td>20,000</td>
-                    <td>10,000</td>
-                    <td>62%</td>
-                    <td><span className="status-pill partially-paid">Partially Paid</span></td>
-                  </tr>
-                  <tr>
-                    <td>Sara Ahmed</td>
-                    <td>CUST-1003</td>
-                    <td>95,000</td>
-                    <td>44,000</td>
-                    <td>20,000</td>
-                    <td>30,000</td>
-                    <td>20,000</td>
-                    <td>52%</td>
-                    <td><span className="status-pill pending">Pending</span></td>
-                  </tr>
-                  <tr>
-                    <td>Faisal Malik</td>
-                    <td>CUST-1004</td>
-                    <td>90,000</td>
-                    <td>72,000</td>
-                    <td>60,000</td>
-                    <td>30,000</td>
-                    <td>10,000</td>
-                    <td>67%</td>
-                    <td><span className="status-pill partially-paid">Partially Paid</span></td>
-                  </tr>
-                  <tr>
-                    <td>Hassan Abbas</td>
-                    <td>CUST-1005</td>
-                    <td>70,000</td>
-                    <td>56,000</td>
-                    <td>56,000</td>
-                    <td>14,000</td>
-                    <td>0</td>
-                    <td>100%</td>
-                    <td><span className="status-pill completed">Completed</span></td>
-                  </tr>
-                  <tr>
-                    <td>Nida Fatima</td>
-                    <td>CUST-1006</td>
-                    <td>60,000</td>
-                    <td>48,000</td>
-                    <td>30,000</td>
-                    <td>30,000</td>
-                    <td>18,000</td>
-                    <td>97%</td>
-                    <td><span className="status-pill overdue">Overdue</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* THIRD ROW: COLLECTOR PERFORMANCE & OVERVIEW */}
-        <div className="dashboard-grid-3-1">
-          {/* Table: Collector Collection Performance */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Collector Collection Performance</span>
-            </div>
-            <div style={{overflowX: 'auto'}}>
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Collector</th>
-                    <th>Assigned Customers</th>
-                    <th>To Collect From</th>
-                    <th>Collected From</th>
-                    <th>Remaining Customers</th>
-                    <th>Target</th>
-                    <th>Expected</th>
-                    <th>Collected</th>
-                    <th>Receivable</th>
-                    <th>Outstanding</th>
-                    <th>Collection %</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Ahmed</td>
-                    <td>66</td>
-                    <td>68</td>
-                    <td>68</td>
-                    <td>12</td>
-                    <td>1.40M</td>
-                    <td>1.10M</td>
-                    <td>980K</td>
-                    <td>900K</td>
-                    <td>120K</td>
-                    <td><div className="inline-progress"><div className="inline-progress-fill" style={{width: '76%'}}></div></div></td>
-                    <td><span className="status-pill on-track">On Track</span></td>
-                  </tr>
-                  <tr>
-                    <td>Hamza</td>
-                    <td>72</td>
-                    <td>68</td>
-                    <td>81</td>
-                    <td>17</td>
-                    <td>1.10M</td>
-                    <td>800K</td>
-                    <td>700K</td>
-                    <td>300K</td>
-                    <td>120K</td>
-                    <td><div className="inline-progress"><div className="inline-progress-fill" style={{width: '70%'}}></div></div></td>
-                    <td><span className="status-pill partially-paid">Partially Paid</span></td>
-                  </tr>
-                  <tr>
-                    <td>Adil</td>
-                    <td>64</td>
-                    <td>60</td>
-                    <td>39</td>
-                    <td>21</td>
-                    <td>900K</td>
-                    <td>700K</td>
-                    <td>880K</td>
-                    <td>550K</td>
-                    <td>170K</td>
-                    <td><div className="inline-progress"><div className="inline-progress-fill" style={{width: '76%'}}></div></div></td>
-                    <td><span className="status-pill pending">Pending</span></td>
-                  </tr>
-                  <tr>
-                    <td>Zain</td>
-                    <td>55</td>
-                    <td>55</td>
-                    <td>30</td>
-                    <td>25</td>
-                    <td>800K</td>
-                    <td>640K</td>
-                    <td>420K</td>
-                    <td>550K</td>
-                    <td>160K</td>
-                    <td><div className="inline-progress"><div className="inline-progress-fill" style={{width: '76%'}}></div></div></td>
-                    <td><span className="status-pill pending">Pending</span></td>
-                  </tr>
-                  <tr>
-                    <td>Bilal</td>
-                    <td>50</td>
-                    <td>48</td>
-                    <td>20</td>
-                    <td>28</td>
-                    <td>600K</td>
-                    <td>400K</td>
-                    <td>300K</td>
-                    <td>560K</td>
-                    <td>160K</td>
-                    <td><div className="inline-progress"><div className="inline-progress-fill" style={{width: '99%', backgroundColor: '#ef4444'}}></div></div></td>
-                    <td><span className="status-pill overdue">Overdue</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Middle Box: Collector Progress Overview */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Collector Progress Overview</span>
-            </div>
-            <div className="collector-progress-list">
-              <div className="collector-progress-item">
-                <span className="collector-name">Ahmed</span>
-                <span className="collector-count">66 / 80</span>
-                <div className="collector-bars">
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '80%', backgroundColor: '#2563eb'}}></div></div>
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '70%', backgroundColor: '#10b981'}}></div></div>
-                </div>
-                <span className="collector-amt">980K / 1.40M</span>
-              </div>
-
-              <div className="collector-progress-item">
-                <span className="collector-name">Hamza</span>
-                <span className="collector-count">51 / 68</span>
-                <div className="collector-bars">
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '75%', backgroundColor: '#2563eb'}}></div></div>
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '63%', backgroundColor: '#10b981'}}></div></div>
-                </div>
-                <span className="collector-amt">700K / 1.10M</span>
-              </div>
-
-              <div className="collector-progress-item">
-                <span className="collector-name">Adil</span>
-                <span className="collector-count">39 / 86</span>
-                <div className="collector-bars">
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '45%', backgroundColor: '#2563eb'}}></div></div>
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '55%', backgroundColor: '#10b981'}}></div></div>
-                </div>
-                <span className="collector-amt">550K / 500K</span>
-              </div>
-
-              <div className="collector-progress-item">
-                <span className="collector-name">Zain</span>
-                <span className="collector-count">30 / 55</span>
-                <div className="collector-bars">
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '54%', backgroundColor: '#2563eb'}}></div></div>
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '40%', backgroundColor: '#10b981'}}></div></div>
-                </div>
-                <span className="collector-amt">420K / 420K</span>
-              </div>
-
-              <div className="collector-progress-item">
-                <span className="collector-name">Bilal</span>
-                <span className="collector-count">20 / 48</span>
-                <div className="collector-bars">
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '41%', backgroundColor: '#2563eb'}}></div></div>
-                  <div className="bar-track" style={{height: '6px'}}><div className="bar-fill" style={{width: '50%', backgroundColor: '#10b981'}}></div></div>
-                </div>
-                <span className="collector-amt">300K / 600K</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Box: Top Performers */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Top Performers</span>
-            </div>
-            <div className="performer-list">
-              <div className="performer-item">
-                <div className="performer-info">
-                  <div className="performer-rank rank-1">1</div>
-                  <div className="performer-avatar">A</div>
-                  <span className="performer-name">Ahmed</span>
-                </div>
-                <div className="performer-score">
-                  <div className="performer-pct">89%</div>
-                  <div className="performer-sub">Rs. 980K</div>
-                </div>
-              </div>
-
-              <div className="performer-item">
-                <div className="performer-info">
-                  <div className="performer-rank rank-2">2</div>
-                  <div className="performer-avatar">H</div>
-                  <span className="performer-name">Hamza</span>
-                </div>
-                <div className="performer-score">
-                  <div className="performer-pct">78%</div>
-                  <div className="performer-sub">Rs. 700K</div>
-                </div>
-              </div>
-
-              <div className="performer-item">
-                <div className="performer-info">
-                  <div className="performer-rank rank-3">3</div>
-                  <div className="performer-avatar">A</div>
-                  <span className="performer-name">Adil</span>
-                </div>
-                <div className="performer-score">
-                  <div className="performer-pct">76%</div>
-                  <div className="performer-sub">Rs. 550K</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* FOURTH ROW: CUSTOMER LIFECYCLE SUMMARY */}
-        <div className="card-box">
+      {/* ============================================================
+          ROW 1 — TOP 6 CARDS
+      ============================================================ */}
+      <div className="row-grid row-1" style={{ marginBottom: "10px" }}>
+        <div className="dashboard-card">
           <div className="card-header">
-            <span className="card-title">Customer Lifecycle Summary</span>
-            <div>
-              <button className="card-header-btn" style={{marginRight: '8px'}}><BsFilter /> Filter</button>
-              <button className="card-header-btn">View All</button>
-            </div>
+            <span className="card-title">TOTAL CUSTOMERS</span>
           </div>
-
-          <div className="dashboard-grid-4">
-            {/* Closed Accounts */}
-            <div className="lifecycle-card green">
-              <div style={{fontWeight: '600', color: '#065f46', fontSize: '11px'}}>CLOSED ACCOUNTS</div>
-              <div className="lifecycle-num" style={{color: '#065f46'}}>128</div>
-              <div className="lifecycle-footer-info">
-                <span>Total Value: Rs. 2.60M</span>
-                <span>18 Accounts</span>
-              </div>
-            </div>
-
-            {/* New Accounts */}
-            <div className="lifecycle-card blue">
-              <div style={{fontWeight: '600', color: '#1e40af', fontSize: '11px'}}>NEW ACCOUNTS</div>
-              <div className="lifecycle-num" style={{color: '#1e40af'}}>34</div>
-              <div className="lifecycle-footer-info">
-                <span>Avg Value: Rs. 185K</span>
-                <span>Next: Nov 1, 2025</span>
-              </div>
-            </div>
-
-            {/* Expired Accounts */}
-            <div className="lifecycle-card red">
-              <div style={{fontWeight: '600', color: '#991b1b', fontSize: '11px'}}>EXPIRED ACCOUNTS</div>
-              <div className="lifecycle-num" style={{color: '#991b1b'}}>17</div>
-              <div className="lifecycle-footer-info">
-                <span>Delinquent: 14</span>
-                <span>Outstanding: Rs. 80K</span>
-              </div>
-            </div>
-
-            {/* Expired Details Table */}
-            <div style={{overflowX: 'auto'}}>
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Customer</th>
-                    <th>Plan Amount (Rs.)</th>
-                    <th>Remaining (Rs.)</th>
-                    <th>Paid Inst.</th>
-                    <th>Completion Date</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Ali Raza</td>
-                    <td>64,000</td>
-                    <td>0</td>
-                    <td>10</td>
-                    <td>May 20, 2025</td>
-                    <td><span className="status-pill completed">Completed</span></td>
-                  </tr>
-                  <tr>
-                    <td>Irfan Sheikh</td>
-                    <td>73,000</td>
-                    <td>0</td>
-                    <td>10</td>
-                    <td>May 18, 2025</td>
-                    <td><span className="status-pill completed">Completed</span></td>
-                  </tr>
-                  <tr>
-                    <td>Faisal Khan</td>
-                    <td>59,000</td>
-                    <td>0</td>
-                    <td>8</td>
-                    <td>May 15, 2025</td>
-                    <td><span className="status-pill completed">Completed</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div className="card-body-top">
+            <span className="main-value">{d.totalCustomers.toLocaleString()}</span>
+            <DonutChart percentage={92} size={62} strokeWidth={6} color="#22c55e" />
+          </div>
+          <div className="card-footer-split">
+            <div className="footer-item"><span className="footer-label">Targeted</span><span className="footer-value">3434</span></div>
+            <div className="footer-item"><span className="footer-label">Avg.</span><span className="footer-value">5466</span></div>
+            <div className="footer-item"><span className="footer-label">Avg Per</span><span className="footer-value">676</span></div>
           </div>
         </div>
 
-        {/* FIFTH ROW: TODAY'S PERFORMANCE & ANALYTICS */}
-        <div className="dashboard-grid-3">
-          {/* Today's Sales & Advance */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Today's Performance</span>
-            </div>
-            <div style={{fontSize: '11px', fontWeight: '600', color: '#4b5563', marginBottom: '8px'}}>
-              TODAY'S SALES & ADVANCE
-            </div>
-            <div className="sales-box-grid">
-              <div className="sales-mini-card">
-                <BsBagCheck className="sales-mini-icon" />
-                <div className="sales-mini-val">42</div>
-                <div className="sales-mini-lbl">Customers Sold</div>
-              </div>
-              <div className="sales-mini-card">
-                <BsCurrencyDollar className="sales-mini-icon" />
-                <div className="sales-mini-val">Rs. 850K</div>
-                <div className="sales-mini-lbl">Today's Sales</div>
-              </div>
-              <div className="sales-mini-card">
-                <BsWallet2 className="sales-mini-icon" />
-                <div className="sales-mini-val">Rs. 210K</div>
-                <div className="sales-mini-lbl">Advance Received</div>
-              </div>
-              <div className="sales-mini-card">
-                <BsPeople className="sales-mini-icon" />
-                <div className="sales-mini-val">Rs. 490K</div>
-                <div className="sales-mini-lbl">Total Collection</div>
-              </div>
-            </div>
+        <div className="dashboard-card">
+          <div className="card-header"><span className="card-title">ACTIVE INSTALLMENTS</span></div>
+          <div className="card-body-top">
+            <span className="main-value">{d.activeInstallments.toLocaleString()}</span>
+            <DonutChart percentage={78} size={62} strokeWidth={6} color="#3b82f6" />
+          </div>
+          <div className="card-footer-split">
+            <div className="footer-item"><span className="footer-label">Targeted</span><span className="footer-value">1400</span></div>
+            <div className="footer-item"><span className="footer-label">Avg.</span><span className="footer-value">1086</span></div>
+            <div className="footer-item"><span className="footer-label">Avg Per</span><span className="footer-value">217</span></div>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="card-header"><span className="card-title">CLOSED ACCOUNTS</span></div>
+          <div className="card-body-top">
+            <span className="main-value">{d.closedAccounts}</span>
+            <DonutChart percentage={92} size={62} strokeWidth={6} color="#22c55e" />
+          </div>
+          <div className="card-footer-split">
+            <div className="footer-item"><span className="footer-label">Targeted</span><span className="footer-value">140</span></div>
+            <div className="footer-item"><span className="footer-label">Avg.</span><span className="footer-value">128</span></div>
+            <div className="footer-item"><span className="footer-label">Avg Per</span><span className="footer-value">25.6</span></div>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="card-header"><span className="card-title">NEW ACCOUNTS</span></div>
+          <div className="card-body-top">
+            <span className="main-value">{d.newAccounts}</span>
+            <DonutChart percentage={65} size={62} strokeWidth={6} color="#f59e0b" />
+          </div>
+          <div className="card-footer-split">
+            <div className="footer-item"><span className="footer-label">Targeted</span><span className="footer-value">50</span></div>
+            <div className="footer-item"><span className="footer-label">Avg.</span><span className="footer-value">34</span></div>
+            <div className="footer-item"><span className="footer-label">Avg Per</span><span className="footer-value">6.8</span></div>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="card-header"><span className="card-title">EXPIRED ACCOUNTS</span></div>
+          <div className="card-body-top">
+            <span className="main-value">{d.expiredAccounts}</span>
+            <DonutChart percentage={34} size={62} strokeWidth={6} color="#ef4444" />
+          </div>
+          <div className="card-footer-split">
+            <div className="footer-item"><span className="footer-label">Targeted</span><span className="footer-value">50</span></div>
+            <div className="footer-item"><span className="footer-label">Avg.</span><span className="footer-value">17</span></div>
+            <div className="footer-item"><span className="footer-label">Avg Per</span><span className="footer-value">3.4</span></div>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="card-header"><span className="card-title">TOTAL COLLECTORS</span></div>
+          <div className="card-body-top">
+            <span className="main-value">{d.totalCollectors}</span>
+            <DonutChart percentage={100} size={62} strokeWidth={6} color="#8b5cf6" />
+          </div>
+          <div className="card-footer-split">
+            <div className="footer-item"><span className="footer-label">Targeted</span><span className="footer-value">5</span></div>
+            <div className="footer-item"><span className="footer-label">Avg.</span><span className="footer-value">5</span></div>
+            <div className="footer-item"><span className="footer-label">Avg Per</span><span className="footer-value">1</span></div>
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================================
+          ROW 2 — INSTALLMENT SUMMARY
+      ============================================================ */}
+      <div className="row-grid row-2" style={{ marginBottom: "10px" }}>
+        <div className="summary-card">
+          <div className="summary-icon"><BsPieChart /></div>
+          <div className="summary-info">
+            <span className="summary-label">Total Installments</span>
+            <span className="summary-value">{d.totalInstallments.toLocaleString()}</span>
+          </div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-icon"><BsCurrencyDollar /></div>
+          <div className="summary-info">
+            <span className="summary-label">Total Receivable</span>
+            <span className="summary-value">{formatCurrency(d.totalReceivable)}</span>
+          </div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-icon"><BsWallet2 /></div>
+          <div className="summary-info">
+            <span className="summary-label">Collection Amount</span>
+            <span className="summary-value">{formatCurrency(d.collectionAmount)}</span>
+          </div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-icon"><BsExclamationTriangle /></div>
+          <div className="summary-info">
+            <span className="summary-label">Outstanding Amount</span>
+            <span className="summary-value">{formatCurrency(d.outstandingAmount)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================================
+          ROW 3 — INSTALLMENT & AMOUNT COMPARISON
+      ============================================================ */}
+      <div className="row-grid row-4" style={{ marginBottom: "10px" }}>
+        {/* Card 1: INSTALLMENT WISE COMPARISON */}
+        <div className="ib-card">
+          <div className="ib-card-header">
+            <span className="ib-card-title">INSTALLMENT WISE COMPARISON</span>
+            <span className="ib-info-icon">ⓘ</span>
           </div>
 
-          {/* Today's Collector Performance */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Today's Collector Performance</span>
+          <div className="ib-split">
+            <div className="ib-columns">
+              {d.installmentBreakdown.installment.map((col, i) => {
+                const colors = [
+                  { bg: "#d1fae5", color: "#059669" },
+                  { bg: "#ffedd5", color: "#ea580c" },
+                  { bg: "#fee2e2", color: "#dc2626" },
+                  { bg: "#ede9fe", color: "#7c3aed" },
+                ][i];
+                return (
+                  <div className="ib-column" key={i}>
+                    <div className="ib-icon-wrap" style={{ background: colors.bg, color: colors.color }}>
+                      <BsCalendar />
+                    </div>
+                    <span className="ib-col-label">{col.label}</span>
+                    <span className="ib-col-value">{col.value}</span>
+                    <span className="ib-col-amount">{col.amount}</span>
+                  </div>
+                );
+              })}
             </div>
-            <div style={{overflowX: 'auto'}}>
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Collector</th>
-                    <th>Assigned</th>
-                    <th>Collected</th>
-                    <th>Target (Rs.)</th>
-                    <th>Remaining (Rs.)</th>
-                    <th>Performance %</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Ahmed</td>
-                    <td>62</td>
-                    <td>10</td>
-                    <td>120,000</td>
-                    <td>120,000</td>
-                    <td>89%</td>
-                  </tr>
-                  <tr>
-                    <td>Hamza</td>
-                    <td>12</td>
-                    <td>0</td>
-                    <td>160,000</td>
-                    <td>90,000</td>
-                    <td>78%</td>
-                  </tr>
-                  <tr>
-                    <td>Adil</td>
-                    <td>15</td>
-                    <td>8</td>
-                    <td>100,000</td>
-                    <td>70,000</td>
-                    <td>78%</td>
-                  </tr>
-                  <tr>
-                    <td>Zain</td>
-                    <td>10</td>
-                    <td>4</td>
-                    <td>50,000</td>
-                    <td>90,000</td>
-                    <td>69%</td>
-                  </tr>
-                  <tr>
-                    <td>Bilal</td>
-                    <td>10</td>
-                    <td>0</td>
-                    <td>70,000</td>
-                    <td>0</td>
-                    <td>0%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          {/* Monthly Collector Analytics Chart */}
-          <div className="card-box">
-            <div className="card-header">
-              <span className="card-title">Monthly Collector Analytics</span>
-              <button className="card-header-btn">May 2023</button>
-            </div>
-            
-            <div className="bar-chart-container">
-              {/* Ahmed */}
-              <div className="bar-group-col">
-                <div className="bars-wrapper">
-                  <div className="chart-bar target" style={{height: '90%'}}></div>
-                  <div className="chart-bar expected" style={{height: '75%'}}></div>
-                  <div className="chart-bar collected" style={{height: '65%'}}></div>
-                  <div className="chart-bar receivable" style={{height: '40%'}}></div>
-                  <div className="chart-bar outstanding" style={{height: '15%'}}></div>
-                </div>
-                <span className="bar-group-label">Ahmed</span>
+            <div className="ib-donuts-pair">
+              <div className="ib-donut-block">
+                <SegmentDonut
+                  segments={[
+                    { value: d.installmentBreakdown.totalInstallments.segments[0], color: "#22c55e" },
+                    { value: d.installmentBreakdown.totalInstallments.segments[1], color: "#f59e0b" },
+                    { value: d.installmentBreakdown.totalInstallments.segments[2], color: "#ef4444" },
+                    { value: d.installmentBreakdown.totalInstallments.segments[3], color: "#8b5cf6" },
+                  ]}
+                  size={90}
+                  strokeWidth={18}
+                  centerLabel="Count"
+                  centerValue={d.installmentBreakdown.totalInstallments.total.toString()}
+                />
               </div>
 
-              {/* Hamza */}
-              <div className="bar-group-col">
-                <div className="bars-wrapper">
-                  <div className="chart-bar target" style={{height: '80%'}}></div>
-                  <div className="chart-bar expected" style={{height: '60%'}}></div>
-                  <div className="chart-bar collected" style={{height: '55%'}}></div>
-                  <div className="chart-bar receivable" style={{height: '30%'}}></div>
-                  <div className="chart-bar outstanding" style={{height: '10%'}}></div>
-                </div>
-                <span className="bar-group-label">Hamza</span>
-              </div>
-
-              {/* Adil */}
-              <div className="bar-group-col">
-                <div className="bars-wrapper">
-                  <div className="chart-bar target" style={{height: '70%'}}></div>
-                  <div className="chart-bar expected" style={{height: '50%'}}></div>
-                  <div className="chart-bar collected" style={{height: '60%'}}></div>
-                  <div className="chart-bar receivable" style={{height: '35%'}}></div>
-                  <div className="chart-bar outstanding" style={{height: '20%'}}></div>
-                </div>
-                <span className="bar-group-label">Adil</span>
-              </div>
-
-              {/* Zain */}
-              <div className="bar-group-col">
-                <div className="bars-wrapper">
-                  <div className="chart-bar target" style={{height: '60%'}}></div>
-                  <div className="chart-bar expected" style={{height: '45%'}}></div>
-                  <div className="chart-bar collected" style={{height: '30%'}}></div>
-                  <div className="chart-bar receivable" style={{height: '40%'}}></div>
-                  <div className="chart-bar outstanding" style={{height: '25%'}}></div>
-                </div>
-                <span className="bar-group-label">Zain</span>
-              </div>
-
-              {/* Bilal */}
-              <div className="bar-group-col">
-                <div className="bars-wrapper">
-                  <div className="chart-bar target" style={{height: '50%'}}></div>
-                  <div className="chart-bar expected" style={{height: '35%'}}></div>
-                  <div className="chart-bar collected" style={{height: '20%'}}></div>
-                  <div className="chart-bar receivable" style={{height: '45%'}}></div>
-                  <div className="chart-bar outstanding" style={{height: '30%'}}></div>
-                </div>
-                <span className="bar-group-label">Bilal</span>
+              <div className="ib-donut-block">
+                <SegmentDonut
+                  segments={[
+                    { value: d.installmentBreakdown.totalInstallmentsAmount.segments[0], color: "#22c55e" },
+                    { value: d.installmentBreakdown.totalInstallmentsAmount.segments[1], color: "#f59e0b" },
+                    { value: d.installmentBreakdown.totalInstallmentsAmount.segments[2], color: "#ef4444" },
+                    { value: d.installmentBreakdown.totalInstallmentsAmount.segments[3], color: "#8b5cf6" },
+                  ]}
+                  size={90}
+                  strokeWidth={18}
+                  centerLabel="Amount"
+                  centerValue={d.installmentBreakdown.totalInstallmentsAmount.total.toString()}
+                />
               </div>
             </div>
           </div>
         </div>
 
+        {/* Card 2: AMOUNT WISE COMPARISON */}
+        <div className="ib-card">
+          <div className="ib-card-header">
+            <span className="ib-card-title">AMOUNT WISE COMPARISON</span>
+            <span className="ib-info-icon">ⓘ</span>
+          </div>
+
+          <div className="ib-split">
+            <div className="ib-columns">
+              {d.installmentBreakdown.amount.map((col, i) => {
+                const colors = [
+                  { bg: "#d1fae5", color: "#059669" },
+                  { bg: "#ffedd5", color: "#ea580c" },
+                  { bg: "#fee2e2", color: "#dc2626" },
+                  { bg: "#ede9fe", color: "#7c3aed" },
+                ][i];
+                return (
+                  <div className="ib-column" key={i}>
+                    <div className="ib-icon-wrap" style={{ background: colors.bg, color: colors.color }}>
+                      <BsCalendar />
+                    </div>
+                    <span className="ib-col-label">{col.label}</span>
+                    <span className="ib-col-value">{col.value}</span>
+                    <span className="ib-col-amount">{col.amount}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="ib-donuts-pair">
+              <div className="ib-donut-block">
+                <SegmentDonut
+                  segments={[
+                    { value: d.installmentBreakdown.totalCustomers.segments[0], color: "#22c55e" },
+                    { value: d.installmentBreakdown.totalCustomers.segments[1], color: "#f59e0b" },
+                    { value: d.installmentBreakdown.totalCustomers.segments[2], color: "#ef4444" },
+                    { value: d.installmentBreakdown.totalCustomers.segments[3], color: "#8b5cf6" },
+                  ]}
+                  size={90}
+                  strokeWidth={18}
+                  centerLabel="Count"
+                  centerValue={d.installmentBreakdown.totalCustomers.total.toString()}
+                />
+              </div>
+
+              <div className="ib-donut-block">
+                <SegmentDonut
+                  segments={[
+                    { value: d.installmentBreakdown.totalCustomersAmount.segments[0], color: "#22c55e" },
+                    { value: d.installmentBreakdown.totalCustomersAmount.segments[1], color: "#f59e0b" },
+                    { value: d.installmentBreakdown.totalCustomersAmount.segments[2], color: "#ef4444" },
+                    { value: d.installmentBreakdown.totalCustomersAmount.segments[3], color: "#8b5cf6" },
+                  ]}
+                  size={90}
+                  strokeWidth={18}
+                  centerLabel="Amount"
+                  centerValue={d.installmentBreakdown.totalCustomersAmount.total.toString()}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================================
+          ROW 4 — COLLECTOR COLLECTION PERFORMANCE (Redesigned)
+      ============================================================ */}
+      <div className="collector-perf-card">
+        {/* Header */}
+        <div className="cpc-header">
+          <div className="cpc-header-left">
+            <span className="cpc-title">COLLECTOR COLLECTION PERFORMANCE</span>
+            <span className="cpc-live-badge">
+              <span className="cpc-live-dot"></span>
+              Live Data
+            </span>
+          </div>
+          <button className="cpc-view-btn">
+            View All
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="cpc-table-wrap">
+          <table className="cpc-table">
+            <thead>
+              <tr className="cpc-head-row-1">
+                <th rowSpan="2" className="cpc-th-collector">COLLECTOR</th>
+                <th colSpan="2" className="cpc-group-header">TODAY</th>
+                <th colSpan="4" className="cpc-group-header">CUSTOMER PERFORMANCE</th>
+                <th colSpan="4" className="cpc-group-header">AMOUNT PERFORMANCE (RS.)</th>
+                <th rowSpan="2" className="cpc-th-collection">COLLECTION %</th>
+              </tr>
+              <tr className="cpc-head-row-2">
+                <th>Today's Cus</th>
+                <th>Today's Collection</th>
+                <th>Assigned Cus</th>
+                <th>To Collect</th>
+                <th>Collected</th>
+                <th>Remaining</th>
+                <th>Target</th>
+                <th>Expected</th>
+                <th>Collected</th>
+                <th>Receivable</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.collectorPerformance.map((row, idx) => {
+                const avatarColors = ["#c7d2fe", "#bfdbfe", "#fde68a", "#fecaca", "#bae6fd"];
+                const avatarColor = avatarColors[idx % avatarColors.length];
+                const initials = row.collector.substring(0, 2);
+                const pct = row.collectionPct;
+                const barColor = pct >= 70 ? "#22c55e" : pct >= 50 ? "#f59e0b" : "#ef4444";
+
+                return (
+                  <tr key={idx} className="cpc-body-row">
+                    <td className="cpc-collector-cell">
+                      <div className="cpc-collector-cell-inner">
+                        <div className="cpc-avatar" style={{ background: avatarColor }}>
+                          {initials}
+                        </div>
+                        <span className="cpc-name">{row.collector}</span>
+                      </div>
+                    </td>
+
+                    <td className="cpc-num-cell">
+                      <span>{row.todayCustomerNo}</span>
+                      <span className="cpc-arrow down">↓</span>
+                    </td>
+                    <td className="cpc-num-cell">
+                      <span>{row.todayCollection.toLocaleString()}</span>
+                    </td>
+                    <td className="cpc-num-cell">
+                      <span>{row.assignedCustomers}</span>
+                      <span className="cpc-arrow up">↗</span>
+                    </td>
+                    <td className="cpc-num-cell">
+                      <span>{row.toCollect}</span>
+                      <span className="cpc-arrow up">↑</span>
+                    </td>
+                    <td className="cpc-num-cell">
+                      <span>{row.collected}</span>
+                      <span className="cpc-arrow up">↗</span>
+                    </td>
+                    <td className="cpc-num-cell">
+                      <span>{row.remaining}</span>
+                      <span className="cpc-rs-tag">Rs</span>
+                    </td>
+
+                    <td className="cpc-num-cell bold-num">{row.target.toLocaleString()}</td>
+                    <td className="cpc-num-cell bold-num">{row.expected.toLocaleString()}</td>
+                    <td className="cpc-num-cell bold-num">{row.collectedAmt.toLocaleString()}</td>
+                    <td className="cpc-num-cell bold-num">{row.receivable.toLocaleString()}</td>
+
+                    <td className="cpc-progress-cell">
+                      <div className="cpc-progress-cell-inner">
+                        <div className="cpc-progress-track">
+                          <div
+                            className="cpc-progress-fill"
+                            style={{ width: `${Math.min(pct, 100)}%`, background: barColor }}
+                          ></div>
+                        </div>
+                        <span className="cpc-progress-label">{pct}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ============================================================
+          ROW 5 — TODAY'S CUSTOMER COLLECTION
+      ============================================================ */}
+      <div className="dashboard-card table-card">
+        <div className="card-header table-header">
+          <span className="card-title">TODAY'S CUSTOMER COLLECTION</span>
+        </div>
+        <div className="today-summary">
+          <div className="summary-strip-item">
+            <span className="strip-label">Total Customers</span>
+            <span className="strip-value">{d.todayCollection.totalCustomers}</span>
+          </div>
+          <div className="summary-strip-item">
+            <span className="strip-label">Total Collected</span>
+            <span className="strip-value">{formatCurrency(d.todayCollection.totalCollected)}</span>
+          </div>
+          <div className="summary-strip-item">
+            <span className="strip-label">Avg. Collected</span>
+            <span className="strip-value">{formatCurrency(d.todayCollection.avgCollected)}</span>
+          </div>
+          <div className="summary-strip-item">
+            <span className="strip-label">Collection %</span>
+            <span className="strip-value">{d.todayCollection.collectionPercentage}%</span>
+          </div>
+        </div>
+        <div className="table-responsive">
+          <table className="dashboard-table today-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Collected (Rs.)</th>
+                <th>Remaining (Rs.)</th>
+                <th>Collection %</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.todayCollection.customers.map((cust, idx) => (
+                <tr key={idx}>
+                  <td className="fw-semibold">{cust.name}</td>
+                  <td>{cust.collected.toLocaleString()}</td>
+                  <td>{cust.remaining.toLocaleString()}</td>
+                  <td>
+                    <div className="progress-cell">
+                      <ProgressBar percentage={cust.pct} color={cust.pct >= 70 ? "#22c55e" : cust.pct >= 50 ? "#f59e0b" : "#ef4444"} />
+                      <span className="progress-label">{cust.pct}%</span>
+                    </div>
+                  </td>
+                  <td className="fw-bold">{cust.total.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ import "../../../vardana/vardana";
 import "../../../vardana/verdana-bold";
 import { FaWhatsapp } from "react-icons/fa";
 
-export default function ToDateOutstandingReport() {
+export default function InstallmentOutstandingReport() {
   const navigate = useNavigate();
   const user = getUserData();
   const organisation = getOrganisationData();
@@ -437,7 +437,7 @@ export default function ToDateOutstandingReport() {
     document.getElementById("todatevalidation").style.border =
       `1px solid ${fontcolor}`;
 
-    const apiUrl = apiLinks + "/ToDateOutstandingReport.php";
+    const apiUrl = apiLinks + "/InstallmentOutstandingReport.php";
     setIsLoading(true);
     const formData = new URLSearchParams({
       FIntDat: fromInputDate,
@@ -446,8 +446,9 @@ export default function ToDateOutstandingReport() {
       FColCod: Collector,
       FCstTyp: Customerselectdata,
 
-      // code: "MTSELEC",
-      // FLocCod: "002",
+    //   code: "MTSELEC",
+    //   FLocCod: "002",
+
         code: organisation.code,
         FLocCod: locationnumber || getLocationNumber,
         FYerDsc: yeardescription || getyeardescription,
@@ -1121,7 +1122,7 @@ const exportPDFHandler = () => {
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
         addTitle(
-          `ToDateOutstanding Report From ${fromInputDate} To ${toInputDate}`,
+          `Installment Outstanding Report From ${fromInputDate} To ${toInputDate}`,
           "",
           "",
           pageNumber,
@@ -1220,7 +1221,7 @@ const exportPDFHandler = () => {
 
     handlePagination();
 
-    doc.save(`ToDateOutstandingReport As On ${date}.pdf`);
+    doc.save(`InstallmentOutstandingReport As On ${date}.pdf`);
   };
 
   // ================================================================
@@ -1312,7 +1313,7 @@ const handleDownloadCSV = async () => {
     );
 
     const storeListRow = worksheet.addRow([
-      `ToDateOutstanding Report From ${fromInputDate} To ${toInputDate}`,
+      `Installment Outstanding Report From ${fromInputDate} To ${toInputDate}`,
     ]);
     storeListRow.eachCell((cell) => {
       cell.font = fontStoreList;
@@ -1625,7 +1626,7 @@ const handleDownloadCSV = async () => {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `ToDateOutstandingReport As On ${currentdate}.xlsx`);
+    saveAs(blob, `InstallmentOutstandingReport As On ${currentdate}.xlsx`);
   };
 
   const dispatch = useDispatch();
@@ -2098,7 +2099,7 @@ const handleDownloadCSV = async () => {
             borderRadius: "9px",
           }}
         >
-          <NavComponent textdata="ToDateOutstanding Report" />
+          <NavComponent textdata="InstallmentOutstanding Report" />
 
           {/* ------------1st row */}
           <div

@@ -171,7 +171,7 @@ import InstallmentWiseReport from "./Component/Reports/Daily_Jobs_Reports/Instal
 import MonthWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/MonthWiseReport.js";
 import InstallmentInvestmentStatusReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentInvestmentStatusReport.js";
 import ToDateOutstandingReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/ToDateOutstandingReport.js";
-
+import InstallmentOutstandingReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentOutstandingReport.js";
 
 //////////////////////////// Item reports //////////////////////////////
 import ItemPurchaseSummary from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemPurchaseSummaryReport.js";
@@ -184,6 +184,7 @@ import ItemStatusReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports
 import ItemStatusComparisonReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemStatusComparisonReport.js";
 import ItemSaleSummaryReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleSummaryReport.js";
 import ItemEvalutionReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemEvalutionReport.js";
+import ItemSaleComparison from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemSaleComparison.js";
 import ItemReorderLevelReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/ItemReorderLevelReport.js";
 import RawMaterialStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/RawMaterialStockReport.js";
 import SemiFinishStockReport from "./Component/Reports/Daily_Jobs_Reports/ItemReports/SemiFinishStockReport.js";
@@ -440,7 +441,8 @@ function App() {
                 <Route exact path="/InstallmentWiseReport" element={<InstallmentWiseReport />} />
                 <Route exact path="/InstallmentMonthWiseReport" element={<MonthWiseReport />} />
                 <Route exact path="/InstallmentInvestmentStatusReport" element={<InstallmentInvestmentStatusReport />} />
-                <Route exact path="/InstallmentOutstandingReport" element={<ToDateOutstandingReport />} />
+                <Route exact path="/ToDateOutstandingReport" element={<ToDateOutstandingReport />} />
+                <Route exact path="/InstallmentOutstandingReport" element={<InstallmentOutstandingReport />} />
 
 
                 {/* Rountes for item reports */}
@@ -454,7 +456,8 @@ function App() {
                 <Route exact path="/ItemStatusReport" element={<ItemStatusReport />} />
                 <Route exact path="/SlowMovingReport" element={<ItemStatusComparisonReport />} />
                 <Route exact path="/ItemSaleSummary" element={<ItemSaleSummaryReport />} />
-                <Route exact path="/ItemSaleComparison" element={<ItemEvalutionReport />} />
+                {/* <Route exact path="/ItemSaleComparison" element={<ItemEvalutionReport />} /> */}
+                <Route exact path="/ItemSaleComparison" element={<ItemSaleComparison />} />
                 <Route exact path="/CompanySaleComparison" element={<ItemReorderLevelReport />} />
                 <Route exact path="/RawMaterialStockReport" element={<RawMaterialStockReport />} />
                 <Route exact path="/SemishFinishStockReport" element={<SemiFinishStockReport />} />
