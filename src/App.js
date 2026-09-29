@@ -549,7 +549,7 @@ function App() {
 
 
                {/* Rountes for Forms */}
-                <Route exact path="/InstallationSheet" element={<InstallarMaintenance />} />
+                <Route exact path="/InstallarMaintenance" element={<InstallarMaintenance />} />
                 <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenance />} />
                 <Route exact path="/CustomerMaintenance" element={<CustomerMaintenance />} />
                 <Route exact path="/SalesManMaintenance" element={<SalesmanMaintenance />} />

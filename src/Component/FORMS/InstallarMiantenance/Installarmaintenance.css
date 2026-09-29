@@ -356,8 +356,8 @@
 }
 
 .el-row-2-fields .el-field-row-inner input {
-  max-width: 200px;
-  width: 200px;
+  max-width: 195px !important;
+  width: 195px !important;
   flex: 0 0 auto;
 }
 

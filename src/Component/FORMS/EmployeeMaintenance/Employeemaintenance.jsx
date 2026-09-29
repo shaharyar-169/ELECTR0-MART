@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../../../ThemeContext";
-import "./Employeemaintenance.css";
+import "./employeemaintenance.css";
 import axios from "axios";
 import {
   getUserData,
@@ -1657,16 +1657,20 @@ export default function EmployeeMaintenance() {
                         <div className="el-field-row">
                           <span className="el-field-label-right">Name :</span>
                           <input
-                            ref={descriptionInputRef}
-                            value={formStore.description}
-                            onChange={set("description")}
-                            placeholder="Name"
-                            className="name-field"
-                            maxLength={40}
-                            onKeyDown={(e) =>
-                              handleKeyDown(e, contactPersonInputRef)
-                            }
-                          />
+  ref={descriptionInputRef}
+  value={formStore.description}
+  onChange={(e) => {
+    // ✅ Force uppercase on the DOM element itself
+    e.target.value = e.target.value.toUpperCase();
+    // ✅ Then store the uppercase value via real event
+    set("description")(e);
+  }}
+  placeholder="Name"
+  className="name-field"
+  maxLength={40}
+  onKeyDown={(e) => handleKeyDown(e, contactPersonInputRef)}
+  style={{ textTransform: "uppercase" }}
+/>
                         </div>
 
                         <div className="el-row-split">
@@ -1763,7 +1767,7 @@ export default function EmployeeMaintenance() {
                               <div className="el-field-row el-cnic-row">
                                 {vis("CNIC") && (
                                   <>
-                                    <span className="el-field-label-right  CNIC_field_setting ">
+                                    <span className="el-field-label-right">
                                       CNIC :
                                     </span>
                                     <input
@@ -1840,23 +1844,35 @@ export default function EmployeeMaintenance() {
                                   Mobile :
                                 </span>
                                 <input
-                                  ref={mobileInputRef}
-                                  type="tel"
-                                  value={formStore.mobile}
-                                  onChange={set("mobile")}
-                                  placeholder="03XXXXXXXXX"
-                                  className="mobile-field"
-                                  maxLength={11}
-                                  onKeyDown={(e) => {
-                                    if (
-                                      !/[0-9]/.test(e.key) &&
-                                      e.key.length === 1
-                                    ) {
-                                      e.preventDefault();
-                                    }
-                                    handleKeyDown(e, dobDateRef);
-                                  }}
-                                />
+  ref={mobileInputRef}
+  type="tel"
+  value={formStore.mobile}
+  onChange={set("mobile")}
+  placeholder="03XXXXXXXXX"
+  className="mobile-field"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, dobDateRef);
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, dobDateRef);
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                               </div>
                             )}
                           </div>

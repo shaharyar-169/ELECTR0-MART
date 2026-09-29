@@ -1574,20 +1574,36 @@ export default function CustomerMaintenance() {
                         {vis("Mobile") && (
                           <div className="el-field-row">
                             <span className="el-field-label-right">Mobile :</span>
-                            <input
-                              ref={R("mobile")}
-                              type="tel"
-                              value={V("mobile")}
-                              onChange={setField("mobile")}
-                              placeholder="Customer Mobile"
-                              className="mobile-field"
-                              maxLength={11}
-                              onKeyDown={(e) => {
-                                if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                  e.preventDefault();
-                                handleKeyDown(e, "name");
-                              }}
-                            />
+                           <input
+  ref={R("mobile")}
+  type="tel"
+  value={V("mobile")}
+  onChange={setField("mobile")}
+  placeholder="Customer Mobile"
+  className="mobile-field"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "name");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "name");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                             {MOBILE_CONFIG && (
                               <button
                                 type="button"
@@ -1605,15 +1621,21 @@ export default function CustomerMaintenance() {
                         {/* NAME — always visible */}
                         <div className="el-field-row">
                           <span className="el-field-label-right">Name :</span>
-                          <input
-                            ref={R("name")}
-                            value={V("name")}
-                            onChange={setField("name")}
-                            placeholder="Name"
-                            className="name-field"
-                            maxLength={40}
-                            onKeyDown={(e) => handleKeyDown(e, "fatherName")}
-                          />
+                  <input
+  ref={R("name")}
+  value={V("name")}
+  onChange={(e) => {
+    // ✅ Force uppercase on the DOM element itself
+    e.target.value = e.target.value.toUpperCase();
+    // ✅ Then store the uppercase value via real event
+    setField("name")(e);
+  }}
+  placeholder="Name"
+  className="name-field"
+  maxLength={40}
+  onKeyDown={(e) => handleKeyDown(e, "fatherName")}
+  style={{ textTransform: "uppercase" }}
+/>
                         </div>
 
                         <hr className="el-mobile-divider" />
@@ -2170,14 +2192,36 @@ export default function CustomerMaintenance() {
                           {vis("OfficeContact") && (
                             <div className="el-field-row el-half">
                               <span className="el-field-label-right">Contact :</span>
-                              <input
-                                ref={R("companyContact")}
-                                value={V("companyContact")}
-                                onChange={setField("companyContact")}
-                                placeholder="Company Contact"
-                                maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, "guarantorContact")}
-                              />
+                                                          <input
+  ref={R("companyContact")}
+  value={V("companyContact")}
+  onChange={setField("companyContact")}
+  placeholder="Company Contact"
+  maxLength={40}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "guarantorContact");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "guarantorContact");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
+
+
                             </div>
                           )}
                         </div>
@@ -2190,20 +2234,36 @@ export default function CustomerMaintenance() {
                             {vis("GuaranterMobile") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">Contact :</span>
-                                <input
-                                  className="contect-width"
-                                  ref={R("guarantorContact")}
-                                  type="tel"
-                                  value={V("guarantorContact")}
-                                  onChange={setField("guarantorContact")}
-                                  placeholder="Guarantor Mobile"
-                                  maxLength={11}
-                                  onKeyDown={(e) => {
-                                    if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                      e.preventDefault();
-                                    handleKeyDown(e, "guarantorName");
-                                  }}
-                                />
+                               <input
+  className="contect-width"
+  ref={R("guarantorContact")}
+  type="tel"
+  value={V("guarantorContact")}
+  onChange={setField("guarantorContact")}
+  placeholder="Guarantor Mobile"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "guarantorName");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "guarantorName");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                                 {MOBILE_CONFIG && (
                                   <button
                                     type="button"
@@ -2345,20 +2405,36 @@ export default function CustomerMaintenance() {
                             {vis("Guaranter2Mobile") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">Contact :</span>
-                                <input
-                                  className="contect-width"
-                                  ref={R("witnessContact")}
-                                  type="tel"
-                                  value={V("witnessContact")}
-                                  onChange={setField("witnessContact")}
-                                  placeholder="Witness Mobile"
-                                  maxLength={11}
-                                  onKeyDown={(e) => {
-                                    if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                      e.preventDefault();
-                                    handleKeyDown(e, "witnessName");
-                                  }}
-                                />
+                               <input
+  className="contect-width"
+  ref={R("witnessContact")}
+  type="tel"
+  value={V("witnessContact")}
+  onChange={setField("witnessContact")}
+  placeholder="Witness Mobile"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "witnessName");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "witnessName");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                                 {MOBILE_CONFIG && (
                                   <button
                                     type="button"

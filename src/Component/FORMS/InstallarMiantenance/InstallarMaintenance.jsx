@@ -910,18 +910,22 @@ export default function InstallarMaintenance() {
                         </div>
 
                         <div className="el-field-row">
-                          <span className="el-field-label-right">
-                            Description :
-                          </span>
-                          <input
-                            ref={descriptionInputRef}
-                            value={formStore.description}
-                            onChange={set("description")}
-                            placeholder="Enter Description"
-                            maxLength={40}
-                            onKeyDown={(e) => handleKeyDown(e, contactPersonInputRef)}
-                          />
-                        </div>
+  <span className="el-field-label-right">
+    Description :
+  </span>
+  <input
+  ref={descriptionInputRef}
+  value={formStore.description}
+  onChange={(e) => {
+    e.target.value = e.target.value.toUpperCase();
+    set("description")(e);
+  }}
+  placeholder="Enter Description"
+  maxLength={40}
+  onKeyDown={(e) => handleKeyDown(e, contactPersonInputRef)}
+  style={{ textTransform: "uppercase" }}
+/>
+</div>
 
                         <div className="el-field-row">
                           <span className="el-field-label-right">
@@ -980,45 +984,69 @@ export default function InstallarMaintenance() {
                         </div>
 
                         <div className="el-field-row el-row-2-fields">
-                          <div className="el-field-row-inner el-field-left" style={{marginLeft:"37px"}}>
-                            <span className="el-field-label-right">
-                              Phone No :
-                            </span>
-                            <input
-                              ref={phoneInputRef}
-                              type="tel"
-                              value={formStore.phone}
-                              onChange={set("phone")}
-                              placeholder="Enter Phone No"
-                              className="fixed-width-field"
-                              maxLength={25}
-                              onKeyDown={(e) => {
-                                if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-                                  e.preventDefault();
-                                }
-                                handleKeyDown(e, mobileInputRef);
-                              }}
-                            />
-                          </div>
-                          <div className="el-field-row-inner el-field-right">
-                            <span className="el-field-label-right">
-                              Mobile No :
-                            </span>
-                            <input
-                              ref={mobileInputRef}
-                              type="tel"
-                              value={formStore.mobile}
-                              onChange={set("mobile")}
-                              placeholder="Enter Mobile No"
-                              maxLength={11}
-                              onKeyDown={(e) => {
-                                if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-                                  e.preventDefault();
-                                }
-                                handleKeyDown(e, citySelectRef);
-                              }}
-                            />
-                          </div>
+                         <div className="el-field-row-inner el-field-left" style={{ marginLeft: "37px" }}>
+  <span className="el-field-label-right">
+    Phone No :
+  </span>
+  <input
+    ref={phoneInputRef}
+    type="tel"
+    value={formStore.phone}
+    onChange={set("phone")}
+    placeholder="Enter Phone No"
+    className="fixed-width-field"
+    maxLength={25}
+    onKeyDown={(e) => {
+      // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        handleKeyDown(e, mobileInputRef);
+        return;
+      }
+
+      // Block non-numeric printable characters
+      if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+        e.preventDefault();
+        return;
+      }
+
+      handleKeyDown(e, mobileInputRef);
+    }}
+  />
+</div>
+                        <div className="el-field-row-inner el-field-right">
+  <span className="el-field-label-right">
+    Mobile No :
+  </span>
+  <input
+    ref={mobileInputRef}
+    type="tel"
+    value={formStore.mobile}
+    onChange={set("mobile")}
+    placeholder="Enter Mobile No"
+    maxLength={11}
+    onKeyDown={(e) => {
+      // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, etc.)
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        handleKeyDown(e, citySelectRef);
+        return;
+      }
+
+      // Block non-numeric printable characters
+      if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+        e.preventDefault();
+        return;
+      }
+
+      handleKeyDown(e, citySelectRef);
+    }}
+    onPaste={(e) => {
+      const pasted = e.clipboardData.getData("text");
+      if (!/^\d+$/.test(pasted)) {
+        e.preventDefault();
+      }
+    }}
+  />
+</div>
                         </div>
 
                         {/* -------- CITY + AREA on the same row -------- */}
@@ -1175,22 +1203,23 @@ export default function InstallarMaintenance() {
                 <div className="el-account-code-row" style={{marginLeft:'17px'}}>
                   <span className="el-field-label-right">A/C Code :</span>
                   <input
-                    ref={accountCodeInputRef}
-                    className="el-account-code-input"
-                    value={formStore.accountCode}
-                    onChange={set("accountCode")}
-                    placeholder="Enter A/C Code"
-                    maxLength={40}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (saveButtonRef.current) {
-                          saveButtonRef.current.focus();
-                        }
-                      }
-                    }}
-                  />
+  ref={accountCodeInputRef}
+  className="el-account-code-input"
+  value={formStore.accountCode}
+  onChange={set("accountCode")}
+  placeholder="Enter A/C Code"
+  maxLength={40}
+  readOnly                    // ✅ Makes it non-editable
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (saveButtonRef.current) {
+        saveButtonRef.current.focus();
+      }
+    }
+  }}
+/>
                   <input
                     className="el-account-code-input"
                     value={formStore.description}

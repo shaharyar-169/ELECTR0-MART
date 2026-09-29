@@ -399,8 +399,8 @@ function useMaintenanceForm({ config }) {
   const [maxCode, setMaxCode] = useState("");
   const [codeKey, setCodeKey] = useState(0);   // ⭐ remount key for InstallationCode
   const [organisation, setOrganisation] = useState(null);
-//   const [orgCode, setOrgCode] = useState("ANEXCOMP");
-//   const [locCode, setLocCode] = useState("001");
+  // const [orgCode, setOrgCode] = useState("AGCOMP");
+  // const [locCode, setLocCode] = useState("001");
 
 const [orgCode, setOrgCode] = useState(organisation);
   const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
@@ -1287,35 +1287,67 @@ export default function TechnicianMaintenance() {
                             <div className="el-row-split-pair">
                               <div className="el-field-row el-half">
                                 <span className="el-field-label-right">Mobile :</span>
-                                <input
-                                  ref={R("mobile")}
-                                  type="tel"
-                                  value={V("mobile")}
-                                  onChange={setField("mobile")}
-                                  placeholder="03XXXXXXXXX"
-                                  maxLength={11}
-                                  onKeyDown={(e) => {
-                                    if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                      e.preventDefault();
-                                    handleKeyDown(e, "emergencyNo");
-                                  }}
-                                />
+                              <input
+  ref={R("mobile")}
+  type="tel"
+  value={V("mobile")}
+  onChange={setField("mobile")}
+  placeholder="03XXXXXXXXX"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "emergencyNo");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "emergencyNo");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                               </div>
                               <div className="el-field-row el-half">
                                 <span className="el-field-label-right">Emergency :</span>
-                                <input
-                                  ref={R("emergencyNo")}
-                                  type="tel"
-                                  value={V("emergencyNo")}
-                                  onChange={setField("emergencyNo")}
-                                  placeholder="03XXXXXXXXX"
-                                  maxLength={11}
-                                  onKeyDown={(e) => {
-                                    if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                      e.preventDefault();
-                                    handleKeyDown(e, "city");
-                                  }}
-                                />
+                               <input
+  ref={R("emergencyNo")}
+  type="tel"
+  value={V("emergencyNo")}
+  onChange={setField("emergencyNo")}
+  placeholder="03XXXXXXXXX"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "city");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "city");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                               </div>
                             </div>
                           </div>
@@ -1543,18 +1575,34 @@ export default function TechnicianMaintenance() {
                           <div className="el-field-row el-half">
                             <span className="el-field-label-right">Reference 1 :</span>
                             <input
-                              ref={R("reference1Mobile")}
-                              type="tel"
-                              value={V("reference1Mobile")}
-                              onChange={setField("reference1Mobile")}
-                              placeholder="03XXXXXXXXX"
-                              maxLength={11}
-                              onKeyDown={(e) => {
-                                if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                  e.preventDefault();
-                                handleKeyDown(e, "reference1");
-                              }}
-                            />
+  ref={R("reference1Mobile")}
+  type="tel"
+  value={V("reference1Mobile")}
+  onChange={setField("reference1Mobile")}
+  placeholder="03XXXXXXXXX"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "reference1");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "reference1");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                           </div>
                           <div className="el-field-row el-half">
                             <input
@@ -1572,19 +1620,35 @@ export default function TechnicianMaintenance() {
                         <div className="el-row-split-pair">
                           <div className="el-field-row el-half">
                             <span className="el-field-label-right">Reference 2 :</span>
-                            <input
-                              ref={R("reference2Mobile")}
-                              type="tel"
-                              value={V("reference2Mobile")}
-                              onChange={setField("reference2Mobile")}
-                              placeholder="03XXXXXXXXX"
-                              maxLength={11}
-                              onKeyDown={(e) => {
-                                if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                  e.preventDefault();
-                                handleKeyDown(e, "reference2");
-                              }}
-                            />
+                           <input
+  ref={R("reference2Mobile")}
+  type="tel"
+  value={V("reference2Mobile")}
+  onChange={setField("reference2Mobile")}
+  placeholder="03XXXXXXXXX"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "reference2");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "reference2");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                           </div>
                           <div className="el-field-row el-half">
                             <input

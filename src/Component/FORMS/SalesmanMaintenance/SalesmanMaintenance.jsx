@@ -377,11 +377,12 @@ function useMaintenanceForm({ config }) {
   const [maxCode, setMaxCode] = useState("");
   const [photoFileName, setPhotoFileName] = useState("");
   const [organisation, setOrganisation] = useState(null);
-//   const [orgCode, setOrgCode] = useState("DEMOINS");
-//   const [locCode, setLocCode] = useState("001");
+  // const [orgCode, setOrgCode] = useState("DEMOINS");
+  // const [locCode, setLocCode] = useState("001");
 
 const [orgCode, setOrgCode] = useState(organisation);
   const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
+
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -1220,14 +1221,20 @@ export default function SalesmanMaintenance() {
                           <div className="el-row-split-left">
                             <div className="el-field-row">
                               <span className="el-field-label-right">Name :</span>
-                              <input
-                                ref={R("name")}
-                                value={V("name")}
-                                onChange={setField("name")}
-                                placeholder="Salesman Name"
-                                maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, "fatherName")}
-                              />
+                            <input
+  ref={R("name")}
+  value={V("name")}
+  onChange={(e) => {
+    // ✅ Force uppercase on the DOM element itself
+    e.target.value = e.target.value.toUpperCase();
+    // ✅ Then store the uppercase value via real event
+    setField("name")(e);
+  }}
+  placeholder="Salesman Name"
+  maxLength={40}
+  onKeyDown={(e) => handleKeyDown(e, "fatherName")}
+  style={{ textTransform: "uppercase" }}
+/>
                             </div>
 
                             <div className="el-field-row">
@@ -1268,20 +1275,36 @@ export default function SalesmanMaintenance() {
 
                             <div className="el-field-row">
                               <span className="el-field-label-right">Mobile :</span>
-                              <input
-                                ref={R("mobile")}
-                                type="tel"
-                                value={V("mobile")}
-                                onChange={setField("mobile")}
-                                placeholder="03XXXXXXXXX"
-                                className="mobile-field"
-                                maxLength={11}
-                                onKeyDown={(e) => {
-                                  if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                    e.preventDefault();
-                                  handleKeyDown(e, "cnic");
-                                }}
-                              />
+                             <input
+  ref={R("mobile")}
+  type="tel"
+  value={V("mobile")}
+  onChange={setField("mobile")}
+  placeholder="03XXXXXXXXX"
+  className="mobile-field"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "cnic");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "cnic");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                             </div>
 
                             <div className="el-field-row">
@@ -1428,19 +1451,35 @@ export default function SalesmanMaintenance() {
                           </div>
                           <div className="el-field-row el-half">
                             <span className="el-field-label-right">Mobile :</span>
-                            <input
-                              ref={R("reference1Mobile")}
-                              type="tel"
-                              value={V("reference1Mobile")}
-                              onChange={setField("reference1Mobile")}
-                              placeholder="03XXXXXXXXX"
-                              maxLength={11}
-                              onKeyDown={(e) => {
-                                if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                  e.preventDefault();
-                                handleKeyDown(e, "reference2");
-                              }}
-                            />
+                          <input
+  ref={R("reference1Mobile")}
+  type="tel"
+  value={V("reference1Mobile")}
+  onChange={setField("reference1Mobile")}
+  placeholder="03XXXXXXXXX"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "reference2");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "reference2");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                           </div>
                         </div>
 
@@ -1458,19 +1497,35 @@ export default function SalesmanMaintenance() {
                           </div>
                           <div className="el-field-row el-half">
                             <span className="el-field-label-right">Mobile :</span>
-                            <input
-                              ref={R("reference2Mobile")}
-                              type="tel"
-                              value={V("reference2Mobile")}
-                              onChange={setField("reference2Mobile")}
-                              placeholder="03XXXXXXXXX"
-                              maxLength={11}
-                              onKeyDown={(e) => {
-                                if (!/[0-9]/.test(e.key) && e.key.length === 1)
-                                  e.preventDefault();
-                                handleKeyDown(e, "documentName");
-                              }}
-                            />
+                           <input
+  ref={R("reference2Mobile")}
+  type="tel"
+  value={V("reference2Mobile")}
+  onChange={setField("reference2Mobile")}
+  placeholder="03XXXXXXXXX"
+  maxLength={11}
+  onKeyDown={(e) => {
+    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      handleKeyDown(e, "documentName");
+      return;
+    }
+
+    // Block non-numeric printable characters
+    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+      e.preventDefault();
+      return;
+    }
+
+    handleKeyDown(e, "documentName");
+  }}
+  onPaste={(e) => {
+    const pasted = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+/>
                           </div>
                         </div>
 

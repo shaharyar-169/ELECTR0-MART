@@ -572,6 +572,7 @@
 .el-cnic-row {
 justify-content: flex-start !important;
 }
+
 .el-cnic-row .el-date-inline {
   flex: 0 0 117px !important;
   width: 117px !important;
