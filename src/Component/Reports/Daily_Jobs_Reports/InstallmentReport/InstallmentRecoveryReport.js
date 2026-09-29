@@ -455,8 +455,8 @@ console.log('customer code value ', Customerselectdatavalue)
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
 
-      // code: "MTSELEC",
-      // FLocCod: "002",
+      // code: "SMART2",
+      // FLocCod: "001",
       // FYerDsc: "2025-2025",
     }).toString();
 
@@ -1991,7 +1991,7 @@ const exportManualPDF = () => {
   });
 
   // Set column widths
-  [10, 8, 40, 12, 10, 12, 7, 12, 12, 12,10,12, 12, 6].forEach((width, index) => {
+  [10, 10, 40, 12, 10, 12, 7, 12, 12, 12,10,12, 12, 6].forEach((width, index) => {
     worksheet.getColumn(index + 1).width = width;
   });
 
@@ -2363,7 +2363,7 @@ const exportManualPDF = () => {
   });
 
   // Set column widths
-  [10, 8, 40, 12, 40, 40, 12, 12, 10, 10, 12, 12].forEach((width, index) => {
+  [10, 10, 45, 12, 45, 45, 12, 12, 10, 10, 12, 12].forEach((width, index) => {
     worksheet.getColumn(index + 1).width = width;
   });
 
@@ -2603,8 +2603,8 @@ const exportManualPDF = () => {
     width: "100%", // 100vw ki jagah 100%
     // maxWidth: isSidebarVisible ? "1000px" :'1200px',
     maxWidth: isSidebarVisible
-    ? (isLargeScreen ? "1270px" : "1000px")
-    : (isLargeScreen ? "1270px" : "1200px"),
+    ? (isLargeScreen ? "1100px" : "1000px")
+    : (isLargeScreen ? "1100px" : "1100px"),
     height: "calc(100vh - 100px)",
     position: "absolute",
     top: "70px",
@@ -2631,10 +2631,9 @@ const exportManualPDF = () => {
   };
   const secondColWidth = {
    
-     width: isSidebarVisible ? "100px" :'300px',
     width: isSidebarVisible
-    ? (isLargeScreen ? "360px" : "100px")
-    : (isLargeScreen ? "360px" : "300px"),
+    ? (isLargeScreen ? "200px" : "100px")
+    : (isLargeScreen ? "200px" : "200px"),
   };
   const thirdColWidth = {
     width: "90px",

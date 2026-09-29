@@ -261,10 +261,11 @@ export default function ItemSaleComparison() {
           FIntDat: fromInputDate,
       FFnlDat: toInputDate,
       FCmpCod: Companyselectdata,
-      FSchTxt: searchQuery,
         code: organisation.code,
       FLocCod: locationnumber || getLocationNumber,
       FYerDsc: yeardescription || getyeardescription,
+
+    
     }).toString();
 
     axios
@@ -631,9 +632,6 @@ const exportPDFHandler = () => {
     const rowHeight = 5;
     const tableWidth = getTotalTableWidth();
 
-    doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10);
-
     for (let i = startIndex; i < endIndex; i++) {
       const row = rows[i];
       const isTotalRow = i === rows.length - 1;
@@ -646,26 +644,69 @@ const exportPDFHandler = () => {
         textColor = [255, 0, 0];
       }
 
-      // Bold for total row
+      // ✅ BOLD font for total row, normal for others
       if (isTotalRow) {
         doc.setFont("verdana-regular", "bold");
+        doc.setFontSize(10);
       } else {
         doc.setFont("verdana-regular", "normal");
+        doc.setFontSize(10);
       }
 
       doc.setDrawColor(0);
-      doc.setLineWidth(0.2);
-      doc.rect(
-        startX,
-        startY + (i - startIndex + 2) * rowHeight,
-        tableWidth,
-        rowHeight
-      );
+
+      // ✅ TOTAL ROW: double border on top & bottom (like ToDateOutstanding)
+      if (isTotalRow) {
+        const rowTopY = startY + (i - startIndex + 2) * rowHeight;
+        const rowBottomY = rowTopY + rowHeight;
+
+        // Top double border
+        doc.setLineWidth(0.3);
+        doc.line(startX, rowTopY, startX + tableWidth, rowTopY);
+        doc.line(startX, rowTopY + 0.5, startX + tableWidth, rowTopY + 0.5);
+
+        // Bottom double border
+        doc.line(startX, rowBottomY, startX + tableWidth, rowBottomY);
+        doc.line(
+          startX,
+          rowBottomY - 0.5,
+          startX + tableWidth,
+          rowBottomY - 0.5
+        );
+
+        // Left & right vertical borders
+        doc.setLineWidth(0.2);
+        doc.line(startX, rowTopY, startX, rowBottomY);
+        doc.line(
+          startX + tableWidth,
+          rowTopY,
+          startX + tableWidth,
+          rowBottomY
+        );
+      } else {
+        // Normal row: single border
+        doc.setLineWidth(0.2);
+        doc.rect(
+          startX,
+          startY + (i - startIndex + 2) * rowHeight,
+          tableWidth,
+          rowHeight
+        );
+      }
 
       row.forEach((cell, cellIndex) => {
         const cellY =
           startY + (i - startIndex + 2) * rowHeight + rowHeight / 2;
         const cellX = startX + 2;
+
+        // ✅ VERDANA font — bold for total row, normal otherwise
+        if (isTotalRow) {
+          doc.setFont("verdana-regular", "bold");
+          doc.setFontSize(10);
+        } else {
+          doc.setFont("verdana-regular", "normal");
+          doc.setFontSize(10);
+        }
 
         doc.setTextColor(...textColor);
 
@@ -700,7 +741,7 @@ const exportPDFHandler = () => {
       startX = (doc.internal.pageSize.width - tableWidth) / 2;
     }
 
-    // Footer
+    // ✅ Footer: Crystal Solution + Date + Time on the SAME line (left side)
     const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
     const lineY = pageHeight - 15;
 
@@ -710,7 +751,13 @@ const exportPDFHandler = () => {
     doc.setFont("verdana-regular", "normal");
     doc.setFontSize(10);
     doc.setTextColor(0);
-    doc.text(`Crystal Solution \t ${date} \t ${time}`, lineX + 2, lineY + 5);
+
+    // ✅ All together on left side
+    doc.text(
+      `Crystal Solution    ${date}    ${time}`,
+      lineX + 2,
+      lineY + 5
+    );
   };
 
   // Function to calculate total table width
@@ -792,8 +839,9 @@ const exportPDFHandler = () => {
       doc.setFont(getfontstyle, "300");
 
       const search = searchQuery ? searchQuery : "";
-        let companyTerm = Companyselectdatavalue.label ? Companyselectdatavalue.label : "ALL";
-
+      let companyTerm = Companyselectdatavalue.label
+        ? Companyselectdatavalue.label
+        : "ALL";
 
       // Company label
       doc.setFont("verdana", "bold");
@@ -1596,7 +1644,7 @@ const exportPDFHandler = () => {
                 alignItems: "center",
                 margin: "0px",
                 padding: "0px",
-                justifyContent: "space-between",
+                justifyContent: "start",
               }}
             >
               {/* Company Select */}
@@ -1630,7 +1678,7 @@ const exportPDFHandler = () => {
                                  className="List-select-class "
                                  ref={saleSelectRef}
                                  options={options}
-                                 onKeyDown={(e) => handlecompanyKeypress(e, input4Ref)}
+                                 onKeyDown={(e) => handlecompanyKeypress(e, selectButtonRef)}
                                  id="selectedsale"
                                  onChange={(selectedOption) => {
                                    if (selectedOption && selectedOption.value) {
@@ -1669,70 +1717,7 @@ const exportPDFHandler = () => {
                              </div>
                            </div>
 
-              {/* Search */}
-              <div id="lastDiv" style={{ marginRight: "1px" }}>
-                <label for="searchInput" style={{ marginRight: "3px" }}>
-                  <span
-                    style={{
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Search :
-                  </span>{" "}
-                </label>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <input
-                    ref={input4Ref}
-                    onKeyDown={(e) => handleKeyPress(e, selectButtonRef)}
-                    type="text"
-                    id="searchsubmit"
-                    placeholder="Search"
-                    value={searchQuery}
-                    autoComplete="off"
-                    style={{
-                      marginRight: "20px",
-                      width: "150px",
-                      height: "24px",
-                      fontSize: getdatafontsize,
-                      fontFamily: getfontstyle,
-                      color: fontcolor,
-                      backgroundColor: getcolor,
-                      border: `1px solid ${fontcolor}`,
-                      outline: "none",
-                      paddingLeft: "10px",
-                      paddingRight: "25px", // space for the clear icon
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.border = "2px solid red")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.border = `1px solid ${fontcolor}`)
-                    }
-                    onChange={(e) =>
-                      setSearchQuery((e.target.value || "").toUpperCase())
-                    }
-                  />
-                  {searchQuery && (
-                    <span
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        color: fontcolor,
-                        userSelect: "none",
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-                </div>
-              </div>
+             
             </div>
           </div>
 

@@ -446,8 +446,8 @@ export default function ToDateOutstandingReport() {
       FColCod: Collector,
       FCstTyp: Customerselectdata,
 
-      // code: "MTSELEC",
-      // FLocCod: "002",
+      // code: "SMART2",
+      // FLocCod: "001",
         code: organisation.code,
         FLocCod: locationnumber || getLocationNumber,
         FYerDsc: yeardescription || getyeardescription,
@@ -805,7 +805,7 @@ const exportPDFHandler = () => {
       "Outstan",
       "Balance",
     ];
-    const columnWidths = [10, 22, 20, 50, 28, 22, 22, 26, 23, 23, 23, 23];
+    const columnWidths = [10, 22, 22, 45, 28, 22, 22, 26, 24, 23, 23, 23];
 
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 
@@ -1167,7 +1167,7 @@ const exportPDFHandler = () => {
         doc.text(`Cust Type :`, labelsX + 180, labelsY + 4.3);
         doc.setFont("verdana-regular", "normal");
         doc.setFontSize(10);
-        doc.text(`${custTypeData}`, labelsX + 210, labelsY + 4.3);
+        doc.text(`${custTypeData}`, labelsX + 205, labelsY + 4.3);
 
         doc.setFont("verdana", "bold");
         doc.setFontSize(10);
@@ -1227,406 +1227,408 @@ const exportPDFHandler = () => {
   // EXCEL — Main "Excel" button (now with Mobile column)
   // ================================================================
 const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet1");
 
-    // 12 original (deduped) + 13 new = 25 columns
-    const numColumns = 25;
+  // 12 original (deduped) + 13 new = 25 columns
+  const numColumns = 25;
 
-    const columnAlignments = [
-      "center", // 1  Sr
-      "center", // 2  A/C Code
-      "left",   // 3  Manual
-      "left",   // 4  Customer
-      "left",   // 5  Mobile
-      "center", // 6  PrmDate
-      "right",  // 7  InsAmt
-      "right",  // 8  Receivable
-      "right",  // 9  LastDate
-      "right",  // 10 Collection
-      "right",  // 11 Outstanding
-      "right",  // 12 Balance
+  const columnAlignments = [
+    "center", // 1  Sr
+    "center", // 2  A/C Code
+    "center", // 3  Manual
+    "left",   // 4  Customer
+    "center", // 5  Mobile
+    "center", // 6  PrmDate
+    "right",  // 7  InsAmt
+    "right",  // 8  Receivable
+    "right",  // 9  LastDate
+    "right",  // 10 Collection
+    "right",  // 11 Outstanding
+    "right",  // 12 Balance
+
+    // -------- New columns appended --------
+    "left",   // 13 FatherName
+    "left",   // 14 Address1
+    "left",   // 15 Address2
+    "center", // 16 Collector
+    "center", // 17 SaleDate
+    "left",   // 18 Item
+    "right",  // 19 LastAmt
+    "right",  // 20 SaleAmt
+    "center", // 21 Day
+    "center", // 22 ExpDate
+    "right",  // 23 Collected
+    "right",  // 24 Opening
+    "right",  // 25 Disc
+  ];
+
+  const toNumber = (value) => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const cleaned = value.replace(/,/g, "");
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+    return 0;
+  };
+
+  const fontCompanyName = {
+    name: "CustomFont" || "CustomFont",
+    size: 18,
+    bold: true,
+  };
+  const fontStoreList = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
+  const fontHeader = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: true,
+  };
+  const fontTableContent = {
+    name: "CustomFont" || "CustomFont",
+    size: 10,
+    bold: false,
+  };
+
+  worksheet.addRow([]);
+
+  const companyRow = worksheet.addRow([comapnyname]);
+  companyRow.eachCell((cell) => {
+    cell.font = {
+      name: "Times New Roman",
+      size: 16,
+      bold: true,
+    };
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.getRow(companyRow.number).height = 30;
+  worksheet.mergeCells(
+    `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`
+  );
+
+  const storeListRow = worksheet.addRow([
+    `ToDateOutstanding Report From ${fromInputDate} To ${toInputDate}`,
+  ]);
+  storeListRow.eachCell((cell) => {
+    cell.font = fontStoreList;
+    cell.alignment = { horizontal: "center" };
+  });
+
+  worksheet.mergeCells(
+    `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`
+  );
+
+  worksheet.addRow([]);
+
+  // ===== EXCEL FILTERS: Collector, Cust Type, Type only =====
+  let collectorData = CollectorDataValue.label
+    ? CollectorDataValue.label
+    : "ALL";
+  let custTypeData = Customerselectdatavalue.label
+    ? Customerselectdatavalue.label
+    : "ALL";
+  let Typefilter =
+    transectionType2 === "N"
+      ? "NILL COLLECTION"
+      : transectionType2 === "A"
+        ? "ADVANCE"
+        : transectionType2 === "L"
+          ? "LESS OUTSTANDING"
+          : transectionType2 === "E"
+            ? "EXPIRD ACCOUNT"
+            : transectionType2 === "C"
+              ? "CLOSE"
+              : "ALL";
+
+  const typeAndStoreRow = worksheet.addRow([
+    "Collec :",
+    collectorData,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "Cust Type :",
+    custTypeData,
+  ]);
+
+  const typeAndStoreRow2 = worksheet.addRow([
+    "Type :",
+    Typefilter,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
+
+  typeAndStoreRow.eachCell((cell, colIndex) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: [1, 9].includes(colIndex),
+    };
+    cell.alignment = { horizontal: "left", vertical: "middle" };
+  });
+  typeAndStoreRow2.eachCell((cell, colIndex) => {
+    cell.font = {
+      name: "CustomFont" || "CustomFont",
+      size: 10,
+      bold: [1].includes(colIndex),
+    };
+    cell.alignment = { horizontal: "left", vertical: "middle" };
+  });
+
+  // ✅ MERGE: Collector value (B:D) and Type value (B:D)
+  worksheet.mergeCells(
+    `B${typeAndStoreRow.number}:D${typeAndStoreRow.number}`
+  );
+  worksheet.mergeCells(
+    `B${typeAndStoreRow2.number}:D${typeAndStoreRow2.number}`
+  );
+
+  const headerStyle = {
+    font: fontHeader,
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFC6D9F7" },
+    },
+    border: {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    },
+  };
+
+  const headers = [
+    "Sr",
+    "A/C Code",
+    "Manual",
+    "Customer",
+    "Mobile",
+    "PrmDate",
+    "InsAmt",
+    "Receivable",
+    "LastDate",
+    "Collection",
+    "Outstanding",
+    "Balance",
+
+    // -------- New columns appended --------
+    "FatherName",
+    "Address1",
+    "Address2",
+    "Collector",
+    "SaleDate",
+    "Item",
+    "LastAmt",
+    "SaleAmt",
+    "Day",
+    "ExpDate",
+    "Collected",
+    "Opening",
+    "Disc",
+  ];
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
+
+  tableData.forEach((item, index) => {
+    const row = worksheet.addRow([
+      String(index + 1), // Sr — generated from row index
+      item.Code,
+      item.ManualNo,
+      item.Customer,
+      item.Mobile,
+      item.PrmDate,
+      toNumber(item.InsAmt),
+      toNumber(item.Receiavable),
+      item.LastDate,
+      toNumber(item.Collection),
+      toNumber(item.Outstanding),
+      toNumber(item.Balance),
 
       // -------- New columns appended --------
-      "left",   // 13 FatherName
-      "left",   // 14 Address1
-      "left",   // 15 Address2
-      "left",   // 16 Collector
-      "center", // 17 SaleDate
-      "left",   // 18 Item
-      "right",  // 19 LastAmt
-      "right",  // 20 SaleAmt
-      "center", // 21 Day
-      "center", // 22 ExpDate
-      "right",  // 23 Collected
-      "right",  // 24 Opening
-      "right",  // 25 Disc
-    ];
-
-    const toNumber = (value) => {
-      if (typeof value === "number") return value;
-      if (typeof value === "string") {
-        const cleaned = value.replace(/,/g, "");
-        const num = parseFloat(cleaned);
-        return isNaN(num) ? 0 : num;
-      }
-      return 0;
-    };
-
-    const fontCompanyName = {
-      name: "CustomFont" || "CustomFont",
-      size: 18,
-      bold: true,
-    };
-    const fontStoreList = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-    const fontHeader = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: true,
-    };
-    const fontTableContent = {
-      name: "CustomFont" || "CustomFont",
-      size: 10,
-      bold: false,
-    };
-
-    worksheet.addRow([]);
-
-    const companyRow = worksheet.addRow([comapnyname]);
-    companyRow.eachCell((cell) => {
-      cell.font = {
-        name: "Times New Roman",
-        size: 16,
-        bold: true,
-      };
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.getRow(companyRow.number).height = 30;
-    worksheet.mergeCells(
-      `A${companyRow.number}:${String.fromCharCode(65 + numColumns - 1)}${companyRow.number}`,
-    );
-
-    const storeListRow = worksheet.addRow([
-      `ToDateOutstanding Report From ${fromInputDate} To ${toInputDate}`,
-    ]);
-    storeListRow.eachCell((cell) => {
-      cell.font = fontStoreList;
-      cell.alignment = { horizontal: "center" };
-    });
-
-    worksheet.mergeCells(
-      `A${storeListRow.number}:${String.fromCharCode(65 + numColumns - 1)}${storeListRow.number}`,
-    );
-
-    worksheet.addRow([]);
-
-    // ===== EXCEL FILTERS: Collector, Cust Type, Type only =====
-    let collectorData = CollectorDataValue.label
-      ? CollectorDataValue.label
-      : "ALL";
-    let custTypeData = Customerselectdatavalue.label
-      ? Customerselectdatavalue.label
-      : "ALL";
-    let Typefilter =
-      transectionType2 === "N"
-        ? "NILL COLLECTION"
-        : transectionType2 === "A"
-          ? "ADVANCE"
-          : transectionType2 === "L"
-            ? "LESS OUTSTANDING"
-            : transectionType2 === "E"
-              ? "EXPIRD ACCOUNT"
-              : transectionType2 === "C"
-                ? "CLOSE"
-                : "ALL";
-
-    const typeAndStoreRow = worksheet.addRow([
-      "Collec :",
-      collectorData,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "Cust Type :",
-      custTypeData,
+      item.FatherName,
+      item.Address1,
+      item.Address2,
+      item.Collector,
+      item.SaleDate,
+      item.Item,
+      toNumber(item.LastAmt),
+      toNumber(item.SaleAmt),
+      item.Day,
+      item.ExpDate,
+      toNumber(item.Collected),
+      toNumber(item.Opening),
+      toNumber(item.Disc),
     ]);
 
-    const typeAndStoreRow2 = worksheet.addRow([
-      "Type :",
-      Typefilter,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
-
-    typeAndStoreRow.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1, 9].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-    typeAndStoreRow2.eachCell((cell, colIndex) => {
-      cell.font = {
-        name: "CustomFont" || "CustomFont",
-        size: 10,
-        bold: [1].includes(colIndex),
-      };
-      cell.alignment = { horizontal: "left", vertical: "middle" };
-    });
-
-    // ===== MERGE: Collection Type filter value cell (B to C) =====
-    // The Collector filter value lives in column B of `typeAndStoreRow`.
-    worksheet.mergeCells(
-      `B${typeAndStoreRow.number}:C${typeAndStoreRow.number}`,
-    );
-
-    const headerStyle = {
-      font: fontHeader,
-      alignment: { horizontal: "center", vertical: "middle" },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC6D9F7" },
-      },
-      border: {
+    row.eachCell((cell, colIndex) => {
+      cell.font = fontTableContent;
+      cell.border = {
         top: { style: "thin" },
         left: { style: "thin" },
         bottom: { style: "thin" },
         right: { style: "thin" },
-      },
-    };
-
-    const headers = [
-      "Sr",
-      "A/C Code",
-      "Manual",
-      "Customer",
-      "Mobile",
-      "PrmDate",
-      "InsAmt",
-      "Receivable",
-      "LastDate",
-      "Collection",
-      "Outstanding",
-      "Balance",
-
-      // -------- New columns appended --------
-      "FatherName",
-      "Address1",
-      "Address2",
-      "Collector",
-      "SaleDate",
-      "Item",
-      "LastAmt",
-      "SaleAmt",
-      "Day",
-      "ExpDate",
-      "Collected",
-      "Opening",
-      "Disc",
-    ];
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => Object.assign(cell, headerStyle));
-
-    tableData.forEach((item, index) => {
-      const row = worksheet.addRow([
-        String(index + 1), // Sr — generated from row index
-        item.Code,
-        item.ManualNo,
-        item.Customer,
-        item.Mobile,
-        item.PrmDate,
-        toNumber(item.InsAmt),
-        toNumber(item.Receiavable),
-        item.LastDate,
-        toNumber(item.Collection),
-        toNumber(item.Outstanding),
-        toNumber(item.Balance),
-
-        // -------- New columns appended --------
-        item.FatherName,
-        item.Address1,
-        item.Address2,
-        item.Collector,
-        item.SaleDate,
-        item.Item,
-        toNumber(item.LastAmt),
-        toNumber(item.SaleAmt),
-        item.Day,
-        item.ExpDate,
-        toNumber(item.Collected),
-        toNumber(item.Opening),
-        toNumber(item.Disc),
-      ]);
-
-      row.eachCell((cell, colIndex) => {
-        cell.font = fontTableContent;
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.alignment = {
-          horizontal: columnAlignments[colIndex - 1] || "left",
-          vertical: "middle",
-        };
-        if ([7, 8, 10, 11, 12, 19, 20, 23, 24, 25].includes(colIndex)) {
-          cell.numFmt = "#,##0";
-        }
-      });
-    });
-
-    // Column widths — 25 columns
-    [
-      8,  // 1  Sr
-      14, // 2  A/C Code
-      16, // 3  Manual
-      45, // 4  Customer
-      12, // 5  Mobile
-      12, // 6  PrmDate
-      14, // 7  InsAmt
-      14, // 8  Receivable
-      14, // 9  LastDate
-      14, // 10 Collection
-      14, // 11 Outstanding
-      14, // 12 Balance
-      20, // 13 FatherName
-      30, // 14 Address1
-      30, // 15 Address2
-      16, // 16 Collector
-      14, // 17 SaleDate
-      30, // 18 Item
-      14, // 19 LastAmt
-      14, // 20 SaleAmt
-      10, // 21 Day
-      14, // 22 ExpDate
-      14, // 23 Collected
-      14, // 24 Opening
-      14, // 25 Disc
-    ].forEach((width, index) => {
-      worksheet.getColumn(index + 1).width = width;
-    });
-
-    // ===== Totals row (from API response) =====
-    const totalSaleNum = toNumber(totalSale);
-    const totalInsNum = toNumber(totalIns);
-    const totalReceiveNum = toNumber(totalReceive);
-    const totalCollectionNum = toNumber(totalCollection);
-    const totalDiscNum = toNumber(totalDisc);
-    const totalOutstanNum = toNumber(totalOutstan);
-    const totalBalanceNum = toNumber(totalBalance);
-
-    const totalRow = worksheet.addRow([
-      String(formatValue(tableData.length.toLocaleString())), // col 1  - count
-      "",                                                     // col 2
-      "",                                                     // col 3
-      "",                                                     // col 4
-      "",                                                     // col 5
-      "",                                                     // col 6
-      totalInsNum,                                            // col 7  InsAmt
-      totalReceiveNum,                                        // col 8  Receivable
-      "",                                                     // col 9
-      totalCollectionNum,                                     // col 10 Collection
-      totalOutstanNum,                                        // col 11 Outstanding
-      totalBalanceNum,                                        // col 12 Balance
-
-      // new columns
-      "",                                                     // col 13 FatherName
-      "",                                                     // col 14 Address1
-      "",                                                     // col 15 Address2
-      "",                                                     // col 16 Collector
-      "",                                                     // col 17 SaleDate
-      "",                                                     // col 18 Item
-      "",                                                     // col 19 LastAmt
-      "",                                                     // col 20 SaleAmt
-      "",                                                     // col 21 Day
-      "",                                                     // col 22 ExpDate
-      "",                                                     // col 23 Collected
-      "",                                                     // col 24 Opening
-      totalDiscNum,                                           // col 25 Disc
-    ]);
-
-    totalRow.eachCell((cell, colNumber) => {
-      cell.font = { bold: true };
-      cell.border = {
-        top: { style: "double" },
-        left: { style: "thin" },
-        bottom: { style: "double" },
-        right: { style: "thin" },
       };
-      if (colNumber > 6) {
-        cell.alignment = { horizontal: "right" };
-      }
-      if (colNumber === 1) {
-        cell.alignment = { horizontal: "center" };
-      }
-      if ([7, 8, 10, 11, 12, 19, 20, 23, 24, 25].includes(colNumber)) {
+      cell.alignment = {
+        horizontal: columnAlignments[colIndex - 1] || "left",
+        vertical: "middle",
+      };
+      if ([7, 8, 10, 11, 12, 19, 20, 23, 24, 25].includes(colIndex)) {
         cell.numFmt = "#,##0";
       }
     });
+  });
 
-    worksheet.addRow([]);
+  // Column widths — 25 columns
+  [
+    8,  // 1  Sr
+    12, // 2  A/C Code
+    10, // 3  Manual
+    45, // 4  Customer
+    12, // 5  Mobile
+    12, // 6  PrmDate
+    14, // 7  InsAmt
+    14, // 8  Receivable
+    14, // 9  LastDate
+    14, // 10 Collection
+    14, // 11 Outstanding
+    14, // 12 Balance
+    30, // 13 FatherName
+    45, // 14 Address1
+    45, // 15 Address2
+    10, // 16 Collector
+    12, // 17 SaleDate
+    30, // 18 Item
+    14, // 19 LastAmt
+    14, // 20 SaleAmt
+    10, // 21 Day
+    14, // 22 ExpDate
+    14, // 23 Collected
+    14, // 24 Opening
+    14, // 25 Disc
+  ].forEach((width, index) => {
+    worksheet.getColumn(index + 1).width = width;
+  });
 
-    const getCurrentTime = () => {
-      const today = new Date();
-      const hh = String(today.getHours()).padStart(2, "0");
-      const mm = String(today.getMinutes()).padStart(2, "0");
-      const ss = String(today.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
+  // ===== Totals row (from API response) =====
+  const totalSaleNum = toNumber(totalSale);
+  const totalInsNum = toNumber(totalIns);
+  const totalReceiveNum = toNumber(totalReceive);
+  const totalCollectionNum = toNumber(totalCollection);
+  const totalDiscNum = toNumber(totalDisc);
+  const totalOutstanNum = toNumber(totalOutstan);
+  const totalBalanceNum = toNumber(totalBalance);
+
+  const totalRow = worksheet.addRow([
+    String(formatValue(tableData.length.toLocaleString())), // col 1  - count
+    "",                                                     // col 2
+    "",                                                     // col 3
+    "",                                                     // col 4
+    "",                                                     // col 5
+    "",                                                     // col 6
+    totalInsNum,                                            // col 7  InsAmt
+    totalReceiveNum,                                        // col 8  Receivable
+    "",                                                     // col 9
+    totalCollectionNum,                                     // col 10 Collection
+    totalOutstanNum,                                        // col 11 Outstanding
+    totalBalanceNum,                                        // col 12 Balance
+
+    // new columns
+    "",                                                     // col 13 FatherName
+    "",                                                     // col 14 Address1
+    "",                                                     // col 15 Address2
+    "",                                                     // col 16 Collector
+    "",                                                     // col 17 SaleDate
+    "",                                                     // col 18 Item
+    "",                                                     // col 19 LastAmt
+    "",                                                     // col 20 SaleAmt
+    "",                                                     // col 21 Day
+    "",                                                     // col 22 ExpDate
+    "",                                                     // col 23 Collected
+    "",                                                     // col 24 Opening
+    totalDiscNum,                                           // col 25 Disc
+  ]);
+
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true };
+    cell.border = {
+      top: { style: "double" },
+      left: { style: "thin" },
+      bottom: { style: "double" },
+      right: { style: "thin" },
     };
-    const getCurrentDate = () => {
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-    const currentTime = getCurrentTime();
-    const currentdate = getCurrentDate();
-    const userid = user.tusrid;
+    if (colNumber > 6) {
+      cell.alignment = { horizontal: "right" };
+    }
+    if (colNumber === 1) {
+      cell.alignment = { horizontal: "center" };
+    }
+    if ([7, 8, 10, 11, 12, 19, 20, 23, 24, 25].includes(colNumber)) {
+      cell.numFmt = "#,##0";
+    }
+  });
 
-    const dateTimeRow = worksheet.addRow([
-      `DATE:   ${currentdate}  TIME:   ${currentTime}`,
-    ]);
-    dateTimeRow.eachCell((cell) => {
-      cell.font = { name: "CustomFont" || "CustomFont", size: 10 };
-      cell.alignment = { horizontal: "left" };
-    });
+  worksheet.addRow([]);
 
-    const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
-    dateTimeRow1.eachCell((cell) => {
-      cell.font = { name: "CustomFont" || "CustomFont", size: 10 };
-      cell.alignment = { horizontal: "left" };
-    });
-
-    worksheet.mergeCells(
-      `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`,
-    );
-    worksheet.mergeCells(
-      `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`,
-    );
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `ToDateOutstandingReport As On ${currentdate}.xlsx`);
+  const getCurrentTime = () => {
+    const today = new Date();
+    const hh = String(today.getHours()).padStart(2, "0");
+    const mm = String(today.getMinutes()).padStart(2, "0");
+    const ss = String(today.getSeconds()).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
   };
+  const getCurrentDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  const currentTime = getCurrentTime();
+  const currentdate = getCurrentDate();
+  const userid = user.tusrid;
+
+  const dateTimeRow = worksheet.addRow([
+    `DATE:   ${currentdate}  TIME:   ${currentTime}`,
+  ]);
+  dateTimeRow.eachCell((cell) => {
+    cell.font = { name: "CustomFont" || "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  const dateTimeRow1 = worksheet.addRow([`USER ID:  ${userid}`]);
+  dateTimeRow1.eachCell((cell) => {
+    cell.font = { name: "CustomFont" || "CustomFont", size: 10 };
+    cell.alignment = { horizontal: "left" };
+  });
+
+  worksheet.mergeCells(
+    `A${dateTimeRow.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow.number}`
+  );
+  worksheet.mergeCells(
+    `A${dateTimeRow1.number}:${String.fromCharCode(65 + numColumns - 1)}${dateTimeRow1.number}`
+  );
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, `ToDateOutstandingReport As On ${currentdate}.xlsx`);
+};
 
   const dispatch = useDispatch();
 
@@ -1735,7 +1737,12 @@ const handleDownloadCSV = async () => {
   // ================================================================
   const firstColWidth = { width: "40px" };
   const secondColWidth = { width: "80px" };
-  const thirdColWidth = { width: "90px" };
+  const thirdColWidth =  {
+   width: isSidebarVisible
+    ? (isLargeScreen ? "90px" : "70px")
+    : (isLargeScreen ? "90px" : "90px"),
+  };
+
   const fourthColWidth = {
   width: isSidebarVisible
     ? (isLargeScreen ? "310px" : "90px")
@@ -2844,7 +2851,16 @@ const handleDownloadCSV = async () => {
                               {item.Code}
                             </td>
 
-                            <td className="text-start" style={thirdColWidth}>
+                          <td
+                              className="text-center"
+                              title={item.ManualNo}
+                              style={{
+                                ...thirdColWidth,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
                               {item.ManualNo}
                             </td>
 
@@ -2914,7 +2930,7 @@ const handleDownloadCSV = async () => {
                               {item.Receiavable}
                             </td>
 
-                            <td className="text-end" style={ninthColWidth}>
+                            <td className="text-center" style={ninthColWidth}>
                               {item.LastDate}
                             </td>
 

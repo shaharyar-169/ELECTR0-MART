@@ -570,7 +570,7 @@
 .el-upload-btn:hover { opacity: 0.88; }
 
 .el-cnic-row {
-justify-content: flex-end !important;
+justify-content: flex-start !important;
 }
 .el-cnic-row .el-date-inline {
   flex: 0 0 117px !important;
