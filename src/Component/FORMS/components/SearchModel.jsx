@@ -117,11 +117,11 @@ const SearchModal = ({
     try {
       const apiUrl = apiLinks + apiEndpoint;
       const formData = new URLSearchParams({
-        [requestCodeParam]: organisation.code,
-        [requestLocParam]: getLocationNumber || locationnumber,
+        // [requestCodeParam]: organisation.code,
+        // [requestLocParam]: getLocationNumber || locationnumber,
 
-        // [requestCodeParam]: "DEMOELEC",
-        // [requestLocParam]: "001",
+        [requestCodeParam]: "DEMOINS",
+        [requestLocParam]: "001",
         ...requestParams,
       }).toString();
 

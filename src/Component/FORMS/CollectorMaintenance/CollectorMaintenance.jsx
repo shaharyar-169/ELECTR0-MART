@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// TECHNICIAN MAINTENANCE — Config-driven + SysControl integrated
+// COLLECTOR MAINTENANCE — Config-driven + SysControl integrated
 // ═══════════════════════════════════════════════════════════════════════════
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import "./technicianmaintenance.css";
+import "./collectormaintenance.css";
 import { useTheme } from "../../../ThemeContext";
 import axios from "axios";
 import {
@@ -14,7 +14,6 @@ import {
 import FormButtons from "../components/FormButton";
 import InstallationCode from "../components/InstallarCode";
 import SearchModal from "../components/SearchModel";
-import DynamicSelect from "../components/CityDropdown";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SECTION 1 — CONFIG
@@ -23,24 +22,16 @@ import DynamicSelect from "../components/CityDropdown";
 const FORM_FIELDS = {
   status:           { default: "Active" },
   name:             { default: "" },
-  businessName:     { default: "" },
+  fatherName:       { default: "" },
   address1:         { default: "" },
   address2:         { default: "" },
+  mobile:           { default: "" },
   cnic:             { default: "" },
   email:            { default: "" },
-  mobile:           { default: "" },
-  emergencyNo:      { default: "" },
-  city:             { default: "" },
-  area:             { default: "" },
-  commissionCode:   { default: "" },
-  commissionText:   { default: "" },
   dobDate:          { default: "today" },
   joinDate:         { default: "today" },
   leaveDate:        { default: "today" },
   leaveRemarks:     { default: "" },
-  maxJob:           { default: "" },
-  comType:          { default: "1" },
-  commission:       { default: "" },
   reference1:       { default: "" },
   reference1Mobile: { default: "" },
   reference2:       { default: "" },
@@ -49,101 +40,83 @@ const FORM_FIELDS = {
   documentName:     { default: "" },
 };
 
-const DROPDOWN_STATES = [
-  "selectedCityCode",
-  "selectedAreaCode",
-];
+const DROPDOWN_STATES = [];
 
 const API_VARIABLES = {
   endpoints: {
-    newCode:      "/NewTechnician.php",
-    getByCode:    "/GetTechnician.php",
-    getList:      "/GetTechnicians.php",
-    save:         "/SaveTechnician.php",
-    searchByCode: "/GetTechnicians.php",
+    newCode:      "/NewCollector.php",
+    getByCode:    "/GetCollector.php",
+    getList:      "/GetCollectors.php",
+    save:         "/SaveCollector.php",
+    searchByCode: "/GetCollectors.php",
   },
 
   saveMap: {
-    code:      { source: "orgCode", fallback: "ANEXCOMP" },
+    code:      { source: "orgCode", fallback: "DEMOINS" },
     FLocCod:   { source: "locCode", fallback: "001" },
     FUsrId:    { source: "userId", fallback: "sohaib" },
 
-    FTchCod:   { source: "code" },
-    FTchSts:   { field: "status", transform: "statusToApi" },
-    FTchNam:   { field: "name" },
-    FBusNam:   { field: "businessName" },
+    // ⭐ Collector API save fields
+    FColCod:   { source: "code" },
+    FColSts:   { field: "status", transform: "statusToApi" },
+    FColNam:   { field: "name" },
+    FFthNam:   { field: "fatherName" },
     FAdd001:   { field: "address1" },
     FAdd002:   { field: "address2" },
-    FNicNum:   { field: "cnic", transform: "stripDashes" },
-    FEmlAdd:   { field: "email" },
     FMobNum:   { field: "mobile" },
-    FPhnNum:   { field: "emergencyNo" },
-
-    FCtyCod:   { state: "selectedCityCode" },
-    FAreCod:   { state: "selectedAreaCode" },
-
-    FTchDob:   { field: "dobDate",  transform: "toApiDateFallback" },
-    FJonDat:   { field: "joinDate", transform: "toApiDateFallback" },
-    FLevDat:   { field: "leaveDate", transform: "toApiDateFallback" },
-    FLevRem:   { field: "leaveRemarks" },
-
-    FJobLim:   { field: "maxJob", transform: "toJobLim" },
-    FComTyp:   { field: "comType", transform: "toComTyp" },
-    FComPrc:   { field: "commission", transform: "toAmount" },
+    FEmlAdd:   { field: "email" },
+    FNicNum:   { field: "cnic", transform: "stripDashes" },
 
     FRef001:   { field: "reference1" },
     FMob001:   { field: "reference1Mobile" },
     FRef002:   { field: "reference2" },
     FMob002:   { field: "reference2Mobile" },
 
-    FTchRem:   { field: "remarks" },
-    FAccCod:   { field: "commissionCode" },
+    FJonDat:   { field: "joinDate", transform: "toApiDate" },
+    FLevDat:   { field: "leaveDate", transform: "toApiDate" },
+    FColDob:   { field: "dobDate", transform: "toApiDate" },
+    FColRem:   { field: "remarks" },
+    FLevRem:   { field: "leaveRemarks" },
+
+    // Pic/Cv NOT in saveMap — only attached when a file is picked
   },
 
   getMap: {
-    status:           { key: "ttchsts", transform: "apiToStatus" },
-    name:             "ttchnam",
-    businessName:     "tbusnam",
+    status:           { key: "tcolsts", transform: "apiToStatus" },
+    name:             "tcolnam",
+    fatherName:       "tfthnam",
     address1:         "tadd001",
     address2:         "tadd002",
+    mobile:           "tmobnum",
     cnic:             { key: "tnicnum", transform: "formatCnic" },
     email:            "temladd",
-    mobile:           "tmobnum",
-    emergencyNo:      "tphnnum",
-    leaveRemarks:     "tlevrem",
-    maxJob:           "tjoblim",
-    comType:          "tcomtyp",
-    commission:       { key: "tcomprc", transform: "formatCommas" },
     reference1:       "tref001",
     reference1Mobile: "tmob001",
     reference2:       "tref002",
     reference2Mobile: "tmob002",
-    remarks:          "ttchrem",
-
-    dobDate:          { key: "ttchdob", transform: "toInputDate" },
+    dobDate:          { key: "tcoldob", transform: "toInputDate" },
     joinDate:         { key: "tjondat", transform: "toInputDate" },
     leaveDate:        { key: "tlevdat", transform: "toInputDate" },
+    leaveRemarks:     "tlevrem",
+    remarks:          "tcolrem",
   },
 
-  getDropdownCodes: {
-    selectedCityCode: "tctycod",
-    selectedAreaCode: "tarecod",
-  },
+  getDropdownCodes: {},
 
-  validResponseKeys: ["ttchcod", "ttchnam"],
+  validResponseKeys: ["tcolcod", "tcolnam"],
 };
 
 const IMAGE_CONFIG = {
-  technician: {
-    saveKey: "FTchPic",
-    getKeys: ["ttchpic"],
-    label: "Technician",
+  collector: {
+    saveKey: "FColPic",
+    getKeys: ["tcolpic"],
+    label: "Collector",
   },
 };
 
 const DOCUMENT_CONFIG = {
-  saveKey: "FTchDoc",
-  getKeys: ["ttchdoc"],
+  saveKey: "FColCv",
+  getKeys: ["tcolcv"],
   fieldName: "documentName",
   maxSizeMB: 10,
   accept: ".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg",
@@ -153,24 +126,21 @@ const MOBILE_CONFIG = null;
 
 const ENTER_FLOW = [
   "status",
-  "name", "businessName",
+  "name", "fatherName",
   "address1", "address2",
-  "cnic", "email", "mobile", "emergencyNo",
-  "city", "area",
-  "commissionCode", "commissionText",
+  "mobile", "cnic", "email",
   "dobDate", "joinDate",
   "leaveDate", "leaveRemarks",
-  "maxJob", "comType", "commission",
-  "reference1Mobile", "reference1",
-  "reference2Mobile", "reference2",
+  "reference1", "reference1Mobile",
+  "reference2", "reference2Mobile",
   "documentName", "remarks",
 ];
 
 const TOASTS = {
-  found:    "Technician Data Found",
-  notFound: "Technician Not Found",
-  updated:  "Technician Updated Successfully",
-  created:  "New Technician Added Successfully",
+  found:    "Collector Data Found",
+  notFound: "Collector Not Found",
+  updated:  "Collector Updated Successfully",
+  created:  "New Collector Added Successfully",
   savingFailed: "Error saving data",
 };
 
@@ -178,7 +148,7 @@ const CODE_FORMAT = "short";
 const CODE_PREFIX = "";
 const IMAGE_SERVER_BASE = "https://crystalsolutions.pk/DI";
 
-const TECHNICIAN_CONFIG = {
+const COLLECTOR_CONFIG = {
   FORM_FIELDS,
   DROPDOWN_STATES,
   API_VARIABLES,
@@ -230,6 +200,12 @@ const cleanAmount = (value) => {
 
 const txt = (value) => String(value ?? "").trim();
 
+const normaliseCode = (value) => {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+  return String(parseInt(digits, 10));
+};
+
 const toInputDate = (val) => {
   if (!val) return "";
   const d = new Date(val);
@@ -256,7 +232,7 @@ const extractNewCode = (data) => {
     if (first === null || first === undefined) return "";
     if (typeof first === "object") {
       return String(
-        first.code ?? first.Code ?? first.FTchCod ?? first.ttchcod ?? ""
+        first.code ?? first.Code ?? first.FColCod ?? first.tcolcod ?? ""
       ).trim();
     }
     return String(first).trim();
@@ -271,10 +247,19 @@ const extractNewCode = (data) => {
   }
   if (typeof data === "object") {
     return String(
-      data.code ?? data.Code ?? data.FTchCod ?? data.ttchcod ?? ""
+      data.code ?? data.Code ?? data.FColCod ?? data.tcolcod ?? ""
     ).trim();
   }
   return "";
+};
+
+const bumpCollectorCode = (value) => {
+  const s = String(value || "").trim();
+  const digits = s.replace(/\D/g, "");
+  if (!digits) return s;
+  const n = parseInt(digits, 10) + 1;
+  if (isNaN(n)) return s;
+  return String(n).padStart(digits.length, "0");
 };
 
 const showToast = (message, type = "success") => {
@@ -301,11 +286,7 @@ const focusFirstVisible = (refs) => {
     if (!el) continue;
     if (!el.isConnected) continue;
     if (el.disabled) continue;
-    try {
-      const style = window.getComputedStyle(el);
-      if (style.display === "none") continue;
-      if (style.visibility === "hidden") continue;
-    } catch (err) {}
+    if (el.offsetParent === null) continue;
     el.focus();
     if (el.tagName === "INPUT") {
       try { el.select(); } catch (err) {}
@@ -318,20 +299,12 @@ const focusFirstVisible = (refs) => {
 const SAVE_TRANSFORMS = {
   statusToApi: (v) => (v === "Active" ? "A" : v === "Non-Active" ? "N" : v || ""),
   stripDashes: (v) => String(v || "").replace(/-/g, ""),
+  stripNonDigits: (v) => String(v || "").replace(/\D/g, ""),
   toAmount: (v) => {
     const parsed = cleanAmount(String(v || "").replace(/,/g, ""));
     return parsed === "" ? "0" : String(parsed);
   },
   toApiDate: (v) => (v ? toInputDate(v) : ""),
-  toApiDateFallback: (v) => (v ? toInputDate(v) : toInputDate(new Date())),
-  toJobLim: (v) => {
-    const parsed = cleanAmount(String(v || "").replace(/,/g, ""));
-    return parsed === "" ? "0" : String(parsed);
-  },
-  toComTyp: (v) => {
-    const s = String(v ?? "").trim();
-    return s || "1";
-  },
 };
 
 const GET_TRANSFORMS = {
@@ -362,7 +335,7 @@ const normalizeRows = (data) => {
 };
 
 const buildImageBaseForOrg = (org, imageServerBase) => {
-  return `${imageServerBase}/${String(org || "ANEXCOMP").trim()}/`;
+  return `${imageServerBase}/${String(org || "DEMOELEC").trim()}/`;
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -397,12 +370,14 @@ function useMaintenanceForm({ config }) {
   const [formStore, setFormStore] = useState(buildInitialForm);
   const [code, setCode] = useState("");
   const [maxCode, setMaxCode] = useState("");
-  const [codeKey, setCodeKey] = useState(0);   // ⭐ remount key for InstallationCode
+  const [photoFileName, setPhotoFileName] = useState("");
   const [organisation, setOrganisation] = useState(null);
-  // const [orgCode, setOrgCode] = useState("AGCOMP");
-  // const [locCode, setLocCode] = useState("001");
 
-const [orgCode, setOrgCode] = useState(organisation);
+//   const [orgCode, setOrgCode] = useState('DEMOINS');
+//   const [locCode, setLocCode] = useState("001");
+
+
+  const [orgCode, setOrgCode] = useState(organisation);
   const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -410,9 +385,13 @@ const [orgCode, setOrgCode] = useState(organisation);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
   const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
   const [isExisting, setIsExisting] = useState(false);
+
   const [sysControl, setSysControl] = useState(null);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+  const [isGuarantorMobileModalOpen, setIsGuarantorMobileModalOpen] = useState(false);
+  const [isWitnessMobileModalOpen, setIsWitnessMobileModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState("");
 
@@ -448,6 +427,8 @@ const [orgCode, setOrgCode] = useState(organisation);
   const isSavingRef = useRef(false);
   const isCoolingDownRef = useRef(false);
   const listRef = useRef([]);
+  const pendingCodeRef = useRef("");
+  const lastSavedCodeRef = useRef("");
 
   const vis = useCallback((key) => {
     try {
@@ -456,6 +437,7 @@ const [orgCode, setOrgCode] = useState(organisation);
       if (v === undefined || v === null) return true;
       return String(v).trim().toLowerCase() === "yes";
     } catch (err) {
+      console.error(">>> vis() error for key:", key, err);
       return true;
     }
   }, [sysControl]);
@@ -476,33 +458,6 @@ const [orgCode, setOrgCode] = useState(organisation);
   const handleCnicChange = useCallback((key) => (e) => {
     const formatted = formatCNIC(e.target.value);
     setFormStore((prev) => ({ ...prev, [key]: formatted }));
-  }, []);
-
-  const handleMoneyChange = useCallback((key) => (e) => {
-    const input = e.target;
-    const rawValue = String(input.value ?? "");
-    const selectionStart = input.selectionStart ?? rawValue.length;
-    const digitsBeforeCursor = rawValue
-      .slice(0, selectionStart)
-      .replace(/\D/g, "").length;
-    const formatted = formatWithCommas(rawValue);
-    setFormStore((prev) => ({ ...prev, [key]: formatted }));
-    requestAnimationFrame(() => {
-      if (!input) return;
-      let digitCount = 0;
-      let newCaret = formatted.length;
-      for (let i = 0; i < formatted.length; i++) {
-        if (/[0-9]/.test(formatted[i])) {
-          digitCount++;
-          if (digitCount === digitsBeforeCursor) {
-            newCaret = i + 1;
-            break;
-          }
-        }
-      }
-      if (digitsBeforeCursor === 0) newCaret = 0;
-      try { input.setSelectionRange(newCaret, newCaret); } catch (err) {}
-    });
   }, []);
 
   const handleDateChange = useCallback((key) => (e) => {
@@ -549,6 +504,7 @@ const [orgCode, setOrgCode] = useState(organisation);
 
   const clearForm = useCallback(() => {
     setFormStore(buildInitialForm());
+    setPhotoFileName("");
     if (IMAGE_CONFIG) {
       const empty = {};
       Object.keys(IMAGE_CONFIG).forEach((k) => { empty[k] = ""; });
@@ -595,7 +551,7 @@ const [orgCode, setOrgCode] = useState(organisation);
     const apiUrl = apiLinks + "/GetSysControl.php";
     const formData = new URLSearchParams({
       code: orgCode,
-      type: "TechnicianMaintenance",
+      type: "CollectorMaintenance",
     }).toString();
 
     axios
@@ -620,34 +576,23 @@ const [orgCode, setOrgCode] = useState(organisation);
       });
   }, [organisation, orgCode, apiLinks]);
 
-  // ⭐ Auto-update commissionText when name changes
-  useEffect(() => {
-    const name = String(formStore.name || "").trim();
-    const code = String(formStore.commissionCode || "").trim();
-
-    if (!code) return;
-
-    const newText = name ? `${name.toUpperCase()} - COMMISSION` : "";
-    const currentText = String(formStore.commissionText || "").trim();
-
-    if (currentText !== newText) {
-      setFormStore((prev) => ({ ...prev, commissionText: newText }));
-    }
-  }, [formStore.name, formStore.commissionCode]);
-
-  const loadNewCode = useCallback((showFetchingFlag = false) => {
+  const loadNewCode = useCallback((showFetchingFlag = false, opts = {}) => {
     if (!organisation || !orgCode || !locCode) return Promise.resolve();
     if (showFetchingFlag) setIsFetchingNextCode(true);
     const apiUrl = apiLinks + API_VARIABLES.endpoints.newCode;
     const formData = new URLSearchParams({
       code: orgCode,
-     FLocCod: locCode,
+      FLocCod: locCode,
     }).toString();
     return axios.post(apiUrl, formData)
       .then((response) => {
-        const newCode = extractNewCode(response.data);
+        let newCode = extractNewCode(response.data);
+        if (newCode && lastSavedCodeRef.current &&
+            newCode === lastSavedCodeRef.current) {
+          newCode = bumpCollectorCode(newCode);
+        }
         if (newCode !== "") {
-          setCode(newCode);
+          if (!opts.skipSetCode) setCode(newCode);
           setMaxCode(newCode);
         }
         return newCode;
@@ -691,6 +636,10 @@ const [orgCode, setOrgCode] = useState(organisation);
         payload[apiVar] = String(user?.tusrid || def.fallback || "").trim();
         return;
       }
+      if (def.source === "photoFileName") {
+        payload[apiVar] = String(photoFileName || "").trim();
+        return;
+      }
       if (def.source === "code") { payload[apiVar] = String(code || "").trim(); return; }
       if (def.state) {
         payload[apiVar] = String(dropdownCodes[def.state] || "").trim();
@@ -707,7 +656,7 @@ const [orgCode, setOrgCode] = useState(organisation);
       }
     });
     return payload;
-  }, [API_VARIABLES, code, dropdownCodes, formStore, orgCode, locCode, user]);
+  }, [API_VARIABLES, code, dropdownCodes, formStore, orgCode, locCode, user, photoFileName]);
 
   const save = useCallback(async () => {
     if (isSavingRef.current || isCoolingDownRef.current) return;
@@ -731,7 +680,7 @@ const [orgCode, setOrgCode] = useState(organisation);
     }
     const trimmedName = String(formStore.name || "").trim();
     if (!trimmedName && FORM_FIELDS.name) {
-      showToast("Technician Name is required", "error");
+      showToast("Collector Name is required", "error");
       isSavingRef.current = false;
       return;
     }
@@ -741,7 +690,7 @@ const [orgCode, setOrgCode] = useState(organisation);
     try {
       const apiUrl = apiLinks + API_VARIABLES.endpoints.save;
       const payload = buildSavePayload();
-      payload.FTchCod = trimmedCode;
+      payload.FColCod = trimmedCode;
 
       console.log("=== SAVE PAYLOAD ===");
       console.log(JSON.stringify(payload, null, 2));
@@ -766,16 +715,14 @@ const [orgCode, setOrgCode] = useState(organisation);
 
       const wasExisting = isExisting;
       const response = await axios.post(apiUrl, formData, { validateStatus: () => true });
-      const body = response.data && typeof response.data === "object" ? response.data : null;
-      const bodyHardFail = !!(body && body.error != null && Number(body.error) >= 400);
-      const bodyMsg = body && body.message != null ? String(body.message).toLowerCase() : "";
-      const bodyOk = !!(body && Number(body.error) === 200 && bodyMsg.indexOf("success") !== -1);
-      const bodyNewCode = body && body.new_code != null ? String(body.new_code).trim() : "";
+      const body = response.data;
+      const bodyObj = body && typeof body === "object" ? body : null;
+      const bodyHardFail = !!(bodyObj && bodyObj.error != null && Number(bodyObj.error) >= 400);
 
       await loadList();
       const rows = Array.isArray(listRef.current) ? listRef.current : [];
-      const nameOf = (r) => String(r && r.ttchnam != null ? r.ttchnam : "").trim();
-      const codeOf = (r) => String(r && r.ttchcod != null ? r.ttchcod : "").trim();
+      const nameOf = (r) => String(r && r.tcolnam != null ? r.tcolnam : "").trim();
+      const codeOf = (r) => String(r && r.tcolcod != null ? r.tcolcod : "").trim();
 
       let savedRow = null;
       if (wasExisting) {
@@ -786,34 +733,31 @@ const [orgCode, setOrgCode] = useState(organisation);
         }
       } else {
         const matches = rows.filter((r) => nameOf(r) === trimmedName);
-        matches.sort((a, b) => Number(b.techid || b.id || 0) - Number(a.techid || a.id || 0));
+        matches.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
         savedRow = matches[0] || null;
       }
 
-        if (!bodyHardFail && (savedRow || bodyOk)) {
-        const actualCode = bodyNewCode || (savedRow && codeOf(savedRow)) || trimmedCode;
+      if (savedRow && !bodyHardFail) {
+        const actualCode = codeOf(savedRow) || trimmedCode;
+        lastSavedCodeRef.current = actualCode;
         showToast(wasExisting ? TOASTS.updated : TOASTS.created, "success");
-        if (!wasExisting && actualCode && actualCode !== trimmedCode) {
+        if (!wasExisting && actualCode !== trimmedCode) {
           showToast(`Saved with code ${actualCode}`, "success");
         }
 
-        // ⭐ Clear all form fields, then set the saved code + focus it
-        // Do NOT call fetchByCode here — user wants a blank form for next entry
         clearForm();
+        setPhotoFileName("");
         setIsExisting(false);
 
-        setMaxCode(actualCode);
-        setCode(actualCode);
-        setCodeKey((k) => k + 1);   // remount InstallationCode so it shows the new code
+        const nextCode = await loadNewCode(true, { skipSetCode: true });
+        const finalCode = nextCode || bumpCollectorCode(actualCode);
+        setCode(finalCode);
+        setMaxCode(finalCode);
 
-        // Focus + select the code input after remount
         setTimeout(() => {
           const input = codeInputRef.current?.querySelector?.("input");
-          if (input) {
-            input.focus();
-            input.select();
-          }
-        }, 300);
+          if (input) { input.focus(); input.select(); }
+        }, 150);
 
         isCoolingDownRef.current = true;
         setIsCoolingDown(true);
@@ -822,11 +766,9 @@ const [orgCode, setOrgCode] = useState(organisation);
           setIsCoolingDown(false);
         }, 5000);
       } else {
-        const reason = bodyMsg
-          ? `Save failed: ${response.status} — ${String(body.message).slice(0, 120)}`
-          : response.status === 200
-            ? "Save accepted but record not found in list"
-            : `Save failed: ${response.status || "network error"}`;
+        const reason = response.status === 200 && !bodyHardFail
+          ? "Save accepted but record not found in list"
+          : `Save failed: ${response.status}${bodyObj && bodyObj.message ? ` — ${String(bodyObj.message).slice(0, 80)}` : ""}`;
         showToast(reason, "error");
       }
     } catch (error) {
@@ -844,8 +786,8 @@ const [orgCode, setOrgCode] = useState(organisation);
       buildSavePayload, apiLinks, API_VARIABLES,
       IMAGE_CONFIG, DOCUMENT_CONFIG, TOASTS]);
 
-  const fetchByCode = useCallback((techCode) => {
-    const cleanCode = String(techCode || "").trim();
+  const fetchByCode = useCallback((collectorCode) => {
+    const cleanCode = String(collectorCode || "").trim();
     if (!organisation || !orgCode || !locCode || !cleanCode) return Promise.resolve();
 
     clearForm();
@@ -855,8 +797,8 @@ const [orgCode, setOrgCode] = useState(organisation);
     const apiUrl = apiLinks + API_VARIABLES.endpoints.getByCode;
     const formData = new URLSearchParams({
       code: orgCode,
-     FLocCod: locCode,
-      FTchCod: cleanCode,
+      FLocCod: locCode,
+      FColCod: cleanCode,
     }).toString();
 
     return axios.post(apiUrl, formData).then((response) => {
@@ -868,11 +810,6 @@ const [orgCode, setOrgCode] = useState(organisation);
 
       if (!data) {
         setIsExisting(false);
-        setFormStore((prev) => ({
-          ...prev,
-          commissionCode: `22-05-0${cleanCode}`,
-          commissionText: "",
-        }));
         showToast(TOASTS.notFound, "error");
         return;
       }
@@ -902,14 +839,6 @@ const [orgCode, setOrgCode] = useState(organisation);
         newForm[field] = raw;
       });
 
-      if (data.ttchcod) {
-        newForm.commissionCode = `22-05-0${String(data.ttchcod).trim()}`;
-        newForm.commissionText = `${String(data.ttchnam || "").trim()} - COMMISSION`;
-      } else if (cleanCode) {
-        newForm.commissionCode = `22-05-0${cleanCode}`;
-        newForm.commissionText = "";
-      }
-
       if (DOCUMENT_CONFIG) {
         const docKey = DOCUMENT_CONFIG.getKeys.find((k) => data[k]);
         if (docKey) newForm[DOCUMENT_CONFIG.fieldName] = txt(data[docKey]);
@@ -917,8 +846,8 @@ const [orgCode, setOrgCode] = useState(organisation);
 
       setFormStore(newForm);
 
-      if (data.ttchcod) {
-        setCode(String(data.ttchcod).trim());
+      if (data.tcolcod) {
+        setCode(String(data.tcolcod).trim());
         setIsExisting(true);
       }
 
@@ -927,9 +856,12 @@ const [orgCode, setOrgCode] = useState(organisation);
       if (IMAGE_CONFIG) {
         Object.entries(IMAGE_CONFIG).forEach(([slotKey, slot]) => {
           const foundKey = slot.getKeys.find((k) => data[k]);
-          if (!foundKey) return;
-          const picName = String(data[foundKey] || "").trim();
-          if (!picName) return;
+          const picName = foundKey ? String(data[foundKey] || "").trim() : "";
+          if (slotKey === "collector") setPhotoFileName(picName);
+          if (!picName) {
+            setImage(slotKey, "");
+            return;
+          }
           const src = picName.startsWith("data:") || picName.startsWith("blob:") ||
             picName.startsWith("http")
             ? picName
@@ -971,26 +903,17 @@ const [orgCode, setOrgCode] = useState(organisation);
     clearForm();
     setCode("");
     setMaxCode("");
-    setCodeKey((k) => k + 1);   // ⭐ force remount so InstallationCode clears visually
     setIsExisting(false);
-
     setTimeout(() => {
       const input = codeInputRef.current?.querySelector?.("input");
       if (input) { input.focus(); input.select(); }
     }, 150);
-
     loadNewCode(true).then((newCode) => {
       if (newCode) {
-        setFormStore((prev) => ({
-          ...prev,
-          commissionCode: `22-05-0${newCode}`,
-          commissionText: "",
-        }));
-        setCodeKey((k) => k + 1);   // ⭐ remount again so new code is shown
         setTimeout(() => {
           const input = codeInputRef.current?.querySelector?.("input");
           if (input) { input.focus(); input.select(); }
-        }, 150);
+        }, 100);
       }
     });
   }, [clearForm, loadNewCode]);
@@ -998,7 +921,7 @@ const [orgCode, setOrgCode] = useState(organisation);
   const handleSearchSelect = useCallback((data) => {
     if (!data) return;
     const selectedCode =
-      data.code ?? data.ttchcod ?? data.Code ?? data.FTchCod ?? "";
+      data.code ?? data.tcolcod ?? data.Code ?? data.FColCod ?? "";
     const clean = String(selectedCode || "").trim();
     if (!clean) return;
     setCode(clean);
@@ -1081,19 +1004,67 @@ const [orgCode, setOrgCode] = useState(organisation);
   }, []);
 
   return {
-    formStore, code, maxCode, codeKey, organisation, orgCode, locCode,
-    isInitialLoad, isSaving, isCoolingDown, isFetchingNextCode, isExisting,
-    images, dropdownCodes, isSearchModalOpen, isImageModalOpen, modalImageSrc,
-    sysControl, vis,
-    refs, codeInputRef, saveButtonRef, fileRefs, documentInputRef,
-    setCode, setMaxCode, setCodeKey, setField, setDropdownCode, setImage, setFormStore,
-    setIsSearchModalOpen, setIsImageModalOpen,
-    save, reset, fetchByCode, loadList, loadNewCode,
-    handleSearchSelect, handleCodeChange, handleSearchModalClose,
-    handleCnicChange, handleMoneyChange, handleDateChange,
-    handleKeyDown, handleDateKeyDown,
-    handleImageUploadClick, handleImageFileChange, openImageModal,
-    handleDocumentUploadClick, handleDocumentFileChange, handleDocumentDownload,
+    formStore,
+    code,
+    maxCode,
+    organisation,
+    orgCode,
+    locCode,
+    isInitialLoad,
+    isSaving,
+    isCoolingDown,
+    isFetchingNextCode,
+    isExisting,
+    images,
+    dropdownCodes,
+    isSearchModalOpen,
+    isMobileModalOpen,
+    isGuarantorMobileModalOpen,
+    isWitnessMobileModalOpen,
+    isImageModalOpen,
+    modalImageSrc,
+    sysControl,
+    vis,
+
+    refs,
+    codeInputRef,
+    saveButtonRef,
+    fileRefs,
+    documentInputRef,
+
+    setCode,
+    setMaxCode,
+    setField,
+    setDropdownCode,
+    setImage,
+    setFormStore,
+
+    setIsSearchModalOpen,
+    setIsMobileModalOpen,
+    setIsGuarantorMobileModalOpen,
+    setIsWitnessMobileModalOpen,
+    setIsImageModalOpen,
+
+    save,
+    reset,
+    fetchByCode,
+    loadList,
+    loadNewCode,
+    handleSearchSelect,
+    handleCodeChange,
+    handleSearchModalClose,
+    handleCnicChange,
+    handleDateChange,
+    handleKeyDown,
+    handleDateKeyDown,
+
+    handleImageUploadClick,
+    handleImageFileChange,
+    openImageModal,
+    handleDocumentUploadClick,
+    handleDocumentFileChange,
+    handleDocumentDownload,
+
     config,
   };
 }
@@ -1102,21 +1073,51 @@ const [orgCode, setOrgCode] = useState(organisation);
 // SECTION 4 — MAIN COMPONENT + JSX
 // ═══════════════════════════════════════════════════════════════════════════
 
-export default function TechnicianMaintenance() {
+export default function CollectorMaintenance() {
   const { apiLinks, getLocationNumber } = useTheme();
-  const form = useMaintenanceForm({ config: TECHNICIAN_CONFIG });
+  const form = useMaintenanceForm({ config: COLLECTOR_CONFIG });
   const {
-    formStore, code, maxCode, codeKey, organisation,
-    isInitialLoad, isSaving, isCoolingDown, isFetchingNextCode,
-    images, dropdownCodes, isSearchModalOpen, isImageModalOpen, modalImageSrc,
-    vis, refs, codeInputRef, saveButtonRef, fileRefs, documentInputRef,
-    setCode, setMaxCode, setCodeKey, setField, setDropdownCode, setFormStore,
-    setIsSearchModalOpen, setIsImageModalOpen,
-    save, reset, fetchByCode, handleSearchSelect, handleCodeChange,
-    handleSearchModalClose, handleCnicChange, handleMoneyChange, handleDateChange,
-    handleKeyDown, handleDateKeyDown,
-    handleImageUploadClick, handleImageFileChange, openImageModal,
-    handleDocumentUploadClick, handleDocumentFileChange, handleDocumentDownload,
+    formStore,
+    code,
+    maxCode,
+    organisation,
+    isInitialLoad,
+    isSaving,
+    isCoolingDown,
+    isFetchingNextCode,
+    images,
+    dropdownCodes,
+    isSearchModalOpen,
+    isImageModalOpen,
+    modalImageSrc,
+    vis,
+    refs,
+    codeInputRef,
+    saveButtonRef,
+    fileRefs,
+    documentInputRef,
+    setCode,
+    setMaxCode,
+    setField,
+    setFormStore,
+    setIsSearchModalOpen,
+    setIsImageModalOpen,
+    save,
+    reset,
+    fetchByCode,
+    handleSearchSelect,
+    handleCodeChange,
+    handleSearchModalClose,
+    handleCnicChange,
+    handleDateChange,
+    handleKeyDown,
+    handleDateKeyDown,
+    handleImageUploadClick,
+    handleImageFileChange,
+    openImageModal,
+    handleDocumentUploadClick,
+    handleDocumentFileChange,
+    handleDocumentDownload,
   } = form;
 
   const handleSubmit = (e) => e.preventDefault();
@@ -1125,7 +1126,7 @@ export default function TechnicianMaintenance() {
   const V = (name) => formStore[name];
 
   const focusFirstFromTopBar = () => {
-    const first = ["status", "name", "businessName"]
+    const first = ["status", "name", "fatherName"]
       .map((k) => R(k))
       .filter(Boolean);
     for (const r of first) {
@@ -1139,20 +1140,20 @@ export default function TechnicianMaintenance() {
   };
 
   return (
-    <div className="el-page-host technician-maintenance-scope">
+    <div className="el-page-host salesman-maintenance-scope">
       <div className="el-page-wrapper">
         <div className="el-page">
           <div className="el-card">
             <form onSubmit={handleSubmit}>
               <header className="el-header">
-                <h1>Technician Maintenance</h1>
+                <h1>Collector Maintenance</h1>
                 <p className="el-subtitle">
-                  Enter the Technician information in the form below
+                  Enter the Collector information in the form below
                 </p>
               </header>
 
               <div className="el-scrollable-body">
-                {/* TOP BAR */}
+                {/* ==================== TOP BAR ==================== */}
                 <div className="el-top-bar">
                   <div
                     className="el-field-row code-alignment"
@@ -1165,9 +1166,8 @@ export default function TechnicianMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right"> Code :</span>
+                    <span className="el-field-label-right">Code :</span>
                     <InstallationCode
-                      key={codeKey}
                       ref={codeInputRef}
                       organisation={organisation}
                       apiLinks={apiLinks}
@@ -1206,7 +1206,7 @@ export default function TechnicianMaintenance() {
                     <section className="el-section">
                       <div className="el-stack">
 
-                        {/* NAME + IMAGE */}
+                        {/* ====== NAME + IMAGE (split row) ====== */}
                         <div className="el-row-split">
                           <div className="el-row-split-left">
                             <div className="el-field-row">
@@ -1214,21 +1214,24 @@ export default function TechnicianMaintenance() {
                               <input
                                 ref={R("name")}
                                 value={V("name")}
- onChange={(e) =>
-      setFormStore((prev) => ({ ...prev, name: e.target.value.toUpperCase() }))
-    }                                placeholder="Technician Name"
+                                onChange={(e) => {
+                                  e.target.value = e.target.value.toUpperCase();
+                                  setField("name")(e);
+                                }}
+                                placeholder="Collector Name"
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, "businessName")}
+                                onKeyDown={(e) => handleKeyDown(e, "fatherName")}
+                                style={{ textTransform: "uppercase" }}
                               />
                             </div>
 
                             <div className="el-field-row">
-                              <span className="el-field-label-right">Business :</span>
+                              <span className="el-field-label-right">Father Name :</span>
                               <input
-                                ref={R("businessName")}
-                                value={V("businessName")}
-                                onChange={setField("businessName")}
-                                placeholder="Business Name"
+                                ref={R("fatherName")}
+                                value={V("fatherName")}
+                                onChange={setField("fatherName")}
+                                placeholder="Father Name"
                                 maxLength={40}
                                 onKeyDown={(e) => handleKeyDown(e, "address1")}
                               />
@@ -1254,7 +1257,37 @@ export default function TechnicianMaintenance() {
                                 onChange={setField("address2")}
                                 placeholder="Address 2"
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, "cnic")}
+                                onKeyDown={(e) => handleKeyDown(e, "mobile")}
+                              />
+                            </div>
+
+                            <div className="el-field-row">
+                              <span className="el-field-label-right">Mobile :</span>
+                              <input
+                                ref={R("mobile")}
+                                type="tel"
+                                value={V("mobile")}
+                                onChange={setField("mobile")}
+                                placeholder="03XXXXXXXXX"
+                                className="mobile-field"
+                                maxLength={11}
+                                onKeyDown={(e) => {
+                                  if (e.ctrlKey || e.metaKey || e.altKey) {
+                                    handleKeyDown(e, "cnic");
+                                    return;
+                                  }
+                                  if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                    e.preventDefault();
+                                    return;
+                                  }
+                                  handleKeyDown(e, "cnic");
+                                }}
+                                onPaste={(e) => {
+                                  const pasted = e.clipboardData.getData("text");
+                                  if (!/^\d+$/.test(pasted)) {
+                                    e.preventDefault();
+                                  }
+                                }}
                               />
                             </div>
 
@@ -1280,79 +1313,12 @@ export default function TechnicianMaintenance() {
                                 placeholder="example@email.com"
                                 className="email-field"
                                 maxLength={40}
-                                onKeyDown={(e) => handleKeyDown(e, "mobile")}
+                                onKeyDown={(e) => handleKeyDown(e, "dobDate")}
                               />
-                            </div>
-
-                            <div className="el-row-split-pair">
-                              <div className="el-field-row el-half">
-                                <span className="el-field-label-right">Mobile :</span>
-                              <input
-  ref={R("mobile")}
-  type="tel"
-  value={V("mobile")}
-  onChange={setField("mobile")}
-  placeholder="03XXXXXXXXX"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "emergencyNo");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "emergencyNo");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
-                              </div>
-                              <div className="el-field-row el-half">
-                                <span className="el-field-label-right">Emergency :</span>
-                               <input
-  ref={R("emergencyNo")}
-  type="tel"
-  value={V("emergencyNo")}
-  onChange={setField("emergencyNo")}
-  placeholder="03XXXXXXXXX"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "city");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "city");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
-                              </div>
                             </div>
                           </div>
 
-                          {vis("Pic") && (
+                          {vis("Picture") && (
                             <div className="el-row-split-right">
                               <div
                                 className="el-photo-box"
@@ -1360,15 +1326,15 @@ export default function TechnicianMaintenance() {
                                   display: "flex", alignItems: "center",
                                   justifyContent: "center", overflow: "hidden",
                                   backgroundColor: "#f5f5f5",
-                                  cursor: images.technician ? "pointer" : "default",
+                                  cursor: images.collector ? "pointer" : "default",
                                 }}
-                                onClick={() => openImageModal(images.technician)}
-                                title={images.technician ? "Click to view full size" : ""}
+                                onClick={() => openImageModal(images.collector)}
+                                title={images.collector ? "Click to view full size" : ""}
                               >
-                                {images.technician ? (
+                                {images.collector ? (
                                   <img
-                                    src={images.technician}
-                                    alt="Technician"
+                                    src={images.collector}
+                                    alt="Collector"
                                     style={{
                                       width: "100%", height: "100%",
                                       objectFit: "contain", objectPosition: "center",
@@ -1382,16 +1348,16 @@ export default function TechnicianMaintenance() {
                                 )}
                               </div>
                               <input
-                                ref={fileRefs.current.technician}
+                                ref={fileRefs.current.collector}
                                 type="file"
                                 accept="image/*"
                                 style={{ display: "none" }}
-                                onChange={handleImageFileChange("technician")}
+                                onChange={handleImageFileChange("collector")}
                               />
                               <button
                                 type="button"
                                 className="el-upload-btn"
-                                onClick={handleImageUploadClick("technician")}
+                                onClick={handleImageUploadClick("collector")}
                               >
                                 ⬆ Upload
                               </button>
@@ -1401,80 +1367,10 @@ export default function TechnicianMaintenance() {
 
                         <hr className="el-mobile-divider" />
 
-                        {/* CITY / AREA */}
-                        <div className="el-row-split-pair">
+                        {/* ====== DOB / JOIN DATE ====== */}
+                        <div className="el-row-split-pair ">
                           <div className="el-field-row el-half">
-                            <span className="el-field-label-right">City :</span>
-                            <DynamicSelect
-                              ref={R("city")}
-                              fetchUrl={`${apiLinks}/GetActiveCity.php`}
-                              valueKey="tctydsc"
-                              labelKey="tctydsc"
-                              codeKey="tctycod"
-                              organisation={organisation}
-                              locationNumber={getLocationNumber || getLocationnumber()}
-                              value={isInitialLoad ? "" : (V("city") || "")}
-                              initialCode={dropdownCodes.selectedCityCode}
-                              onChange={(desc) => setFormStore((p) => ({ ...p, city: desc }))}
-                              onCodeChange={(c) => setDropdownCode("selectedCityCode", c)}
-                              placeholder="Please Select City"
-                              onKeyDown={(e) => handleKeyDown(e, "area")}
-                            />
-                          </div>
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">Area :</span>
-                            <DynamicSelect
-                              ref={R("area")}
-                              fetchUrl={`${apiLinks}/GetActiveArea.php`}
-                              valueKey="taredsc"
-                              labelKey="taredsc"
-                              codeKey="tarecod"
-                              organisation={organisation}
-                              locationNumber={getLocationNumber || getLocationnumber()}
-                              value={isInitialLoad ? "" : (V("area") || "")}
-                              initialCode={dropdownCodes.selectedAreaCode}
-                              onChange={(desc) => setFormStore((p) => ({ ...p, area: desc }))}
-                              onCodeChange={(c) => setDropdownCode("selectedAreaCode", c)}
-                              placeholder="Please Select Area"
-                              onKeyDown={(e) => handleKeyDown(e, "commissionCode")}
-                            />
-                          </div>
-                        </div>
-
-                        <hr className="el-mobile-divider" />
-
-                        {/* COMMISSION CODE ROW */}
-                        <div className="el-row-code-pair">
-                          <div className="el-field-row el-code-field-cell">
-                            <span className="el-field-label-right">Comm Code :</span>
-                            <input
-                              ref={R("commissionCode")}
-                              value={V("commissionCode") || ""}
-                              readOnly
-                              tabIndex={-1}
-                              className="el-code-input"
-                              onKeyDown={(e) => handleKeyDown(e, "commissionText")}
-                            />
-                          </div>
-                          <div className="el-field-row el-remark-field-cell">
-                            <input
-                              ref={R("commissionText")}
-                              value={V("commissionText") || ""}
-                              readOnly
-                              tabIndex={-1}
-                              placeholder="- COMMISSION"
-                              className="el-remark-field"
-                              onKeyDown={(e) => handleKeyDown(e, "dobDate")}
-                            />
-                          </div>
-                        </div>
-
-                        <hr className="el-mobile-divider" />
-
-                        {/* DOB / JOIN DATE */}
-                        <div className="el-row-split-pair">
-                          <div className="el-field-row el-half">
-                            <span className="el-field-label-right">DOB Date :</span>
+                            <span className="el-field-label-right">Date of Birth :</span>
                             <input
                               ref={R("dobDate")}
                               type="date"
@@ -1497,9 +1393,8 @@ export default function TechnicianMaintenance() {
                           </div>
                         </div>
 
-                        {/* LEAVE DATE / REMARKS */}
-                        <div className="el-row-split-pair el-row-leave leave-date">
-                          <div className="el-field-row el-half leavedate">
+                        <div className="el-row-split-pair">
+                          <div className="el-field-row el-half">
                             <span className="el-field-label-right">Leave Date :</span>
                             <input
                               ref={R("leaveDate")}
@@ -1511,108 +1406,59 @@ export default function TechnicianMaintenance() {
                             />
                           </div>
                           <div className="el-field-row el-half">
+                            <span className="el-field-label-right">Remarks :</span>
                             <input
                               ref={R("leaveRemarks")}
                               value={V("leaveRemarks")}
                               onChange={setField("leaveRemarks")}
                               placeholder="Leave Remarks"
-                              className="el-remark-field"
                               maxLength={60}
-                              onKeyDown={(e) => handleKeyDown(e, "maxJob")}
+                              onKeyDown={(e) => handleKeyDown(e, "reference1")}
                             />
                           </div>
                         </div>
 
                         <hr className="el-mobile-divider" />
 
-                        {/* MAX JOB / TYPE / COMMISSION */}
-                        <div className="el-row-three">
-                          <div className="el-field-row el-third">
-                            <span className="el-field-label-right">Max Job :</span>
-                            <input
-                              ref={R("maxJob")}
-                              value={V("maxJob")}
-                              onChange={setField("maxJob")}
-                              placeholder="Max Job"
-                              className="el-num-field"
-                              maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, "comType")}
-                            />
-                          </div>
-                          <div className="el-field-row el-third">
-                            <span className="el-field-label-right">Type :</span>
-                            <select
-                              ref={R("comType")}
-                              value={V("comType")}
-                              onChange={setField("comType")}
-                              onKeyDown={(e) => handleKeyDown(e, "commission")}
-                            >
-                              <option value="1">Per Quantity</option>
-                              <option value="2">Charges</option>
-                              <option value="3">Profit</option>
-                              <option value="4">Charges + Profit</option>
-                              <option value="5">Total</option>
-                            </select>
-                          </div>
-                          <div className="el-field-row el-third el-third-right">
-                            <span className="el-field-label-right">Commission :</span>
-                            <input
-                              ref={R("commission")}
-                              value={V("commission")}
-                              onChange={handleMoneyChange("commission")}
-                              placeholder="Commission"
-                              className="el-num-field"
-                              maxLength={20}
-                              onKeyDown={(e) => handleKeyDown(e, "reference1Mobile")}
-                            />
-                          </div>
-                        </div>
-
-                        <hr className="el-mobile-divider" />
-
-                        {/* REFERENCES */}
+                        {/* ====== REFERENCES ====== */}
                         <div className="el-row-split-pair">
                           <div className="el-field-row el-half">
                             <span className="el-field-label-right">Reference 1 :</span>
                             <input
-  ref={R("reference1Mobile")}
-  type="tel"
-  value={V("reference1Mobile")}
-  onChange={setField("reference1Mobile")}
-  placeholder="03XXXXXXXXX"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "reference1");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "reference1");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
-                          </div>
-                          <div className="el-field-row el-half">
-                            <input
                               ref={R("reference1")}
                               value={V("reference1")}
                               onChange={setField("reference1")}
-                              placeholder="Name"
-                              className="el-remark-field"
+                              placeholder="Reference 1"
                               maxLength={40}
-                              onKeyDown={(e) => handleKeyDown(e, "reference2Mobile")}
+                              onKeyDown={(e) => handleKeyDown(e, "reference1Mobile")}
+                            />
+                          </div>
+                          <div className="el-field-row el-half">
+                            <span className="el-field-label-right">Mobile :</span>
+                            <input
+                              ref={R("reference1Mobile")}
+                              type="tel"
+                              value={V("reference1Mobile")}
+                              onChange={setField("reference1Mobile")}
+                              placeholder="03XXXXXXXXX"
+                              maxLength={11}
+                              onKeyDown={(e) => {
+                                if (e.ctrlKey || e.metaKey || e.altKey) {
+                                  handleKeyDown(e, "reference2");
+                                  return;
+                                }
+                                if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                  e.preventDefault();
+                                  return;
+                                }
+                                handleKeyDown(e, "reference2");
+                              }}
+                              onPaste={(e) => {
+                                const pasted = e.clipboardData.getData("text");
+                                if (!/^\d+$/.test(pasted)) {
+                                  e.preventDefault();
+                                }
+                              }}
                             />
                           </div>
                         </div>
@@ -1620,52 +1466,48 @@ export default function TechnicianMaintenance() {
                         <div className="el-row-split-pair">
                           <div className="el-field-row el-half">
                             <span className="el-field-label-right">Reference 2 :</span>
-                           <input
-  ref={R("reference2Mobile")}
-  type="tel"
-  value={V("reference2Mobile")}
-  onChange={setField("reference2Mobile")}
-  placeholder="03XXXXXXXXX"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "reference2");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "reference2");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
-                          </div>
-                          <div className="el-field-row el-half">
                             <input
                               ref={R("reference2")}
                               value={V("reference2")}
                               onChange={setField("reference2")}
-                              placeholder="Name"
-                              className="el-remark-field"
+                              placeholder="Reference 2"
                               maxLength={40}
-                              onKeyDown={(e) => handleKeyDown(e, "documentName")}
+                              onKeyDown={(e) => handleKeyDown(e, "reference2Mobile")}
+                            />
+                          </div>
+                          <div className="el-field-row el-half">
+                            <span className="el-field-label-right">Mobile :</span>
+                            <input
+                              ref={R("reference2Mobile")}
+                              type="tel"
+                              value={V("reference2Mobile")}
+                              onChange={setField("reference2Mobile")}
+                              placeholder="03XXXXXXXXX"
+                              maxLength={11}
+                              onKeyDown={(e) => {
+                                if (e.ctrlKey || e.metaKey || e.altKey) {
+                                  handleKeyDown(e, "documentName");
+                                  return;
+                                }
+                                if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                  e.preventDefault();
+                                  return;
+                                }
+                                handleKeyDown(e, "documentName");
+                              }}
+                              onPaste={(e) => {
+                                const pasted = e.clipboardData.getData("text");
+                                if (!/^\d+$/.test(pasted)) {
+                                  e.preventDefault();
+                                }
+                              }}
                             />
                           </div>
                         </div>
 
                         <hr className="el-mobile-divider" />
 
-                        {/* DOCUMENT */}
+                        {/* ====== DOCUMENT ====== */}
                         {vis("Document") && (
                           <div className="el-doc-row">
                             <span className="el-field-label-right el-doc-label">
@@ -1707,7 +1549,7 @@ export default function TechnicianMaintenance() {
                           </div>
                         )}
 
-                        {/* REMARKS */}
+                        {/* ====== REMARKS ====== */}
                         <div className="el-field-row el-remarks-row">
                           <span className="el-field-label-right">Remarks :</span>
                           <textarea
@@ -1747,19 +1589,19 @@ export default function TechnicianMaintenance() {
         </div>
       </div>
 
-      {/* SEARCH MODAL */}
+      {/* ====== SEARCH MODAL ====== */}
       <SearchModal
         isOpen={isSearchModalOpen}
         onClose={handleSearchModalClose}
         onSelectInstaller={handleSearchSelect}
         apiLinks={apiLinks}
         apiEndpoint={API_VARIABLES.endpoints.searchByCode}
-        title="Select Technician"
-        codeKey="ttchcod"
-        descriptionKey="ttchnam"
+        title="Select Collector"
+        codeKey="tcolcod"
+        descriptionKey="tcolnam"
       />
 
-      {/* IMAGE PREVIEW MODAL */}
+      {/* ====== IMAGE PREVIEW MODAL ====== */}
       {isImageModalOpen && modalImageSrc && (
         <div
           onClick={() => setIsImageModalOpen(false)}

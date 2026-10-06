@@ -38,6 +38,7 @@ export default function InstallmentLedger2() {
   const toRef = useRef(null);
   const fromRef = useRef(null);
   const hasFetchedForSession = useRef(false);
+  const latestRequestRef = useRef(0);
   
   const [CashBookSummaryData, setCashBookSummaryData] = useState([]);
   const [CashPaymentData, setCashPaymentData] = useState([]);
@@ -148,19 +149,29 @@ export default function InstallmentLedger2() {
  
 
   function fetchGeneralLedger(codeParam) {
+  // ignore click events / empty values
+  if (typeof codeParam !== "string" || !codeParam.trim()) return;
+
+  // track the latest request so slow older responses can't overwrite newer data
+  const requestId = ++latestRequestRef.current;
+
   const apiUrl = apiLinks + "/InstallmentLedger.php";
   setIsLoading(true);
 
   const formData = new URLSearchParams({
-    // code: "MTSELEC",
-    // FLocCod: "002",
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-    FInsCod: codeParam, // 👈 dynamic
+    code: "SMARTJELEC",
+    FLocCod: "001",
+    // code: organisation.code,
+    // FLocCod: locationnumber || getLocationNumber,
+    FInsCod: codeParam.trim(), // 👈 dynamic
   }).toString();
 
-  axios.post(apiUrl, formData)
+  axios
+    .post(apiUrl, formData)
     .then((response) => {
+      // a newer request has started, so drop this stale response
+      if (requestId !== latestRequestRef.current) return;
+
       setIsLoading(false);
 
       if (Array.isArray(response.data?.Detail)) {
@@ -172,10 +183,11 @@ export default function InstallmentLedger2() {
       if (response.data?.Header) {
         setheaderData(response.data.Header);
       } else {
-        setheaderData([]);
+        setheaderData({}); // object, not array
       }
     })
     .catch((error) => {
+      if (requestId !== latestRequestRef.current) return;
       console.error("Error:", error);
       setIsLoading(false);
     });
@@ -242,10 +254,10 @@ useEffect(() => {
 useEffect(() => {
     const apiUrl = apiLinks + "/GetActiveCustomers.php";
     const formData = new URLSearchParams({
-      code: organisation.code,
-      FLocCod: locationnumber || getLocationNumber,
-      // FLocCod: "002",
-      // code: "MTSELEC",
+      // code: organisation.code,
+      // FLocCod: locationnumber || getLocationNumber,
+      FLocCod: "001",
+      code: "SMARTJELEC",
     }).toString();
     axios
       .post(apiUrl, formData)
@@ -524,6 +536,7 @@ useEffect(() => {
   };
 
   ///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
+
 // const exportPDFHandler = () => {
 //   const doc = new jsPDF({ orientation: "landscape" });
 
@@ -547,7 +560,7 @@ useEffect(() => {
 //     "Collection",
 //     "Balance",
 //   ];
-//   const columnWidths = [25, 20, 17, 110, 25, 25, 25];
+//   const columnWidths = [27, 20, 17, 110, 25, 25, 25];
 //   const totalWidth = columnWidths.reduce((acc, w) => acc + w, 0);
 //   const pageHeight = doc.internal.pageSize.height;
 //   const paddingTop = 15;
@@ -560,127 +573,153 @@ useEffect(() => {
 //     return total;
 //   };
 
-//   // ─── Safe form header ────────────────────────────────────────
+//     // ─── Safe form header ────────────────────────────────────────
+//    // ─── Safe form header ────────────────────────────────────────
 //   const drawFormHeader = (doc, startY) => {
-//     const pageWidth = doc.internal.pageSize.width;
-//     const formWidth = 300;
-//     const startX = (pageWidth - formWidth) / 2;
+//   const pageWidth = doc.internal.pageSize.width;
+//   const formWidth = 300;
+//   const startX = (pageWidth - formWidth) / 2;
 
-//     const leftX = startX;
-//     const rightX = startX + formWidth / 2;
-//     const thirdColX = rightX + 60;
+//   const leftX = startX;
+//   const rightX = startX + formWidth / 2;
 
-//     const labelWidth = 28;
-//     const fieldHeight = 6;
-//     const gapY = 2;
+//   const labelWidth = 28;
+//   const fieldHeight = 6;
+//   const gapY = 2;
 
-//     doc.setFont("verdana-regular", "normal");
-//     doc.setFontSize(10);
+//   // ── Right-side field width ──
+//   const rightFieldWidth = 32;
+//   // ── Ins Amt width ──
+//   const insAmtWidth = 28;
+//   // ── officeContact width ──
+//   const officeContactWidth = 30;
+//   // ── Exp Date field width (increased: 22 → 26) ──
+//   const expiryWidth = 26;
 
-//     // Safe field drawer – checks every coordinate
-//     const drawField = (label, value, x, y, fieldWidth, alignRight = false, valueColor = [0, 0, 0]) => {
-//       // If any coordinate is not a number, skip drawing to avoid errors
-//       if (isNaN(x) || isNaN(y) || isNaN(fieldWidth)) return;
+//   // ── Witness section ──
+//   const witnessX = rightX - 10;
 
-//       const fieldX = x + labelWidth + 2;
-//       if (label) doc.text(`${label} :`, x + labelWidth, y + 4, { align: "right" });
-//       doc.rect(fieldX, y, fieldWidth, fieldHeight);
+//   doc.setFont("verdana-regular", "normal");
+//   doc.setFontSize(10);
 
-//       if (value) {
-//         doc.setTextColor(...valueColor);
-//         const textX = alignRight ? fieldX + fieldWidth - 2 : fieldX + 2;
-//         doc.text(String(value), textX, y + 4, { align: alignRight ? "right" : "left" });
-//         doc.setTextColor(0, 0, 0);
-//       }
-//     };
+//   // Safe field drawer
+//   const drawField = (label, value, x, y, fieldWidth, alignRight = false, valueColor = [0, 0, 0]) => {
+//     if (isNaN(x) || isNaN(y) || isNaN(fieldWidth)) return;
 
-//     let y = startY;
+//     const fieldX = x + labelWidth + 2;
+//     if (label) doc.text(`${label} :`, x + labelWidth, y + 4, { align: "right" });
+//     doc.rect(fieldX, y, fieldWidth, fieldHeight);
 
-//     // ─── Rows 1–7 ──────────────────────────────────────────────
-//     drawField("A/C", "14-01-0001-ADIL MASIH", leftX, y, 90);
-//     drawField("Sale Date", "", rightX, y, 50, true);
-//     y += fieldHeight + gapY;
-
-//     drawField("Name", "AFTAB AHMAD ( AFTAB AHMAD )", leftX, y, 90);
-//     drawField("Sale Amt", "", rightX, y, 50, true);
-//     y += fieldHeight + gapY;
-
-//     drawField("Address", "", leftX, y, 90);
-//     drawField("Rent Amt", "", rightX, y, 50, true);
-//     y += fieldHeight + gapY;
-
-//     drawField("", "", leftX, y, 90);
-//     drawField("Total Amount", "", rightX, y, 50, true);
-//     y += fieldHeight + gapY;
-
-//     drawField("Sales Man", "AFTAB AHMAD", leftX, y, 90);
-//     drawField("Balance", "", rightX, y, 50, true, [255, 0, 0]);
-//     y += fieldHeight + gapY;
-
-//     drawField("Collector", "ZUBAIR", leftX, y, 90);
-//     drawField("PrmDate", "", rightX, y, 50, true);
-//     y += fieldHeight + gapY;
-
-//     drawField("Verify By", "", leftX, y, 90);
-//     drawField("Ins Num", "", rightX, y, 50, true);
-//     y += fieldHeight + gapY;
-
-//     // Partial line
-//     doc.setLineWidth(0.4);
-//     doc.line(startX, y + 4, rightX + 50, y + 4);
-//     y += 8;
-
-//     // Profession / officeContact / Ins Amt
-//     drawField("Profession", "", leftX, y, 90);
-//     drawField("officeContact", "", rightX - 15, y, 50);
-//     drawField("Ins Amt", "", thirdColX, y, 50, true);
-//     y += fieldHeight + gapY;
-
-//     drawField("OfficeAdd1", "", leftX, y, 90);
-//     y += fieldHeight + gapY;
-
-//     drawField("officeAdd2", "", leftX, y, 90);
-//     y += fieldHeight + gapY;
-
-//     // Line before Guarantor
-//     doc.setLineWidth(0.4);
-//     doc.line(startX, y + 4, startX + formWidth, y + 4);
-//     y += 8;
-
-//     // ─── Guarantor & Witness ──────────────────────────────────
-//     const sideWidth = 90;
-//     const halfWidth = Math.floor((sideWidth - 2) / 2);
-
-//     drawField("Guarantor", "", leftX, y, sideWidth);
-//     drawField("Witness", "", rightX, y, sideWidth);
-//     y += fieldHeight + gapY;
-
-//     drawField("Father Name", "", leftX, y, sideWidth);
-//     drawField("Father Name", "", rightX, y, sideWidth);
-//     y += fieldHeight + gapY;
-
-//     drawField("Address", "", leftX, y, sideWidth);
-//     drawField("Address", "", rightX, y, sideWidth);
-//     y += fieldHeight + gapY;
-
-//     drawField("", "", leftX, y, sideWidth);
-//     drawField("", "", rightX, y, sideWidth);
-//     y += fieldHeight + gapY;
-
-//     // Mobile & CNIC (split)
-//     drawField("Mobile", "", leftX, y, halfWidth);
-//     drawField("CNIC", "", leftX + labelWidth + halfWidth + 2, y, halfWidth);
-
-//     drawField("Mobile", "", rightX, y, halfWidth);
-//     drawField("CNIC", "", rightX + labelWidth + halfWidth + 2, y, halfWidth);
-//     y += fieldHeight + gapY;
-
-//     // Final line
-//     doc.setLineWidth(0.4);
-//     doc.line(startX, y + 4, startX + formWidth, y + 4);
-
-//     return y + 10;
+//     if (value) {
+//       doc.setTextColor(...valueColor);
+//       const textX = alignRight ? fieldX + fieldWidth - 2 : fieldX + 2;
+//       doc.text(String(value), textX, y + 4, { align: alignRight ? "right" : "left" });
+//       doc.setTextColor(0, 0, 0);
+//     }
 //   };
+
+//   let y = startY;
+
+//   // ─── Rows 1–7 (right side fields) ──
+//   drawField("A/C", Companyselectdatavalue.label, leftX, y, 90);
+//   drawField("Sale Date", headerData.InvDate, rightX, y, rightFieldWidth, true);
+//   y += fieldHeight + gapY;
+
+//   drawField("Name", headerData.Name, leftX, y, 90);
+//   drawField("Sale Amt", headerData.SaleAmt, rightX, y, rightFieldWidth, true);
+//   y += fieldHeight + gapY;
+
+//   drawField("Address", headerData.Address1, leftX, y, 90);
+//   drawField("Rent Amt", headerData.RentAmt, rightX, y, rightFieldWidth, true);
+//   y += fieldHeight + gapY;
+
+//   drawField("", headerData.Address2, leftX, y, 90);
+//   drawField("Total Amount", headerData.TotalAmt, rightX, y, rightFieldWidth, true);
+//   y += fieldHeight + gapY;
+
+//   drawField("Sales Man", headerData.SalesMan, leftX, y, 90);
+//   drawField("Balance", (
+//     parseFloat(headerData?.TotalAmt?.replace(/,/g, "") || 0) -
+//     parseFloat(headerData?.Advance?.replace(/,/g, "") || 0)
+//   ).toLocaleString(), rightX, y, rightFieldWidth, true, [255, 0, 0]);
+//   y += fieldHeight + gapY;
+
+//   drawField("Collector", headerData.Collector, leftX, y, 90);
+//   drawField("PrmDate", headerData.PrmDate, rightX, y, rightFieldWidth, true);
+//   y += fieldHeight + gapY;
+
+//   drawField("Verify By", headerData.verify, leftX, y, 90);
+//   drawField("Ins Num", headerData.InsNum, rightX, y, rightFieldWidth, true);
+//   y += fieldHeight + gapY;
+
+//   // Partial line
+//   doc.setLineWidth(0.4);
+//   doc.line(startX, y + 4, rightX + rightFieldWidth, y + 4);
+//   y += 8;
+
+//   // ─── Profession / officeContact / Ins Amt / Exp Date ───
+//   drawField("Profession", headerData.Profession, leftX, y, 90);
+
+//   // officeContact – same position, narrower width
+//   const officeContactX = rightX - 35;
+//   drawField("offContact", headerData.OfficeContact, officeContactX, y, officeContactWidth);
+
+//   // Ins Amt – follows officeContact with a small gap
+//   const gapBetweenFields = -7;
+//   const insAmtX = officeContactX + labelWidth + officeContactWidth + gapBetweenFields;
+//   drawField("Ins Amt", headerData.InsAmt, insAmtX, y, insAmtWidth, true);
+
+//   // Exp Date – follows Ins Amt with the same gap, slightly wider
+//   const expiryX = insAmtX + labelWidth + insAmtWidth + gapBetweenFields;
+//   drawField("ExpDate", headerData.ExpiryDate, expiryX, y, expiryWidth, true);
+
+//   y += fieldHeight + gapY;
+
+//   drawField("OfficeAdd1", headerData.OfficeAdd1, leftX, y, 90);
+//   y += fieldHeight + gapY;
+
+//   drawField("officeAdd2", headerData.OfficeAdd2, leftX, y, 90);
+//   y += fieldHeight + gapY;
+
+//   // Line before Guarantor
+//   doc.setLineWidth(0.4);
+//   doc.line(startX, y + 4, startX + formWidth, y + 4);
+//   y += 8;
+
+//   // ─── Guarantor & Witness ──────────────────────────────────
+//   const sideWidth = 100;
+//   const halfWidth = Math.floor((sideWidth - 15 - 2) / 2);
+
+//   drawField("Guarantor", headerData.GrnName, leftX, y, sideWidth);
+//   drawField("Witness", headerData.WitName, witnessX, y, sideWidth);
+//   y += fieldHeight + gapY;
+
+//   drawField("Father Name", headerData.GrnFather, leftX, y, sideWidth);
+//   drawField("Father Name", headerData.WitFather, witnessX, y, sideWidth);
+//   y += fieldHeight + gapY;
+
+//   drawField("Address", headerData.GrnAdd1, leftX, y, sideWidth);
+//   drawField("Address", headerData.WitAdd1, witnessX, y, sideWidth);
+//   y += fieldHeight + gapY;
+
+//   drawField("", headerData.GrnAdd2, leftX, y, sideWidth);
+//   drawField("", headerData.WitAdd2, witnessX, y, sideWidth);
+//   y += fieldHeight + gapY;
+
+//   // Mobile & CNIC (split)
+//   drawField("Mobile", headerData.GrnMobile, leftX, y, halfWidth);
+//   drawField("CNIC", headerData.GrnNic, leftX - 12 + labelWidth + halfWidth + 2, y, halfWidth);
+
+//   drawField("Mobile", headerData.WitMobile, witnessX, y, halfWidth);
+//   drawField("CNIC", headerData.WitNic, witnessX - 12 + labelWidth + halfWidth + 2, y, halfWidth);
+//   y += fieldHeight + gapY;
+
+//   // Final line
+//   doc.setLineWidth(0.4);
+//   doc.line(startX, y + 4, startX + formWidth, y + 4);
+
+//   return y + 10;
+// };
 
 //   // ─── Table headers ──────────────────────────────────────────
 //   const addTableHeaders = (startX, startY) => {
@@ -715,7 +754,7 @@ useEffect(() => {
 //     doc.text(`Crystal Solution    ${date}    ${time}`, lineX + 2, lineY + 4);
 //   };
 
-//   // ─── Table rows (dynamic) ──────────────────────────────────
+//   // ─── Table rows (dynamic, NO total row) ────────────────────
 //   const addTableRows = (startX, startY, startIndex) => {
 //     const lineHeight = 4;
 //     const tableWidth = getTotalTableWidth();
@@ -726,11 +765,13 @@ useEffect(() => {
 //       const row = rows[currentRowIndex];
 //       const isOddRow = currentRowIndex % 2 !== 0;
 //       const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-//       const isTotalRow = currentRowIndex === rows.length - 1;
 //       const textColor = isRedRow ? [255, 0, 0] : [0, 0, 0];
 
 //       const splitRow = row.map((cell, idx) => {
 //         const text = String(cell).trim();
+//         if (idx === 0 || idx === 1 || idx === 2) {
+//           return [text];
+//         }
 //         const maxWidth = columnWidths[idx] - 4;
 //         const textWidth =
 //           (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
@@ -747,27 +788,14 @@ useEffect(() => {
 //         return currentRowIndex;
 //       }
 
-//       if (isOddRow && !isTotalRow) {
+//       if (isOddRow) {
 //         doc.setFillColor(240);
 //         doc.rect(startX, currentY, tableWidth, rowHeight, "F");
 //       }
 //       doc.setDrawColor(0);
-
-//       if (isTotalRow) {
-//         doc.setFont("verdana", "bold");
-//         doc.setLineWidth(0.3);
-//         doc.line(startX, currentY, startX + tableWidth, currentY);
-//         doc.line(startX, currentY + 0.5, startX + tableWidth, currentY + 0.5);
-//         doc.line(startX, currentY + rowHeight, startX + tableWidth, currentY + rowHeight);
-//         doc.line(startX, currentY + rowHeight - 0.5, startX + tableWidth, currentY + rowHeight - 0.5);
-//         doc.setLineWidth(0.2);
-//         doc.line(startX, currentY, startX, currentY + rowHeight);
-//         doc.line(startX + tableWidth, currentY, startX + tableWidth, currentY + rowHeight);
-//       } else {
-//         doc.setLineWidth(0.2);
-//         doc.rect(startX, currentY, tableWidth, rowHeight);
-//         doc.setFont("verdana-regular", "normal");
-//       }
+//       doc.setLineWidth(0.2);
+//       doc.rect(startX, currentY, tableWidth, rowHeight);
+//       doc.setFont("verdana-regular", "normal");
 
 //       let currentX = startX;
 //       splitRow.forEach((textArray, cellIndex) => {
@@ -793,7 +821,6 @@ useEffect(() => {
 
 //       currentY += rowHeight;
 //       currentRowIndex++;
-//       if (isTotalRow) doc.setFont("verdana-regular", "normal");
 //     }
 
 //     drawFooter();
@@ -817,7 +844,6 @@ useEffect(() => {
 //         currentY = paddingTop;
 //       }
 
-//       // Title
 //       doc.setFont("helvetica", "300");
 //       addTitle(comapnyname, currentY, 18);
 //       currentY += 5;
@@ -831,19 +857,16 @@ useEffect(() => {
 //       );
 //       currentY += 8;
 
-//       // Form header – only on first page
 //       if (pageNumber === 1) {
 //         currentY = drawFormHeader(doc, currentY);
 //       } else {
-//         currentY += 2; // tiny gap
+//         currentY += 2;
 //       }
 
-//       // Table headers
 //       const headersStartX = (doc.internal.pageSize.width - totalWidth) / 2;
 //       addTableHeaders(headersStartX, currentY);
 //       currentY += 6;
 
-//       // Rows
 //       const nextRowIndex = addTableRows(headersStartX, currentY, rowIndex);
 
 //       if (nextRowIndex < rows.length) {
@@ -884,7 +907,7 @@ useEffect(() => {
 //     doc.setTextColor(0, 0, 0);
 //     doc.text(
 //       `Page ${p} / ${totalPages}`,
-//       doc.internal.pageSize.width - 10,
+//       doc.internal.pageSize.width - 20,
 //       pageHeight - 8,
 //       { align: "right" }
 //     );
@@ -893,10 +916,68 @@ useEffect(() => {
 //   doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
 // };
 
-const exportPDFHandler = () => {
-  const doc = new jsPDF({ orientation: "landscape" });
+// Image URL → base64 data URL
+// ─── Helper: Image URL → base64 ─────────────────────────────────
+// Yeh function component ke bahar (top par) rakho
+// Loads an image URL and returns { data (base64 JPEG), w, h }
+const loadImageAsBase64 = (url) =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
 
-  // ─── Table data ───────────────────────────────────────────────
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+
+        // white background so transparent PNGs don't turn black
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+
+        resolve({
+          data: canvas.toDataURL("image/jpeg", 0.9),
+          w: img.naturalWidth,
+          h: img.naturalHeight,
+        });
+      } catch (err) {
+        reject(err);
+      }
+    };
+
+    img.onerror = (err) => reject(err);
+
+    // cache-bust so the browser doesn't reuse the non-CORS copy used by the on-screen <img>
+    img.src = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+  });
+
+const exportPDFHandler = async () => {
+  const doc = new jsPDF({ orientation: "portrait" });
+
+  // ─── Load picture via proxy (adds CORS headers) ─────────────
+  let pictureBase64 = null;
+  let picW = 1;
+  let picH = 1;
+
+  if (headerData?.Picture) {
+    const originalUrl = `https://crystalsolutions.pk/DI/${organisation.code}/${headerData.Picture}`;
+    const imageUrl = `https://images.weserv.nl/?url=${encodeURIComponent(
+      originalUrl
+    )}&output=jpg`;
+
+    try {
+      const res = await loadImageAsBase64(imageUrl);
+      pictureBase64 = res.data;
+      picW = res.w;
+      picH = res.h;
+    } catch (err) {
+      console.error("Image failed:", err);
+    }
+  }
+
+  // ─── Table data ─────────────────────────────────────────────
   const rows = tableData.map((item) => [
     item.Date,
     item["Trn#"],
@@ -907,165 +988,209 @@ const exportPDFHandler = () => {
     formatValue(item.Balance),
   ]);
 
-  const headers = [
-    "Date",
-    "Trn#",
-    "Type",
-    "Description",
-    "Sale",
-    "Collection",
-    "Balance",
-  ];
-  const columnWidths = [27, 20, 17, 110, 25, 25, 25];
+  const headers = ["Date", "Trn#", "Type", "Description", "Sale", "Collection", "Balance"];
+  const columnWidths = [20, 15, 14, 70, 22, 22, 22];
   const totalWidth = columnWidths.reduce((acc, w) => acc + w, 0);
+
   const pageHeight = doc.internal.pageSize.height;
-  const paddingTop = 15;
-  const footerReserve = 18;
+  const pageWidth = doc.internal.pageSize.width;
+  const paddingTop = 12;
+  const footerReserve = 16;
 
-  // ─── Helper: total table width ──────────────────────────────
-  const getTotalTableWidth = () => {
-    let total = 0;
-    columnWidths.forEach((w) => (total += w));
-    return total;
+  const getTotalTableWidth = () => columnWidths.reduce((t, w) => t + w, 0);
+
+  // ─── Date / time (defined before use) ───────────────────────
+  const getCurrentDate = () => {
+    const t = new Date();
+    return `${String(t.getDate()).padStart(2, "0")}-${String(t.getMonth() + 1).padStart(2, "0")}-${t.getFullYear()}`;
   };
+  const getCurrentTime = () => {
+    const t = new Date();
+    return `${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}:${String(t.getSeconds()).padStart(2, "0")}`;
+  };
+  const date = getCurrentDate();
+  const time = getCurrentTime();
 
-  // ─── Safe form header ────────────────────────────────────────
+  // ─── Form header ────────────────────────────────────────────
   const drawFormHeader = (doc, startY) => {
-    const pageWidth = doc.internal.pageSize.width;
-    const formWidth = 300;
+    const formWidth = 180;
     const startX = (pageWidth - formWidth) / 2;
 
-    const leftX = startX;
-    const rightX = startX + formWidth / 2;
-    const thirdColX = rightX + 60;
+    const leftX = startX - 8;
+    const rightX = startX + formWidth / 2 + 8;
+    const rightXTop = rightX - 10;
 
-    const labelWidth = 28;
-    const fieldHeight = 6;
-    const gapY = 2;
+    const labelWidth = 22;
+    const fieldHeight = 5.5;
+    const gapY = 1.8;
+
+    const rightFieldWidth = 30;
+    const insAmtWidth = 26;
+    const officeContactWidth = 26;
+    const expiryWidth = 26;
+    const leftFieldWidth = 72;
+    const witnessX = rightX - 10;
 
     doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(7.5);
 
-    // Safe field drawer – checks every coordinate
     const drawField = (label, value, x, y, fieldWidth, alignRight = false, valueColor = [0, 0, 0]) => {
-      // If any coordinate is not a number, skip drawing to avoid errors
       if (isNaN(x) || isNaN(y) || isNaN(fieldWidth)) return;
-
       const fieldX = x + labelWidth + 2;
       if (label) doc.text(`${label} :`, x + labelWidth, y + 4, { align: "right" });
       doc.rect(fieldX, y, fieldWidth, fieldHeight);
-
       if (value) {
         doc.setTextColor(...valueColor);
-        const textX = alignRight ? fieldX + fieldWidth - 2 : fieldX + 2;
-        doc.text(String(value), textX, y + 4, { align: alignRight ? "right" : "left" });
+        const textX = alignRight ? fieldX + fieldWidth - 1.5 : fieldX + 1.5;
+        doc.text(String(value), textX, y + 3.8, { align: alignRight ? "right" : "left" });
         doc.setTextColor(0, 0, 0);
       }
     };
 
     let y = startY;
 
-    // ─── Rows 1–7 ──────────────────────────────────────────────
-    drawField("A/C", Companyselectdatavalue.label, leftX, y, 90);
-    drawField("Sale Date", headerData.InvDate, rightX, y, 50, true);
+    // ─── Picture box ──────────────────────────────────────────
+    const picBoxWidth = 35;
+    const picBoxHeight = 30;
+    const picBoxX = rightXTop + rightFieldWidth + labelWidth + 5;
+    const picBoxY = startY;
+
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.3);
+    doc.rect(picBoxX, picBoxY, picBoxWidth, picBoxHeight);
+
+    // Placeholder text shown when there is no picture / load failed
+    const drawNoImage = () => {
+      doc.setFont("verdana", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(120, 120, 120); // grey
+      doc.text("NO IMAGE", picBoxX + picBoxWidth / 2, picBoxY + picBoxHeight / 2 + 1, {
+        align: "center",
+      });
+
+      // restore defaults for the rest of the form
+      doc.setFont("verdana-regular", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(0, 0, 0);
+    };
+
+    if (pictureBase64) {
+      try {
+        // fit inside the box, keep aspect ratio, centered
+        const maxW = picBoxWidth - 2;
+        const maxH = picBoxHeight - 2;
+        const ratio = Math.min(maxW / picW, maxH / picH);
+        const w = picW * ratio;
+        const h = picH * ratio;
+        const x = picBoxX + 1 + (maxW - w) / 2;
+        const yImg = picBoxY + 1 + (maxH - h) / 2;
+
+        doc.addImage(pictureBase64, "JPEG", x, yImg, w, h);
+      } catch (e) {
+        console.error("addImage failed:", e);
+        drawNoImage();
+      }
+    } else {
+      drawNoImage();
+    }
+
+    // ─── Rows ─────────────────────────────────────────────────
+    drawField("A/C", Companyselectdatavalue.label, leftX, y, leftFieldWidth);
+    drawField("Sale Date", headerData.InvDate, rightXTop, y, rightFieldWidth, true);
     y += fieldHeight + gapY;
 
-    drawField("Name", headerData.Name, leftX, y, 90);
-    drawField("Sale Amt", headerData.SaleAmt, rightX, y, 50, true);
+    drawField("Name", headerData.Name, leftX, y, leftFieldWidth);
+    drawField("Sale Amt", headerData.SaleAmt, rightXTop, y, rightFieldWidth, true);
     y += fieldHeight + gapY;
 
-    drawField("Address",  headerData.Address1 , leftX, y, 90);
-    drawField("Rent Amt", headerData.RentAmt, rightX, y, 50, true);
+    drawField("Address", headerData.Address1, leftX, y, leftFieldWidth);
+    drawField("Rent Amt", headerData.RentAmt, rightXTop, y, rightFieldWidth, true);
     y += fieldHeight + gapY;
 
-    drawField("", headerData.Address2, leftX, y, 90);
-    drawField("Total Amount",  headerData.TotalAmt, rightX, y, 50, true);
+    drawField("", headerData.Address2, leftX, y, leftFieldWidth);
+    drawField("Total Amount", headerData.TotalAmt, rightXTop, y, rightFieldWidth, true);
     y += fieldHeight + gapY;
 
-    drawField("Sales Man", headerData.SalesMan, leftX, y, 90);
-    drawField("Balance",     (
-                         parseFloat(
-                          headerData?.TotalAmt?.replace(/,/g, "") || 0,
-                        ) -
-                        parseFloat(headerData?.Advance?.replace(/,/g, "") || 0)
-                      ).toLocaleString(), rightX, y, 50, true, [255, 0, 0]);
+    drawField("Sales Man", headerData.SalesMan, leftX, y, leftFieldWidth);
+    drawField("Advance", headerData.Advance, rightXTop, y, rightFieldWidth, true, [255, 0, 0]);
     y += fieldHeight + gapY;
 
-    drawField("Collector",  headerData.Collector, leftX, y, 90);
-    drawField("PrmDate", headerData.PrmDate, rightX, y, 50, true);
+    drawField("Collector", headerData.Collector, leftX, y, leftFieldWidth);
+    drawField("PrmDate", headerData.PrmDate, rightXTop, y, rightFieldWidth, true);
     y += fieldHeight + gapY;
 
-    drawField("Verify By", headerData.verify, leftX, y, 90);
-    drawField("Ins Num", headerData.InsNum, rightX, y, 50, true);
+    drawField("Verify By", headerData.verify, leftX, y, leftFieldWidth);
+    drawField("Ins Num", headerData.InsNum, rightXTop, y, rightFieldWidth, true);
     y += fieldHeight + gapY;
 
-    // Partial line
-    doc.setLineWidth(0.4);
-    doc.line(startX, y + 4, rightX + 50, y + 4);
-    y += 8;
+    doc.setLineWidth(0.3);
+    doc.line(startX - 8, y + 3, rightX + rightFieldWidth, y + 3);
+    y += 7;
 
-    // Profession / officeContact / Ins Amt
-    drawField("Profession", headerData.Profession, leftX, y, 90);
-    drawField("officeContact", headerData.OfficeContact, rightX - 15, y, 50);
-    drawField("Ins Amt", headerData.InsAmt, thirdColX, y, 50, true);
+    drawField("Profession", headerData.Profession, leftX, y, leftFieldWidth);
+    const officeContactX = rightX - 12;
+    drawField("offContact", headerData.OfficeContact, officeContactX, y, officeContactWidth);
+
+    const gapBetweenFields = -5;
+    const insAmtX = officeContactX + labelWidth + officeContactWidth + gapBetweenFields;
+    drawField("Ins Amt", headerData.InsAmt, insAmtX, y, insAmtWidth, true);
+
+    const expiryX = insAmtX;
+    const expiryY = y + fieldHeight + 0.8;
+    drawField("ExpDate", headerData.ExpiryDate, expiryX, expiryY, expiryWidth, true);
+
+    y += fieldHeight + gapY;
+    drawField("OfficeAdd1", headerData.OfficeAdd1, leftX, y, leftFieldWidth);
+    y += fieldHeight + gapY;
+    drawField("officeAdd2", headerData.OfficeAdd2, leftX, y, leftFieldWidth);
     y += fieldHeight + gapY;
 
-    drawField("OfficeAdd1", headerData.OfficeAdd1, leftX, y, 90);
-    y += fieldHeight + gapY;
+    doc.setLineWidth(0.3);
+    doc.line(startX - 8, y + 3, startX + formWidth + 8, y + 3);
+    y += 7;
 
-    drawField("officeAdd2", headerData.OfficeAdd2, leftX, y, 90);
-    y += fieldHeight + gapY;
-
-    // Line before Guarantor
-    doc.setLineWidth(0.4);
-    doc.line(startX, y + 4, startX + formWidth, y + 4);
-    y += 8;
-
-    // ─── Guarantor & Witness ──────────────────────────────────
-    const sideWidth = 100;
-    const halfWidth = Math.floor((sideWidth-15 - 2) / 2);
+    const sideWidth = 72;
+    const halfWidth = Math.floor((sideWidth - 12 - 2) / 2);
 
     drawField("Guarantor", headerData.GrnName, leftX, y, sideWidth);
-    drawField("Witness",  headerData.WitName, rightX, y, sideWidth);
+    drawField("Witness", headerData.WitName, witnessX, y, sideWidth);
     y += fieldHeight + gapY;
 
     drawField("Father Name", headerData.GrnFather, leftX, y, sideWidth);
-    drawField("Father Name", headerData.WitFather, rightX, y, sideWidth);
+    drawField("Father Name", headerData.WitFather, witnessX, y, sideWidth);
     y += fieldHeight + gapY;
 
-    drawField("Address", headerData.GrnAdd1 , leftX, y, sideWidth);
-    drawField("Address", headerData.WitAdd1, rightX, y, sideWidth);
+    drawField("Address", headerData.GrnAdd1, leftX, y, sideWidth);
+    drawField("Address", headerData.WitAdd1, witnessX, y, sideWidth);
     y += fieldHeight + gapY;
 
-    drawField("", headerData.GrnAdd2 , leftX, y, sideWidth);
-    drawField("", headerData.WitAdd2, rightX, y, sideWidth);
+    drawField("", headerData.GrnAdd2, leftX, y, sideWidth);
+    drawField("", headerData.WitAdd2, witnessX, y, sideWidth);
     y += fieldHeight + gapY;
 
-    // Mobile & CNIC (split)
     drawField("Mobile", headerData.GrnMobile, leftX, y, halfWidth);
-    drawField("CNIC", headerData.GrnNic, leftX-12 + labelWidth + halfWidth + 2, y, halfWidth);
+    drawField("CNIC", headerData.GrnNic, leftX - 10 + labelWidth + halfWidth + 2, y, halfWidth);
 
-    drawField("Mobile", headerData.WitMobile, rightX, y, halfWidth);
-    drawField("CNIC", headerData.WitNic, rightX-12 + labelWidth + halfWidth + 2, y, halfWidth);
+    drawField("Mobile", headerData.WitMobile, witnessX, y, halfWidth);
+    drawField("CNIC", headerData.WitNic, witnessX - 10 + labelWidth + halfWidth + 2, y, halfWidth);
     y += fieldHeight + gapY;
 
-    // Final line
-    doc.setLineWidth(0.4);
-    doc.line(startX, y + 4, startX + formWidth, y + 4);
+    doc.setLineWidth(0.3);
+    doc.line(startX - 8, y + 3, startX + formWidth + 8, y + 3);
 
-    return y + 10;
+    return y + 9;
   };
 
   // ─── Table headers ──────────────────────────────────────────
   const addTableHeaders = (startX, startY) => {
     doc.setFont("verdana", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(7.5);
     let currentX = startX;
     headers.forEach((header, index) => {
       const cellWidth = columnWidths[index];
-      const cellHeight = 6;
+      const cellHeight = 5.5;
       const cellX = currentX + cellWidth / 2;
-      const cellY = startY + cellHeight / 2 + 1.5;
+      const cellY = startY + cellHeight / 2 + 1.3;
       doc.setFillColor(200, 200, 200);
       doc.rect(currentX, startY, cellWidth, cellHeight, "F");
       doc.setLineWidth(0.2);
@@ -1076,140 +1201,127 @@ const exportPDFHandler = () => {
     });
   };
 
-  // ─── Footer ──────────────────────────────────────────────────
+  // ─── Footer ─────────────────────────────────────────────────
   const drawFooter = () => {
     const tableWidth = getTotalTableWidth();
-    const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
-    const lineY = pageHeight - 12;
+    const lineX = (pageWidth - tableWidth) / 2;
+    const lineY = pageHeight - 11;
     doc.setLineWidth(0.3);
     doc.line(lineX, lineY, lineX + tableWidth, lineY);
     doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(7.5);
     doc.setTextColor(0, 0, 0);
     doc.text(`Crystal Solution    ${date}    ${time}`, lineX + 2, lineY + 4);
   };
 
-  // ─── Table rows (dynamic, NO total row) ────────────────────
- const addTableRows = (startX, startY, startIndex) => {
-  const lineHeight = 4;
-  const tableWidth = getTotalTableWidth();
-  let currentY = startY;
-  let currentRowIndex = startIndex;
+  // ─── Table rows ─────────────────────────────────────────────
+  const addTableRows = (startX, startY, startIndex) => {
+    const lineHeight = 3.5;
+    const tableWidth = getTotalTableWidth();
+    let currentY = startY;
+    let currentRowIndex = startIndex;
 
-  while (currentRowIndex < rows.length) {
-    const row = rows[currentRowIndex];
-    const isOddRow = currentRowIndex % 2 !== 0;
-    const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
-    const textColor = isRedRow ? [255, 0, 0] : [0, 0, 0];
+    while (currentRowIndex < rows.length) {
+      const row = rows[currentRowIndex];
+      const isOddRow = currentRowIndex % 2 !== 0;
+      const isRedRow = row[0] && parseInt(row[0]) > 10000000000;
+      const textColor = isRedRow ? [255, 0, 0] : [0, 0, 0];
 
-    // ─── Split each cell, but DO NOT split for Date, Trn#, Type ───
-    const splitRow = row.map((cell, idx) => {
-      const text = String(cell).trim();
-      // Skip wrapping for columns 0, 1, 2 (Date, Trn#, Type)
-      if (idx === 0 || idx === 1 || idx === 2) {
-        return [text]; // keep as single line
+      const splitRow = row.map((cell, idx) => {
+        const text = String(cell ?? "").trim();
+        if (idx === 0 || idx === 1 || idx === 2) return [text];
+        const maxWidth = columnWidths[idx] - 3;
+        const textWidth =
+          (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
+          doc.internal.scaleFactor;
+        if (textWidth <= maxWidth) return [text];
+        return doc.splitTextToSize(text, maxWidth);
+      });
+
+      const maxLines = Math.max(...splitRow.map((c) => c.length));
+      const rowHeight = maxLines * lineHeight + 2;
+
+      if (currentY + rowHeight > pageHeight - footerReserve) {
+        drawFooter();
+        return currentRowIndex;
       }
-      const maxWidth = columnWidths[idx] - 4;
-      const textWidth =
-        (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
-        doc.internal.scaleFactor;
-      if (textWidth <= maxWidth) return [text];
-      return doc.splitTextToSize(text, maxWidth);
-    });
 
-    const maxLines = Math.max(...splitRow.map((c) => c.length));
-    const rowHeight = maxLines * lineHeight + 2;
+      if (isOddRow) {
+        doc.setFillColor(240);
+        doc.rect(startX, currentY, tableWidth, rowHeight, "F");
+      }
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.2);
+      doc.rect(startX, currentY, tableWidth, rowHeight);
+      doc.setFont("verdana-regular", "normal");
 
-    if (currentY + rowHeight > pageHeight - footerReserve) {
-      drawFooter();
-      return currentRowIndex;
+      let currentX = startX;
+      splitRow.forEach((textArray, cellIndex) => {
+        const cellWidth = columnWidths[cellIndex];
+        doc.setTextColor(...textColor);
+        doc.setFontSize(7.5);
+        const textY =
+          currentY + (rowHeight - textArray.length * lineHeight) / 2 + lineHeight - 1;
+
+        if (cellIndex <= 2) {
+          doc.text(textArray, currentX + cellWidth / 2, textY, { align: "center" });
+        } else if (cellIndex >= 4) {
+          doc.text(textArray, currentX + cellWidth - 1.5, textY, { align: "right" });
+        } else {
+          doc.text(textArray, currentX + 1.5, textY);
+        }
+
+        if (cellIndex < splitRow.length - 1) {
+          doc.line(currentX + cellWidth, currentY, currentX + cellWidth, currentY + rowHeight);
+        }
+        currentX += cellWidth;
+      });
+
+      currentY += rowHeight;
+      currentRowIndex++;
     }
 
-    // ─── Draw background and borders (unchanged) ───
-    if (isOddRow) {
-      doc.setFillColor(240);
-      doc.rect(startX, currentY, tableWidth, rowHeight, "F");
-    }
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.2);
-    doc.rect(startX, currentY, tableWidth, rowHeight);
-    doc.setFont("verdana-regular", "normal");
+    drawFooter();
+    return rows.length;
+  };
 
-    // ─── Draw cell content (unchanged) ───
-    let currentX = startX;
-    splitRow.forEach((textArray, cellIndex) => {
-      const cellWidth = columnWidths[cellIndex];
-      doc.setTextColor(...textColor);
-      doc.setFontSize(10);
-      const textY =
-        currentY + (rowHeight - textArray.length * lineHeight) / 2 + lineHeight - 1;
-
-      if (cellIndex === 0 || cellIndex === 1 || cellIndex === 2) {
-        doc.text(textArray, currentX + cellWidth / 2, textY, { align: "center" });
-      } else if (cellIndex === 4 || cellIndex === 5 || cellIndex === 6) {
-        doc.text(textArray, currentX + cellWidth - 2, textY, { align: "right" });
-      } else {
-        doc.text(textArray, currentX + 2, textY);
-      }
-
-      if (cellIndex < splitRow.length - 1) {
-        doc.line(currentX + cellWidth, currentY, currentX + cellWidth, currentY + rowHeight);
-      }
-      currentX += cellWidth;
-    });
-
-    currentY += rowHeight;
-    currentRowIndex++;
-  }
-
-  drawFooter();
-  return rows.length;
-};
-
-  // ─── Pagination (form header only on first page) ──────────
+  // ─── Pagination ─────────────────────────────────────────────
   const handlePagination = () => {
-    const addTitle = (title, y, fontSize = 18) => {
+    const addTitle = (title, y, fontSize = 14) => {
       doc.setFontSize(fontSize);
-      doc.text(title, doc.internal.pageSize.width / 2, y, { align: "center" });
+      doc.text(title, pageWidth / 2, y, { align: "center" });
     };
 
     let rowIndex = 0;
     let pageNumber = 1;
     let currentY = paddingTop;
 
-    while (rowIndex < rows.length) {
+    // do-while so page 1 (with header + picture) is created even if there are no rows
+    do {
       if (pageNumber > 1) {
         doc.addPage();
         currentY = paddingTop;
       }
 
-      // Title
       doc.setFont("helvetica", "300");
-      addTitle(comapnyname, currentY, 18);
-      currentY += 5;
+      addTitle(comapnyname, currentY, 14);
+      currentY += 4;
 
       doc.setFont("verdana-regular", "normal");
-      doc.setFontSize(10);
-      addTitle(
-        `Installment Ledger Report From ${fromInputDate} To ${toInputDate}`,
-        currentY,
-        12
-      );
-      currentY += 8;
+      doc.setFontSize(9);
+      addTitle(`Installment Ledger Report From ${fromInputDate} To ${toInputDate}`, currentY, 9);
+      currentY += 7;
 
-      // Form header – only on first page
       if (pageNumber === 1) {
         currentY = drawFormHeader(doc, currentY);
       } else {
-        currentY += 2; // tiny gap
+        currentY += 2;
       }
 
-      // Table headers
-      const headersStartX = (doc.internal.pageSize.width - totalWidth) / 2;
+      const headersStartX = (pageWidth - totalWidth) / 2;
       addTableHeaders(headersStartX, currentY);
-      currentY += 6;
+      currentY += 5.5;
 
-      // Rows
       const nextRowIndex = addTableRows(headersStartX, currentY, rowIndex);
 
       if (nextRowIndex < rows.length) {
@@ -1218,42 +1330,19 @@ const exportPDFHandler = () => {
       } else {
         break;
       }
-    }
+    } while (true);
   };
 
-  // ─── Date / time ─────────────────────────────────────────────
-  const getCurrentDate = () => {
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-    return `${dd}-${mm}-${yyyy}`;
-  };
-  const getCurrentTime = () => {
-    const today = new Date();
-    const hh = String(today.getHours()).padStart(2, "0");
-    const mm = String(today.getMinutes()).padStart(2, "0");
-    const ss = String(today.getSeconds()).padStart(2, "0");
-    return hh + ":" + mm + ":" + ss;
-  };
-  const date = getCurrentDate();
-  const time = getCurrentTime();
-
-  // ─── Generate ────────────────────────────────────────────────
   handlePagination();
 
+  // ─── Page numbers ───────────────────────────────────────────
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
     doc.setFont("verdana-regular", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(7.5);
     doc.setTextColor(0, 0, 0);
-    doc.text(
-      `Page ${p} / ${totalPages}`,
-      doc.internal.pageSize.width - 10,
-      pageHeight - 8,
-      { align: "right" }
-    );
+    doc.text(`Page ${p} / ${totalPages}`, pageWidth - 8, pageHeight - 6, { align: "right" });
   }
 
   doc.save(`InstallmentLedgerReport As On ${date}.pdf`);
@@ -1464,13 +1553,10 @@ const exportPDFHandler = () => {
   };
   ///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
   useHotkeys(
-    "alt+s",
-    () => {
-      fetchGeneralLedger();
-      // resetSorting();
-    },
-    { preventDefault: true, enableOnFormTags: true },
-  );
+  "alt+s",
+  () => fetchGeneralLedger(sessionCode || saleType),
+  { preventDefault: true, enableOnFormTags: true }
+);
 
   useHotkeys("alt+p", exportPDFHandler, {
     preventDefault: true,
@@ -1662,6 +1748,9 @@ const exportPDFHandler = () => {
     }
   }, [selectedIndex]); // Add selectedIndex as a dependency
   //////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
+
+
+
 
   return (
     <>
@@ -2138,7 +2227,7 @@ const exportPDFHandler = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      Balance :
+                      Advance :
                     </div>
                     <div
                       style={{
@@ -2157,12 +2246,7 @@ const exportPDFHandler = () => {
                         paddingRight: "5px",
                       }}
                     >
-                      {(
-                        parseFloat(
-                          headerData?.TotalAmt?.replace(/,/g, "") || 0,
-                        ) -
-                        parseFloat(headerData?.Advance?.replace(/,/g, "") || 0)
-                      ).toLocaleString()}
+                      {headerData.Advance}
                     </div>
                   </div>
                 </div>
@@ -2224,7 +2308,7 @@ const exportPDFHandler = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      PrmDate :
+                      Ins Amt :
                     </div>
                     <div
                       style={{
@@ -2243,7 +2327,7 @@ const exportPDFHandler = () => {
                         paddingRight: "5px",
                       }}
                     >
-                      {headerData.PrmDate}
+                      {headerData.InsAmt}
                     </div>
                   </div>
                 </div>
@@ -2449,7 +2533,7 @@ const exportPDFHandler = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      Ins Amt :
+                      PrmDate :
                     </div>
                     <div
                       style={{
@@ -2468,7 +2552,7 @@ const exportPDFHandler = () => {
                         paddingRight: "5px",
                       }}
                     >
-                      {headerData.InsAmt}
+                      {headerData.PrmDate}
                     </div>
                   </div>
                 </div>
@@ -3409,12 +3493,12 @@ const exportPDFHandler = () => {
             <SingleButton to="/MainPage" text="Return" />
             <SingleButton text="PDF" onClick={exportPDFHandler} />
             <SingleButton text="EXCEL" onClick={handleDownloadCSV} />
-            <SingleButton
-              id="searchsubmit"
-              text="SELECT"
-              ref={input3Ref}
-              onClick={fetchGeneralLedger}
-            />
+           <SingleButton
+  id="searchsubmit"
+  text="SELECT"
+  ref={input3Ref}
+  onClick={() => fetchGeneralLedger(sessionCode || saleType)}
+/>
           </div>
         </div>
       </div>

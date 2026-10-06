@@ -70,7 +70,7 @@ export default function InstallarMaintenance() {
   const [organisation, setOrganisation] = useState(null);
 
   // ⭐ Organisation + Location codes (replaces hardcoded "AMRELEC" / "001")
-  // const [orgCode, setOrgCode] = useState("DEMOELEC");
+  // const [orgCode, setOrgCode] = useState("AMRELEC");
   // const [locCode, setLocCode] = useState("001");
 
   const [orgCode, setOrgCode] = useState(organisation);
@@ -829,7 +829,7 @@ export default function InstallarMaintenance() {
   };
 
   return (
-    <div className="el-page-host">
+    <div className="el-page-host store-maintenance-scope">
       <div className="el-page-wrapper">
         <div className="el-page">
           <div className="el-card">
@@ -984,7 +984,7 @@ export default function InstallarMaintenance() {
                         </div>
 
                         <div className="el-field-row el-row-2-fields">
-                         <div className="el-field-row-inner el-field-left" style={{ marginLeft: "37px" }}>
+                         <div className="el-field-row-inner el-field-left" >
   <span className="el-field-label-right">
     Phone No :
   </span>
@@ -1052,9 +1052,9 @@ export default function InstallarMaintenance() {
                         {/* -------- CITY + AREA on the same row -------- */}
                         <div className="el-field-row el-row-2-fields">
                           {/* CITY (left) */}
-                          <div className="el-field-row-inner el-field-left" style={{marginLeft:"40px"}}>
+                          <div className="el-field-row-inner el-field-left" >
                             <span className="el-field-label-right">City :</span>
-                            <div ref={citySelectRef} style={{ width: '200px', maxWidth: '200px', flex: '0 0 auto' }}>
+                            <div ref={citySelectRef} style={{ width: '200px', maxWidth: '200px', flex: '0 0 auto' , marginLeft:'4px'}}>
                               <DynamicSelect
                                 apiEndpoint="/GetActiveCity.php"
                                 apiLinks={apiLinks}
@@ -1200,7 +1200,7 @@ export default function InstallarMaintenance() {
               </div>
 
               <div className="el-account-code-section">
-                <div className="el-account-code-row" style={{marginLeft:'17px'}}>
+                <div className="el-account-code-row" >
                   <span className="el-field-label-right">A/C Code :</span>
                   <input
   ref={accountCodeInputRef}

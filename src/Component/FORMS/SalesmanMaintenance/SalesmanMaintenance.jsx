@@ -1150,7 +1150,7 @@ export default function SalesmanMaintenance() {
 };
 
   return (
-    <div className="el-page-host">
+    <div className="el-page-host salesman-maintenance-scope">
       <div className="el-page-wrapper">
         <div className="el-page">
           <div className="el-card">

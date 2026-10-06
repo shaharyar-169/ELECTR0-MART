@@ -59,7 +59,7 @@ const DynamicSelect = forwardRef(function DynamicSelect(
     const formData = new URLSearchParams({
       code:
         (organisation && (organisation.code || organisation.organization)) ||
-        "ANEXCOMP",
+        "AMRELEC",
       FLocCod: locationNumber || "001",
     }).toString();
 

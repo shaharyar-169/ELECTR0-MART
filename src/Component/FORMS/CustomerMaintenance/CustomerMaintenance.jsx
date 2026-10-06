@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef , useCallback} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./customermaintenance.css";
 import { useTheme } from "../../../ThemeContext";
 import axios from "axios";
@@ -12,9 +12,6 @@ import FormButtons from "../components/FormButton";
 import InstallationCode from "../components/InstallarCode";
 import SearchModal from "../components/SearchModel";
 import DynamicSelect from "../components/CityDropdown";
-
-
-
 
 const FORM_FIELDS = {
   man:              { default: "" },
@@ -374,7 +371,6 @@ const CUSTOMER_CONFIG = {
 // SECTION 2 — IMPORTS & HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
 
-
 const todayISO = () => {
   const d = new Date();
   const yyyy = d.getFullYear();
@@ -579,17 +575,16 @@ function useMaintenanceForm({ config }) {
   const [organisation, setOrganisation] = useState(null);
   // const [orgCode, setOrgCode] = useState("DEMOINS");
   // const [locCode, setLocCode] = useState("001");
-  
-  const [orgCode, setOrgCode] = useState(organisation);
-  const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
 
+   const [orgCode, setOrgCode] = useState(organisation);
+    const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
+  
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
   const [isFetchingNextCode, setIsFetchingNextCode] = useState(false);
   const [isExisting, setIsExisting] = useState(false);
 
-  // ⭐ SYS CONTROL STATE
   const [sysControl, setSysControl] = useState(null);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -598,6 +593,12 @@ function useMaintenanceForm({ config }) {
   const [isWitnessMobileModalOpen, setIsWitnessMobileModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState("");
+
+  // ⭐ CAMERA STATE
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [cameraTargetSlot, setCameraTargetSlot] = useState(null);
+  const cameraVideoRef = useRef(null);
 
   const [images, setImages] = useState(() => {
     if (!IMAGE_CONFIG) return {};
@@ -633,7 +634,6 @@ function useMaintenanceForm({ config }) {
   const listRef = useRef([]);
   const pendingCodeRef = useRef("");
 
-  // ⭐ SYS CONTROL HELPER
   const vis = useCallback((key) => {
     try {
       if (!sysControl) return true;
@@ -781,7 +781,6 @@ function useMaintenanceForm({ config }) {
     }
   }, []);
 
-  // ⭐ SYS CONTROL LOAD
   useEffect(() => {
     if (!organisation || !orgCode) return;
 
@@ -795,25 +794,15 @@ function useMaintenanceForm({ config }) {
       .post(apiUrl, formData)
       .then((response) => {
         let obj = response.data;
-
         if (typeof obj === "string") {
-          try {
-            obj = JSON.parse(obj);
-          } catch (e) {
-            console.error(">>> GetSysControl parse error:", e);
-            obj = null;
-          }
+          try { obj = JSON.parse(obj); } catch (e) { obj = null; }
         }
-
         if (Array.isArray(obj) && obj.length > 0 && typeof obj[0] === "object") {
           obj = obj[0];
         }
-
         if (obj && typeof obj === "object" && !Array.isArray(obj)) {
-          console.log(">>> SysControl loaded:", obj);
           setSysControl(obj);
         } else {
-          console.warn(">>> SysControl empty — showing all fields");
           setSysControl({});
         }
       })
@@ -987,9 +976,6 @@ function useMaintenanceForm({ config }) {
       const apiUrl = apiLinks + API_VARIABLES.endpoints.save;
       const payload = buildSavePayload();
       payload.FCstCod = trimmedCode;
-
-      console.log("=== SAVE PAYLOAD ===");
-      console.log(JSON.stringify(payload, null, 2));
 
       const formData = new FormData();
       Object.entries(payload).forEach(([k, v]) => {
@@ -1224,27 +1210,27 @@ function useMaintenanceForm({ config }) {
       return;
     }
 
-   setFormStore((prev) => {
-  const next = { ...prev };
-  const sourceMap = slot.sourceMap || {};
-  Object.entries(sourceMap).forEach(([field, def]) => {
-    let raw;
-    let transformName = null;
-    if (typeof def === "string") raw = mobileData[def];
-    else if (def && typeof def === "object") {
-      raw = mobileData[def.key];
-      transformName = def.transform;
-    }
-    if (raw === undefined || raw === null) return;
-    if (transformName && GET_TRANSFORMS[transformName]) {
-      raw = GET_TRANSFORMS[transformName](raw);
-    } else {
-      raw = String(raw).trim();
-    }
-    next[field] = raw;
-  });
-  return next;
-});
+    setFormStore((prev) => {
+      const next = { ...prev };
+      const sourceMap = slot.sourceMap || {};
+      Object.entries(sourceMap).forEach(([field, def]) => {
+        let raw;
+        let transformName = null;
+        if (typeof def === "string") raw = mobileData[def];
+        else if (def && typeof def === "object") {
+          raw = mobileData[def.key];
+          transformName = def.transform;
+        }
+        if (raw === undefined || raw === null) return;
+        if (transformName && GET_TRANSFORMS[transformName]) {
+          raw = GET_TRANSFORMS[transformName](raw);
+        } else {
+          raw = String(raw).trim();
+        }
+        next[field] = raw;
+      });
+      return next;
+    });
 
     const linkedCode = String(mobileData.tcstcod ?? "").trim();
     if (linkedCode) {
@@ -1322,6 +1308,87 @@ function useMaintenanceForm({ config }) {
     }, 100);
   }, []);
 
+  // ⭐ CAMERA FUNCTIONS
+  const openCamera = useCallback(async (slotKey) => {
+    setCameraTargetSlot(slotKey);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false,
+      });
+      setCameraStream(stream);
+      setCameraOpen(true);
+    } catch (err) {
+      console.error("Camera error:", err);
+      showToast("Unable to access camera. Please check permissions.", "error");
+    }
+  }, []);
+
+  const closeCamera = useCallback(() => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+    }
+    setCameraStream(null);
+    setCameraOpen(false);
+    setCameraTargetSlot(null);
+  }, [cameraStream]);
+
+  const capturePhoto = useCallback(() => {
+    if (!cameraVideoRef.current || !cameraTargetSlot) return;
+
+    const video = cameraVideoRef.current;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const file = new File([blob], `photo-${Date.now()}.jpg`, {
+            type: "image/jpeg",
+          });
+          const imageUrl = URL.createObjectURL(blob);
+          setImage(cameraTargetSlot, imageUrl);
+
+          // Also set the file to the hidden file input so it gets saved
+          const fileInput = fileRefs.current[cameraTargetSlot]?.current;
+          if (fileInput) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            // Manually trigger the change event to update the form state
+            const event = new Event("change", { bubbles: true });
+            fileInput.dispatchEvent(event);
+          }
+
+          showToast("Photo captured successfully", "success");
+        }
+        closeCamera();
+      },
+      "image/jpeg",
+      0.9
+    );
+  }, [cameraTargetSlot, closeCamera, setImage]);
+
+  const handleCameraKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Escape") {
+        closeCamera();
+      }
+    },
+    [closeCamera]
+  );
+
+  // Set video ref when modal opens
+  useEffect(() => {
+    if (cameraOpen && cameraVideoRef.current && cameraStream) {
+      cameraVideoRef.current.srcObject = cameraStream;
+    }
+  }, [cameraOpen, cameraStream]);
+
   return {
     formStore,
     code,
@@ -1344,6 +1411,15 @@ function useMaintenanceForm({ config }) {
     modalImageSrc,
     sysControl,
     vis,
+    // ⭐ Camera
+    cameraOpen,
+    cameraStream,
+    cameraTargetSlot,
+    cameraVideoRef,
+    openCamera,
+    closeCamera,
+    capturePhoto,
+    handleCameraKeyDown,
 
     refs,
     codeInputRef,
@@ -1450,6 +1526,15 @@ export default function CustomerMaintenance() {
     handleDocumentUploadClick,
     handleDocumentFileChange,
     handleDocumentDownload,
+    // ⭐ Camera
+    cameraOpen,
+    cameraStream,
+    cameraTargetSlot,
+    cameraVideoRef,
+    openCamera,
+    closeCamera,
+    capturePhoto,
+    handleCameraKeyDown,
   } = form;
 
   const handleSubmit = (e) => e.preventDefault();
@@ -1472,7 +1557,7 @@ export default function CustomerMaintenance() {
   };
 
   return (
-    <div className="el-page-host">
+    <div className="el-page-host customer-maintenance-scope">
       <div className="el-page-wrapper">
         <div className="el-page">
           <div className="el-card">
@@ -1487,7 +1572,6 @@ export default function CustomerMaintenance() {
               <div className="el-scrollable-body">
                 {/* ==================== TOP BAR ==================== */}
                 <div className="el-top-bar">
-                  {/* Code — always visible */}
                   <div
                     className="el-field-row"
                     onKeyDownCapture={(e) => {
@@ -1519,7 +1603,6 @@ export default function CustomerMaintenance() {
                     />
                   </div>
 
-                  {/* Man — ManualCode key */}
                   {vis("ManualCode") && (
                     <div className="el-field-row el-field-abb">
                       <span className="el-field-label-right">Man :</span>
@@ -1534,7 +1617,6 @@ export default function CustomerMaintenance() {
                     </div>
                   )}
 
-                  {/* Ref — ReferenceCod key */}
                   {vis("ReferenceCod") && (
                     <div className="el-field-row el-field-abb">
                       <span className="el-field-label-right">Ref :</span>
@@ -1549,7 +1631,6 @@ export default function CustomerMaintenance() {
                     </div>
                   )}
 
-                  {/* Status — always visible */}
                   <div className="el-field-row">
                     <span className="el-field-label-right">Sts :</span>
                     <select
@@ -1570,40 +1651,36 @@ export default function CustomerMaintenance() {
                     <section className="el-section">
                       <div className="el-stack">
 
-                        {/* MOBILE — Mobile */}
+                        {/* MOBILE */}
                         {vis("Mobile") && (
                           <div className="el-field-row">
                             <span className="el-field-label-right">Mobile :</span>
-                           <input
-  ref={R("mobile")}
-  type="tel"
-  value={V("mobile")}
-  onChange={setField("mobile")}
-  placeholder="Customer Mobile"
-  className="mobile-field"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "name");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "name");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
+                            <input
+                              ref={R("mobile")}
+                              type="tel"
+                              value={V("mobile")}
+                              onChange={setField("mobile")}
+                              placeholder="Customer Mobile"
+                              className="mobile-field"
+                              maxLength={11}
+                              onKeyDown={(e) => {
+                                if (e.ctrlKey || e.metaKey || e.altKey) {
+                                  handleKeyDown(e, "name");
+                                  return;
+                                }
+                                if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                  e.preventDefault();
+                                  return;
+                                }
+                                handleKeyDown(e, "name");
+                              }}
+                              onPaste={(e) => {
+                                const pasted = e.clipboardData.getData("text");
+                                if (!/^\d+$/.test(pasted)) {
+                                  e.preventDefault();
+                                }
+                              }}
+                            />
                             {MOBILE_CONFIG && (
                               <button
                                 type="button"
@@ -1618,24 +1695,22 @@ export default function CustomerMaintenance() {
                           </div>
                         )}
 
-                        {/* NAME — always visible */}
+                        {/* NAME */}
                         <div className="el-field-row">
                           <span className="el-field-label-right">Name :</span>
-                  <input
-  ref={R("name")}
-  value={V("name")}
-  onChange={(e) => {
-    // ✅ Force uppercase on the DOM element itself
-    e.target.value = e.target.value.toUpperCase();
-    // ✅ Then store the uppercase value via real event
-    setField("name")(e);
-  }}
-  placeholder="Name"
-  className="name-field"
-  maxLength={40}
-  onKeyDown={(e) => handleKeyDown(e, "fatherName")}
-  style={{ textTransform: "uppercase" }}
-/>
+                          <input
+                            ref={R("name")}
+                            value={V("name")}
+                            onChange={(e) => {
+                              e.target.value = e.target.value.toUpperCase();
+                              setField("name")(e);
+                            }}
+                            placeholder="Name"
+                            className="name-field"
+                            maxLength={40}
+                            onKeyDown={(e) => handleKeyDown(e, "fatherName")}
+                            style={{ textTransform: "uppercase" }}
+                          />
                         </div>
 
                         <hr className="el-mobile-divider" />
@@ -1787,13 +1862,39 @@ export default function CustomerMaintenance() {
                                 style={{ display: "none" }}
                                 onChange={handleImageFileChange("customer")}
                               />
-                              <button
-                                type="button"
-                                className="el-upload-btn"
-                                onClick={handleImageUploadClick("customer")}
-                              >
-                                ⬆ Upload
-                              </button>
+                              {/* ⭐ UPLOAD + CAMERA BUTTONS */}
+                              <div className="el-photo-buttons">
+  <button
+    type="button"
+    className="el-upload-btn"
+    onClick={handleImageUploadClick("customer")}
+    title="Upload image from device"
+  >
+    ⬆ Upload
+  </button>
+  <button
+    type="button"
+    className="el-camera-btn"
+    onClick={() => openCamera("customer")}
+    title="Take photo with camera"
+  >
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+    Camera
+  </button>
+</div>
                             </div>
                           )}
                         </div>
@@ -2101,9 +2202,21 @@ export default function CustomerMaintenance() {
                                 placeholder="Mobile"
                                 maxLength={11}
                                 onKeyDown={(e) => {
-                                  if (!/[0-9]/.test(e.key) && e.key.length === 1)
+                                  if (e.ctrlKey || e.metaKey || e.altKey) {
+                                    handleKeyDown(e, "ownerName");
+                                    return;
+                                  }
+                                  if (!/[0-9]/.test(e.key) && e.key.length === 1) {
                                     e.preventDefault();
+                                    return;
+                                  }
                                   handleKeyDown(e, "ownerName");
+                                }}
+                                onPaste={(e) => {
+                                  const pasted = e.clipboardData.getData("text");
+                                  if (!/^\d+$/.test(pasted)) {
+                                    e.preventDefault();
+                                  }
                                 }}
                               />
                             </div>
@@ -2135,9 +2248,21 @@ export default function CustomerMaintenance() {
                                 placeholder="Mobile"
                                 maxLength={11}
                                 onKeyDown={(e) => {
-                                  if (!/[0-9]/.test(e.key) && e.key.length === 1)
+                                  if (e.ctrlKey || e.metaKey || e.altKey) {
+                                    handleKeyDown(e, "profession");
+                                    return;
+                                  }
+                                  if (!/[0-9]/.test(e.key) && e.key.length === 1) {
                                     e.preventDefault();
+                                    return;
+                                  }
                                   handleKeyDown(e, "profession");
+                                }}
+                                onPaste={(e) => {
+                                  const pasted = e.clipboardData.getData("text");
+                                  if (!/^\d+$/.test(pasted)) {
+                                    e.preventDefault();
+                                  }
                                 }}
                               />
                             </div>
@@ -2192,36 +2317,30 @@ export default function CustomerMaintenance() {
                           {vis("OfficeContact") && (
                             <div className="el-field-row el-half">
                               <span className="el-field-label-right">Contact :</span>
-                                                          <input
-  ref={R("companyContact")}
-  value={V("companyContact")}
-  onChange={setField("companyContact")}
-  placeholder="Company Contact"
-  maxLength={40}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "guarantorContact");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "guarantorContact");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
-
-
+                              <input
+                                ref={R("companyContact")}
+                                value={V("companyContact")}
+                                onChange={setField("companyContact")}
+                                placeholder="Company Contact"
+                                maxLength={40}
+                                onKeyDown={(e) => {
+                                  if (e.ctrlKey || e.metaKey || e.altKey) {
+                                    handleKeyDown(e, "guarantorContact");
+                                    return;
+                                  }
+                                  if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                    e.preventDefault();
+                                    return;
+                                  }
+                                  handleKeyDown(e, "guarantorContact");
+                                }}
+                                onPaste={(e) => {
+                                  const pasted = e.clipboardData.getData("text");
+                                  if (!/^\d+$/.test(pasted)) {
+                                    e.preventDefault();
+                                  }
+                                }}
+                              />
                             </div>
                           )}
                         </div>
@@ -2234,36 +2353,32 @@ export default function CustomerMaintenance() {
                             {vis("GuaranterMobile") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">Contact :</span>
-                               <input
-  className="contect-width"
-  ref={R("guarantorContact")}
-  type="tel"
-  value={V("guarantorContact")}
-  onChange={setField("guarantorContact")}
-  placeholder="Guarantor Mobile"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "guarantorName");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "guarantorName");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
+                                <input
+                                  className="contect-width"
+                                  ref={R("guarantorContact")}
+                                  type="tel"
+                                  value={V("guarantorContact")}
+                                  onChange={setField("guarantorContact")}
+                                  placeholder="Guarantor Mobile"
+                                  maxLength={11}
+                                  onKeyDown={(e) => {
+                                    if (e.ctrlKey || e.metaKey || e.altKey) {
+                                      handleKeyDown(e, "guarantorName");
+                                      return;
+                                    }
+                                    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                      e.preventDefault();
+                                      return;
+                                    }
+                                    handleKeyDown(e, "guarantorName");
+                                  }}
+                                  onPaste={(e) => {
+                                    const pasted = e.clipboardData.getData("text");
+                                    if (!/^\d+$/.test(pasted)) {
+                                      e.preventDefault();
+                                    }
+                                  }}
+                                />
                                 {MOBILE_CONFIG && (
                                   <button
                                     type="button"
@@ -2386,55 +2501,77 @@ export default function CustomerMaintenance() {
                                 style={{ display: "none" }}
                                 onChange={handleImageFileChange("guarantor")}
                               />
-                              <button
-                                type="button"
-                                className="el-upload-btn"
-                                onClick={handleImageUploadClick("guarantor")}
-                              >
-                                ⬆ Upload
-                              </button>
+                              {/* ⭐ UPLOAD + CAMERA BUTTONS */}
+                            <div className="el-photo-buttons">
+  <button
+    type="button"
+    className="el-upload-btn"
+    onClick={handleImageUploadClick("guarantor")}
+    title="Upload image from device"
+  >
+    ⬆ Upload
+  </button>
+  <button
+    type="button"
+    className="el-camera-btn"
+    onClick={() => openCamera("guarantor")}
+    title="Take photo with camera"
+  >
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+    Camera
+  </button>
+</div>
                             </div>
                           )}
                         </div>
 
                         <hr className="el-mobile-divider" />
 
-                        {/* WITNESS — API keys Guaranter2* */}
+                        {/* WITNESS */}
                         <div className="el-row-split">
                           <div className="el-row-split-left">
                             {vis("Guaranter2Mobile") && (
                               <div className="el-field-row">
                                 <span className="el-field-label-right">Contact :</span>
-                               <input
-  className="contect-width"
-  ref={R("witnessContact")}
-  type="tel"
-  value={V("witnessContact")}
-  onChange={setField("witnessContact")}
-  placeholder="Witness Mobile"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, "witnessName");
-      return;
-    }
-
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
-
-    handleKeyDown(e, "witnessName");
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
+                                <input
+                                  className="contect-width"
+                                  ref={R("witnessContact")}
+                                  type="tel"
+                                  value={V("witnessContact")}
+                                  onChange={setField("witnessContact")}
+                                  placeholder="Witness Mobile"
+                                  maxLength={11}
+                                  onKeyDown={(e) => {
+                                    if (e.ctrlKey || e.metaKey || e.altKey) {
+                                      handleKeyDown(e, "witnessName");
+                                      return;
+                                    }
+                                    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
+                                      e.preventDefault();
+                                      return;
+                                    }
+                                    handleKeyDown(e, "witnessName");
+                                  }}
+                                  onPaste={(e) => {
+                                    const pasted = e.clipboardData.getData("text");
+                                    if (!/^\d+$/.test(pasted)) {
+                                      e.preventDefault();
+                                    }
+                                  }}
+                                />
                                 {MOBILE_CONFIG && (
                                   <button
                                     type="button"
@@ -2557,13 +2694,39 @@ export default function CustomerMaintenance() {
                                 style={{ display: "none" }}
                                 onChange={handleImageFileChange("witness")}
                               />
-                              <button
-                                type="button"
-                                className="el-upload-btn"
-                                onClick={handleImageUploadClick("witness")}
-                              >
-                                ⬆ Upload
-                              </button>
+                              {/* ⭐ UPLOAD + CAMERA BUTTONS */}
+<div className="el-photo-buttons">
+  <button
+    type="button"
+    className="el-upload-btn"
+    onClick={handleImageUploadClick("witness")}
+    title="Upload image from device"
+  >
+    ⬆ Upload
+  </button>
+  <button
+    type="button"
+    className="el-camera-btn"
+    onClick={() => openCamera("witness")}
+    title="Take photo with camera"
+  >
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+    Camera
+  </button>
+</div>
                             </div>
                           )}
                         </div>
@@ -2835,6 +2998,47 @@ export default function CustomerMaintenance() {
           >
             ×
           </button>
+        </div>
+      )}
+
+      {/* ⭐ CAMERA MODAL */}
+      {cameraOpen && (
+        <div
+          className="el-camera-modal-overlay"
+          onKeyDown={handleCameraKeyDown}
+          tabIndex={-1}
+          ref={(el) => el && el.focus()}
+        >
+          <div className="el-camera-modal">
+            <div className="el-camera-header">
+              <h3>Take a Photo - {cameraTargetSlot ? cameraTargetSlot.charAt(0).toUpperCase() + cameraTargetSlot.slice(1) : ""}</h3>
+            </div>
+            <div className="el-camera-body">
+              <video
+                ref={cameraVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="el-camera-video"
+              />
+            </div>
+            <div className="el-camera-footer">
+              <button
+                type="button"
+                className="el-camera-capture-btn"
+                onClick={capturePhoto}
+              >
+                📷 Capture
+              </button>
+              <button
+                type="button"
+                className="el-camera-cancel-btn"
+                onClick={closeCamera}
+              >
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

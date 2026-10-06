@@ -167,9 +167,9 @@ import InstallmentCollectionMonthlyComparison from "./Component/Reports/Daily_Jo
 import InstallmentCustomerList from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentCustomerList.js";
 import InstallmentLedger2 from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentLedger2.js";
 import InstallmentRecoveryReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentRecoveryReport.js";
-import InstallmentWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentWiseReport.js"; 
-import MonthWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/MonthWiseReport.js";
-import InstallmentInvestmentStatusReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentInvestmentStatusReport.js";
+
+import InstallmentWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentWiseRepor.js";
+import InstallmentMonthWiseReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentMonthWiseReport.js";
 import ToDateOutstandingReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/ToDateOutstandingReport.js";
 import InstallmentOutstandingReport from "./Component/Reports/Daily_Jobs_Reports/InstallmentReport/InstallmentOutstandingReport.js";
 
@@ -244,7 +244,6 @@ import SupplierOutstandingBills from "./Component/Reports/Daily_Jobs_Reports/Mis
 
 
 //////////////////////////// FILE MAINTINANCE //////////////////////////////////
-import StoreMaintinanace from "./Component/FileMaintinance/StoreMaintinance.jsx";
 
 
 /////////////////////////////// FINANCIAL REPORT /////////////////////////////
@@ -261,10 +260,16 @@ import CollectorWiseCustomerSearch from "./Component/Reports/Daily_Jobs_Reports/
 
 /////////////////////////////// AMERICAN TRASECTION FROMA /////////////////////////////
 import InstallarMaintenance from "./Component/FORMS/InstallarMiantenance/InstallarMaintenance.jsx";
-import EmployeeMaintenance from "./Component/FORMS/EmployeeMaintenance/Employeemaintenance.jsx";
+// import EmployeeMaintenanceform from "./Component/FORMS/EmployeeMaintenance/Employeemaintenance.jsx";
+import EmployeeMaintenance2 from "./Component/FORMS/Employeemiantenace/EmployeeMaintenece.jsx";
 import CustomerMaintenance from "./Component/FORMS/CustomerMaintenance/CustomerMaintenance.jsx";
 import SalesmanMaintenance from "./Component/FORMS/SalesmanMaintenance/SalesmanMaintenance.jsx";
 import TechnicianMaintenance from "./Component/FORMS/TechnicianMaintenance/TechnicianMaintenance.jsx";
+import CollectorMaintenance from "./Component/FORMS/CollectorMaintenance/CollectorMaintenance.jsx";
+import VerifyMaintenance from "./Component/FORMS/VerifyMaintenance/VerifyMaintenance.jsx";
+import AreaMaintenance from "./Component/FORMS/AeraMaintenance/AreaMaintenance.jsx";
+import CityMaintenance from "./Component/FORMS/CityMaintenance/CityMaintenance.jsx";
+
 
 function App() {
   const queryClient = new QueryClient();
@@ -439,8 +444,8 @@ function App() {
                 <Route exact path="/InstallmentLedger" element={<InstallmentLedger2 />} />
                 <Route exact path="/InstallmentRecveryReport" element={<InstallmentRecoveryReport />} />
                 <Route exact path="/InstallmentWiseReport" element={<InstallmentWiseReport />} />
-                <Route exact path="/InstallmentMonthWiseReport" element={<MonthWiseReport />} />
-                <Route exact path="/InstallmentInvestmentStatusReport" element={<InstallmentInvestmentStatusReport />} />
+                <Route exact path="/InstallmentMonthWiseReport" element={<InstallmentMonthWiseReport />} />
+                {/* <Route exact path="/InstallmentInvestmentStatusReport" element={<InstallmentInvestmentStatusReport />} /> */}
                 <Route exact path="/ToDateOutstandingReport" element={<ToDateOutstandingReport />} />
                 <Route exact path="/InstallmentOutstandingReport" element={<InstallmentOutstandingReport />} />
 
@@ -534,7 +539,7 @@ function App() {
 
                 {/* Rountes for Utilities reports */}
                 <Route exact path="/CollectorWiseCustomerSearch" element={<CollectorWiseCustomerSearch />} />
-                <Route exact path="/StoreMaintenance" element={<StoreMaintinanace />} />
+                {/* <Route exact path="/StoreMaintenance" element={<StoreMaintinanace />} /> */}
 
 
 
@@ -550,10 +555,15 @@ function App() {
 
                {/* Rountes for Forms */}
                 <Route exact path="/InstallarMaintenance" element={<InstallarMaintenance />} />
-                <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenance />} />
+                {/* <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenanceform />} /> */}
+                <Route exact path="/EmployeeMaintenance" element={<EmployeeMaintenance2 />} />
                 <Route exact path="/CustomerMaintenance" element={<CustomerMaintenance />} />
                 <Route exact path="/SalesManMaintenance" element={<SalesmanMaintenance />} />
                 <Route exact path="/TechnicianMaintenance1" element={<TechnicianMaintenance />} />
+                <Route exact path="/CollectorMaintenance" element={<CollectorMaintenance />} />
+                <Route exact path="/VerifyMaintenance" element={<VerifyMaintenance />} />
+                <Route exact path="/AreaMaintenance" element={<AreaMaintenance />} />
+                <Route exact path="/CityMaintenance" element={<CityMaintenance />} />
 
 
 

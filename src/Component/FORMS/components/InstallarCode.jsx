@@ -63,10 +63,10 @@ const InstallationCode = forwardRef(({
     const apiUrl = apiLinks + apiEndpoint;
 
     const formData = new URLSearchParams({
-      // code: "DEMOELEC",
-      // FLocCod: "001",
-      code: organisation.code,
-      FLocCod: getLocationNumber || getLocationnumber(),
+      code: "DEMOINS",
+      FLocCod: "001",
+      // code: organisation.code,
+      // FLocCod: getLocationNumber || getLocationnumber(),
     }).toString();
 
     axios

@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import { useTheme } from "../../../ThemeContext";
-import "./employeemaintenance.css";
 import axios from "axios";
 import {
   getUserData,
   getOrganisationData,
   getLocationnumber,
   getYearDescription,
-} from "../../../Component/Auth";
+} from "../../Auth";
 
 import FormButtons from "../components/FormButton";
 import InstallationCode from "../components/InstallarCode";
 import SearchModal from "../components/SearchModel";
+import "./employeemaintenance.css";
 
-export default function EmployeeMaintenance() {
+export default function EmployeeMaintenance2() {
   const {
     isSidebarVisible,
     toggleSidebar,
@@ -111,6 +111,7 @@ export default function EmployeeMaintenance() {
 
   const [orgCode, setOrgCode] = useState(organisation);
   const [locCode, setLocCode] = useState(locationnumber || getLocationNumber);
+
 
   const [sysControl, setSysControl] = useState(null);
 
@@ -265,48 +266,39 @@ export default function EmployeeMaintenance() {
     return raw.replace(/,/g, "");
   };
 
- const handleMoneyChange = (key) => (e) => {
-  const input = e.target;
-  const rawValue = String(input.value ?? "");
-  const selectionStart = input.selectionStart ?? rawValue.length;
+  const handleMoneyChange = (key) => (e) => {
+    const input = e.target;
+    const rawValue = String(input.value ?? "");
+    const selectionStart = input.selectionStart ?? rawValue.length;
 
-  // Count how many digits (0-9) appear BEFORE the cursor in the raw
-  // (user-typed) value. This is the number of digits the caret should
-  // sit after once we re-format.
-  const digitsBeforeCursor = rawValue
-    .slice(0, selectionStart)
-    .replace(/\D/g, "").length;
+    const digitsBeforeCursor = rawValue
+      .slice(0, selectionStart)
+      .replace(/\D/g, "").length;
 
-  const formatted = formatWithCommas(rawValue);
+    const formatted = formatWithCommas(rawValue);
 
-  setFormStore((prev) => ({ ...prev, [key]: formatted }));
+    setFormStore((prev) => ({ ...prev, [key]: formatted }));
 
-  // After React re-renders the input with the formatted value, walk
-  // through the formatted string and place the caret right after the
-  // same number of digits that were before the cursor in the raw input.
-  requestAnimationFrame(() => {
-    if (!input) return;
-    let digitCount = 0;
-    let newCaret = formatted.length;
-    for (let i = 0; i < formatted.length; i++) {
-      if (/[0-9]/.test(formatted[i])) {
-        digitCount++;
-        if (digitCount === digitsBeforeCursor) {
-          newCaret = i + 1;
-          break;
+    requestAnimationFrame(() => {
+      if (!input) return;
+      let digitCount = 0;
+      let newCaret = formatted.length;
+      for (let i = 0; i < formatted.length; i++) {
+        if (/[0-9]/.test(formatted[i])) {
+          digitCount++;
+          if (digitCount === digitsBeforeCursor) {
+            newCaret = i + 1;
+            break;
+          }
         }
       }
-    }
-    // If there were no digits before the cursor, keep caret at start.
-    if (digitsBeforeCursor === 0) newCaret = 0;
+      if (digitsBeforeCursor === 0) newCaret = 0;
 
-    try {
-      input.setSelectionRange(newCaret, newCaret);
-    } catch (err) {
-      // Some browsers throw on range ops during animation frames.
-    }
-  });
-};
+      try {
+        input.setSelectionRange(newCaret, newCaret);
+      } catch (err) {}
+    });
+  };
 
   const cleanAmount = (value) => {
     if (value === null || value === undefined || value === "") return "";
@@ -654,10 +646,6 @@ export default function EmployeeMaintenance() {
     }
   }, [code, isInitialLoad]);
 
-  // After a successful save, resetForm() clears code and then fires
-  // NewEmployee.php to fetch the NEXT code. When that new code arrives
-  // (isFetchingNextCode flips back to false), focus the Employee Code
-  // input and select the value so the user can immediately type.
   useEffect(() => {
     if (isFetchingNextCode) {
       wasFetchingCodeRef.current = true;
@@ -1002,24 +990,13 @@ export default function EmployeeMaintenance() {
           documentName: txt(data.tempdoc) || prev.documentName,
         }));
 
-        // if (data.tempcod) {
-        //   setCode(String(data.tempcod).trim());
-        //   setIsExistingEmployee(true);
-        // }
-
-                if (data.tempcod) {
+        if (data.tempcod) {
           const cleanEmpCode = String(data.tempcod).trim();
           const cleanDescription = txt(data.tempnam);
 
           setCode(cleanEmpCode);
           setIsExistingEmployee(true);
 
-          // Re-derive Advance / Delivery / Commission fields NOW,
-          // because the description may just have arrived in this same
-          // response and the deriveAdvanceDelivery effect that watches
-          // [code, description] may fire before this state settles —
-          // which was leaving Advance Text / Delivery Text as "- ADVANCE"
-          // / "- DELIVERY" instead of "HAMZA - ADVANCE" / "HAMZA - DELIVERY".
           const derived = deriveAdvanceDelivery(cleanEmpCode, cleanDescription);
           setFormStore((prev) => ({
             ...prev,
@@ -1237,57 +1214,58 @@ export default function EmployeeMaintenance() {
     }, 100);
   };
 
- const focusFirstVisible = (refs) => {
-  for (const ref of refs) {
-    const el = ref?.current;
-    if (!el) continue;
-    if (!el.isConnected) continue;
+  const focusFirstVisible = (refs) => {
+    for (const ref of refs) {
+      const el = ref?.current;
+      if (!el) continue;
+      if (!el.isConnected) continue;
 
-    // If ref points to React component → dig into DOM
-    let target = el;
-    if (!el.tagName) {
-      if (typeof el.querySelector === "function") {
-        target = el.querySelector("input, select, textarea");
-      } else {
-        continue;
+      let target = el;
+      if (!el.tagName) {
+        if (typeof el.querySelector === "function") {
+          target = el.querySelector("input, select, textarea");
+        } else {
+          continue;
+        }
       }
-    }
 
-    if (!target || !target.isConnected) continue;
-    if (target.disabled) continue;
-    if (target.offsetParent === null) continue;
+      if (!target || !target.isConnected) continue;
+      if (target.disabled) continue;
+      if (target.offsetParent === null) continue;
 
-    target.focus();
-    if (target.tagName === "INPUT") {
-      try { target.select(); } catch (err) {}
-    }
-    return true;
-  }
-  return false;
-};
-
- const handleKeyDown = (e, nextRef) => {
-  if (e.key !== "Enter") return;
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (nextRef && focusFirstVisible([nextRef])) return;
-
-  const active = document.activeElement;
-  const currentIdx = FOCUS_CHAIN.findIndex((r) => {
-    const el = r?.current;
-    if (!el) return false;
-    if (el === active) return true;
-    if (!el.tagName && typeof el.querySelector === "function") {
-      const inner = el.querySelector("input, select, textarea");
-      return inner === active;
+      target.focus();
+      if (target.tagName === "INPUT") {
+        try {
+          target.select();
+        } catch (err) {}
+      }
+      return true;
     }
     return false;
-  });
+  };
 
-  if (currentIdx === -1) return;
-  focusFirstVisible(FOCUS_CHAIN.slice(currentIdx + 1));
-};
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (nextRef && focusFirstVisible([nextRef])) return;
+
+    const active = document.activeElement;
+    const currentIdx = FOCUS_CHAIN.findIndex((r) => {
+      const el = r?.current;
+      if (!el) return false;
+      if (el === active) return true;
+      if (!el.tagName && typeof el.querySelector === "function") {
+        const inner = el.querySelector("input, select, textarea");
+        return inner === active;
+      }
+      return false;
+    });
+
+    if (currentIdx === -1) return;
+    focusFirstVisible(FOCUS_CHAIN.slice(currentIdx + 1));
+  };
 
   const handleNicEnter = (e) => {
     if (e.key === "Enter") {
@@ -1297,7 +1275,6 @@ export default function EmployeeMaintenance() {
     }
   };
 
-  // Focus Employee Code input and select its value.
   const focusEmployeeCode = () => {
     if (codeInputRef.current) {
       const input = codeInputRef.current.querySelector("input");
@@ -1308,7 +1285,6 @@ export default function EmployeeMaintenance() {
     }
   };
 
-  // Date change handler — keeps the year to 4 digits only.
   const handleDateChange = (key) => (e) => {
     const value = String(e.target.value || "");
 
@@ -1331,7 +1307,6 @@ export default function EmployeeMaintenance() {
     setFormStore((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Date keydown — only handles Enter to move focus.
   const handleDateKeyDown = (e, nextRef) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -1422,7 +1397,7 @@ export default function EmployeeMaintenance() {
     FDlvCod: strForApi(formStore.deliveryCode),
     FDlvDsc: strForApi(formStore.deliveryText),
 
-      tcomcod: strForApi(formStore.commissionCode),
+    tcomcod: strForApi(formStore.commissionCode),
     FComDsc: strForApi(formStore.commissionDescription),
 
     FRef001: strForApi(formStore.reference1Name),
@@ -1567,7 +1542,7 @@ export default function EmployeeMaintenance() {
   };
 
   return (
-    <div className="el-page-host">
+    <div className="el-page-host employee-maintenance-scope">
       <div className="el-page-wrapper">
         <div className="el-page">
           <div className="el-card">
@@ -1582,7 +1557,7 @@ export default function EmployeeMaintenance() {
               <div className="el-scrollable-body">
                 <div className="el-top-bar">
                   <div
-                    className="el-field-row " 
+                    className="el-field-row"
                     onKeyDownCapture={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -1599,7 +1574,7 @@ export default function EmployeeMaintenance() {
                       }
                     }}
                   >
-                    <span className="el-field-label-right " >
+                    <span className="el-field-label-right">
                       Code :
                     </span>
                     <InstallationCode
@@ -1657,20 +1632,20 @@ export default function EmployeeMaintenance() {
                         <div className="el-field-row">
                           <span className="el-field-label-right">Name :</span>
                           <input
-  ref={descriptionInputRef}
-  value={formStore.description}
-  onChange={(e) => {
-    // ✅ Force uppercase on the DOM element itself
-    e.target.value = e.target.value.toUpperCase();
-    // ✅ Then store the uppercase value via real event
-    set("description")(e);
-  }}
-  placeholder="Name"
-  className="name-field"
-  maxLength={40}
-  onKeyDown={(e) => handleKeyDown(e, contactPersonInputRef)}
-  style={{ textTransform: "uppercase" }}
-/>
+                            ref={descriptionInputRef}
+                            value={formStore.description}
+                            onChange={(e) => {
+                              e.target.value = e.target.value.toUpperCase();
+                              set("description")(e);
+                            }}
+                            placeholder="Name"
+                            className="name-field"
+                            maxLength={40}
+                            onKeyDown={(e) =>
+                              handleKeyDown(e, contactPersonInputRef)
+                            }
+                            style={{ textTransform: "uppercase" }}
+                          />
                         </div>
 
                         <div className="el-row-split">
@@ -1763,118 +1738,124 @@ export default function EmployeeMaintenance() {
                               </>
                             )}
 
-                            {(vis("CNIC") || vis("CNICExpiry") || vis("Email")) && (
-                              <div className="el-field-row el-cnic-row">
-                                {vis("CNIC") && (
-                                  <>
-                                    <span className="el-field-label-right">
-                                      CNIC :
-                                    </span>
-                                    <input
-                                      ref={nicInputRef}
-                                      value={formStore.nic}
-                                      onChange={handleNicChange}
-                                      placeholder="CNIC (35XXX-XXXXXXX-X)"
-                                      className="cnic-field"
-                                      onKeyDown={handleNicEnter}
-                                      maxLength={15}
-                                    />
-                                  </>
-                                )}
+                           {(vis("CNIC") || vis("CNICExpiry") || vis("Email")) && (
+  <div className="el-field-row el-cnic-row">
+    {vis("CNIC") && (
+      <>
+        <span className="el-field-label-right">
+          CNIC :
+        </span>
+        <input
+          ref={nicInputRef}
+          value={formStore.nic}
+          onChange={handleNicChange}
+          placeholder="CNIC (35XXX-XXXXXXX-X)"
+          className={
+            vis("CNICExpiry")
+              ? "cnic-field cnic-field-compact"
+              : "cnic-field"
+          }
+          onKeyDown={handleNicEnter}
+          maxLength={15}
+        />
+      </>
+    )}
 
-                                {!vis("CNIC") && vis("Email") && (
-                                  <>
-                                    <span className="el-field-label-right">
-                                      Email:
-                                    </span>
-                                    <input
-                                      ref={phoneInputRef}
-                                      value={formStore.phone}
-                                      onChange={set("phone")}
-                                      placeholder="crystalsolution@gmail.com"
-                                      className="email-field"
-                                      maxLength={40}
-                                      onKeyDown={(e) =>
-                                        handleKeyDown(e, mobileInputRef)
-                                      }
-                                    />
-                                  </>
-                                )}
+    {!vis("CNIC") && vis("Email") && (
+      <>
+        <span className="el-field-label-right">
+          Email:
+        </span>
+        <input
+          ref={phoneInputRef}
+          value={formStore.phone}
+          onChange={set("phone")}
+          placeholder="crystalsolution@gmail.com"
+          className="email-field"
+          maxLength={40}
+          onKeyDown={(e) =>
+            handleKeyDown(e, mobileInputRef)
+          }
+        />
+      </>
+    )}
 
-                                {vis("CNICExpiry") && (
-                                  <>
-                                    <span className="el-inline-label">
-                                      Expiry :
-                                    </span>
-                                    <input
-                                      ref={expiryRef}
-                                      type="date"
-                                      value={formStore.expiry || ""}
-                                      onChange={handleDateChange("expiry")}
-                                      className="el-date-inline"
-                                      onKeyDown={(e) => handleDateKeyDown(e)}
-                                    />
-                                  </>
-                                )}
-                              </div>
-                            )}
+    {vis("CNICExpiry") && (
+      <>
+        <span className="el-inline-label">
+          Expiry :
+        </span>
+        <input
+          ref={expiryRef}
+          type="date"
+          value={formStore.expiry || ""}
+          onChange={handleDateChange("expiry")}
+          className="el-date-inline"
+          onKeyDown={(e) => handleDateKeyDown(e)}
+        />
+      </>
+    )}
+  </div>
+)}
 
-                            {vis("Email") && vis("CNIC") && (
-                              <div className="el-field-row">
-                                <span className="el-field-label-right">
-                                  Email :
-                                </span>
-                                <input
-                                  ref={phoneInputRef}
-                                  value={formStore.phone}
-                                  onChange={set("phone")}
-                                  placeholder="crystalsolution@gmail.com"
-                                  className="email-field"
-                                  maxLength={40}
-                                  onKeyDown={(e) =>
-                                    handleKeyDown(e, mobileInputRef)
-                                  }
-                                />
-                              </div>
-                            )}
+{vis("Email") && vis("CNIC") && (
+  <div className="el-field-row">
+    <span className="el-field-label-right">
+      Email :
+    </span>
+    <input
+      ref={phoneInputRef}
+      value={formStore.phone}
+      onChange={set("phone")}
+      placeholder="crystalsolution@gmail.com"
+      className="email-field"
+      maxLength={40}
+      onKeyDown={(e) =>
+        handleKeyDown(e, mobileInputRef)
+      }
+    />
+  </div>
+)}
 
-                            {vis("Mobile") && (
-                              <div className="el-field-row">
-                                <span className="el-field-label-right">
-                                  Mobile :
-                                </span>
-                                <input
-  ref={mobileInputRef}
-  type="tel"
-  value={formStore.mobile}
-  onChange={set("mobile")}
-  placeholder="03XXXXXXXXX"
-  className="mobile-field"
-  maxLength={11}
-  onKeyDown={(e) => {
-    // ✅ Allow Ctrl/Cmd/Alt shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, etc.)
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      handleKeyDown(e, dobDateRef);
-      return;
-    }
+{vis("Mobile") && (
+  <div className="el-field-row">
+    <span className="el-field-label-right">
+      Mobile :
+    </span>
+    <input
+      ref={mobileInputRef}
+      type="tel"
+      value={formStore.mobile}
+      onChange={set("mobile")}
+      placeholder="03XXXXXXXXX"
+      className="mobile-field"
+      maxLength={11}
+      onKeyDown={(e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) {
+          handleKeyDown(e, dobDateRef);
+          return;
+        }
 
-    // Block non-numeric printable characters
-    if (!/[0-9]/.test(e.key) && e.key.length === 1) {
-      e.preventDefault();
-      return;
-    }
+        if (
+          !/[0-9]/.test(e.key) &&
+          e.key.length === 1
+        ) {
+          e.preventDefault();
+          return;
+        }
 
-    handleKeyDown(e, dobDateRef);
-  }}
-  onPaste={(e) => {
-    const pasted = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(pasted)) {
-      e.preventDefault();
-    }
-  }}
-/>
-                              </div>
-                            )}
+        handleKeyDown(e, dobDateRef);
+      }}
+      onPaste={(e) => {
+        const pasted =
+          e.clipboardData.getData("text");
+        if (!/^\d+$/.test(pasted)) {
+          e.preventDefault();
+        }
+      }}
+    />
+  </div>
+)}
                           </div>
 
                           {vis("Picture") && (
@@ -1887,12 +1868,19 @@ export default function EmployeeMaintenance() {
                                   justifyContent: "center",
                                   overflow: "hidden",
                                   backgroundColor: "#f5f5f5",
-                                  cursor: selectedImage1 ? "pointer" : "default",
+                                  cursor: selectedImage1
+                                    ? "pointer"
+                                    : "default",
                                 }}
                                 onClick={() => {
-                                  if (selectedImage1) setIsImageModalOpen(true);
+                                  if (selectedImage1)
+                                    setIsImageModalOpen(true);
                                 }}
-                                title={selectedImage1 ? "Click to view full size" : ""}
+                                title={
+                                  selectedImage1
+                                    ? "Click to view full size"
+                                    : ""
+                                }
                               >
                                 {selectedImage1 ? (
                                   <img
@@ -1943,7 +1931,7 @@ export default function EmployeeMaintenance() {
                         {(vis("DOB") || vis("JoinDate")) && (
                           <div className="el-row-split-pair el-row-dob-join">
                             {vis("DOB") && (
-                              <div className="el-field-row el-half" >
+                              <div className="el-field-row el-half">
                                 <span className="el-field-label-right">
                                   DOB Date :
                                 </span>
@@ -1960,7 +1948,7 @@ export default function EmployeeMaintenance() {
                               </div>
                             )}
                             {vis("JoinDate") && (
-                              <div className="el-field-row el-half" >
+                              <div className="el-field-row el-half">
                                 <span className="el-field-label-right">
                                   Join Date :
                                 </span>
@@ -1982,7 +1970,7 @@ export default function EmployeeMaintenance() {
                         {(vis("LeaveDate") || vis("LeaveRemarks")) && (
                           <div className="el-row-split-pair el-row-leave">
                             {vis("LeaveDate") && (
-                              <div className="el-field-row el-half" >
+                              <div className="el-field-row el-half">
                                 <span className="el-field-label-right">
                                   Leave Date :
                                 </span>
@@ -2050,7 +2038,9 @@ export default function EmployeeMaintenance() {
                                   placeholder="0.00"
                                   className="el-num-field"
                                   maxLength={20}
-                                  onKeyDown={(e) => handleKeyDown(e, insCommRef)}
+                                  onKeyDown={(e) =>
+                                    handleKeyDown(e, insCommRef)
+                                  }
                                 />
                               </div>
                             )}
@@ -2070,7 +2060,9 @@ export default function EmployeeMaintenance() {
                                 placeholder="0.00"
                                 className="el-num-field"
                                 maxLength={20}
-                                onKeyDown={(e) => handleKeyDown(e, salaryRef)}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, salaryRef)
+                                }
                               />
                             </div>
                             <div className="el-field-row el-half" />
@@ -2237,7 +2229,10 @@ export default function EmployeeMaintenance() {
                                 className="el-ref-phone-field"
                                 maxLength={11}
                                 onKeyDown={(e) =>
-                                  handleReferencePhoneKeyDown(e, reference1NameRef)
+                                  handleReferencePhoneKeyDown(
+                                    e,
+                                    reference1NameRef
+                                  )
                                 }
                               />
                             </div>
@@ -2245,7 +2240,9 @@ export default function EmployeeMaintenance() {
                               <input
                                 ref={reference1NameRef}
                                 value={formStore.reference1Name || ""}
-                                onChange={handleReferenceNameChange("reference1Name")}
+                                onChange={handleReferenceNameChange(
+                                  "reference1Name"
+                                )}
                                 placeholder="Name"
                                 className="el-remark-field"
                                 maxLength={40}
@@ -2273,7 +2270,10 @@ export default function EmployeeMaintenance() {
                                 className="el-ref-phone-field"
                                 maxLength={11}
                                 onKeyDown={(e) =>
-                                  handleReferencePhoneKeyDown(e, reference2NameRef)
+                                  handleReferencePhoneKeyDown(
+                                    e,
+                                    reference2NameRef
+                                  )
                                 }
                               />
                             </div>
@@ -2281,7 +2281,9 @@ export default function EmployeeMaintenance() {
                               <input
                                 ref={reference2NameRef}
                                 value={formStore.reference2Name || ""}
-                                onChange={handleReferenceNameChange("reference2Name")}
+                                onChange={handleReferenceNameChange(
+                                  "reference2Name"
+                                )}
                                 placeholder="Name"
                                 className="el-remark-field"
                                 maxLength={40}
@@ -2391,7 +2393,6 @@ export default function EmployeeMaintenance() {
         descriptionKey="Employee"
       />
 
-      {/* Fullscreen image preview modal */}
       {isImageModalOpen && selectedImage1 && (
         <div
           onClick={() => setIsImageModalOpen(false)}
